@@ -1,4 +1,4 @@
-# shoptempdb
+# shop with temporary db
 
 A new Flutter application.
 
