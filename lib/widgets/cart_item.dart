@@ -66,7 +66,7 @@ class _CartItemWidgetState extends State<CartItemWidget>{
             ),
             title: Text(widget.title),
             subtitle: Text('Total : \$${(widget.price * widget.quantity)}'),
-//            trailing: Text('${(widget.quantity)}' + 'xx'),
+//            trailing: Text('${(widget.quantity)}' + 'x'),
           trailing: Container(
             width: 110.0,
             child: widget.quantity != null ? Row(
