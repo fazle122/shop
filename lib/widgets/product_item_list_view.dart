@@ -58,6 +58,41 @@ class _ProductItemListViewState extends State<ProductItemListView>{
               icon: Icon(Icons.add),
               onPressed: (){
                 cart.addItem(product.id, product.title, product.price);
+                Scaffold.of(context).hideCurrentSnackBar();
+                if(cart.items.length> 0)
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                  backgroundColor: cart.totalAmount > 500
+                      ? Theme.of(context).primaryColor
+                      : Colors.red[300],
+                  content: cart.totalAmount > 500
+                      ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                      child:Text('Delievry charge free'))
+                      : Row(
+                    children: <Widget>[
+                      Container(
+                          decoration: BoxDecoration(
+                              border: Border(
+                                  right: BorderSide(
+                                      color: Colors.white,
+                                      width: 1.0))),
+                          width: MediaQuery.of(context).size.width *
+                              1 /
+                              7,
+                          child: Text('Delivery charge \n50 BDT')),
+                      SizedBox(
+                        width: 5.0,
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width *
+                            4 /
+                            7,
+                        child: Text(
+                            'Shop more for free delivery charge.'),
+                      )
+                    ],
+                  ),
+                  duration: Duration(seconds: 2),
+                ));
               },
             ),
              Text(cart.items[product.id].quantity.toString(),style: TextStyle(fontSize: 20.0),),
@@ -65,6 +100,41 @@ class _ProductItemListViewState extends State<ProductItemListView>{
               icon: Icon(Icons.remove),
               onPressed: (){
                 cart.removeSingleItem(product.id);
+                Scaffold.of(context).hideCurrentSnackBar();
+                if(cart.items.length> 0)
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                  backgroundColor: cart.totalAmount > 500
+                      ? Theme.of(context).primaryColor
+                      : Colors.red[300],
+                  content: cart.totalAmount > 500
+                      ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                      child:Text('Delievry charge free'))
+                      : Row(
+                    children: <Widget>[
+                      Container(
+                          decoration: BoxDecoration(
+                              border: Border(
+                                  right: BorderSide(
+                                      color: Colors.white,
+                                      width: 1.0))),
+                          width: MediaQuery.of(context).size.width *
+                              1 /
+                              7,
+                          child: Text('Delivery charge \n50 BDT')),
+                      SizedBox(
+                        width: 5.0,
+                      ),
+                      Container(
+                        width: MediaQuery.of(context).size.width *
+                            4 /
+                            7,
+                        child: Text(
+                            'Shop more for free delivery charge.'),
+                      )
+                    ],
+                  ),
+                  duration: Duration(seconds: 2),
+                ));
               },
             ),
           ],
@@ -73,17 +143,41 @@ class _ProductItemListViewState extends State<ProductItemListView>{
           icon: Icon(Icons.shopping_cart),
           onPressed: () {
             cart.addItem(product.id, product.title, product.price);
-//            Scaffold.of(context).hideCurrentSnackBar();
-//            Scaffold.of(context).showSnackBar(SnackBar(
-//              content: Text('Item added to cart.'),
-//              duration: Duration(seconds: 2),
-//              action: SnackBarAction(
-//                label: 'undo',
-//                onPressed: () {
-//                  cart.removeSingleItem(product.id);
-//                },
-//              ),
-//            ));
+            Scaffold.of(context).hideCurrentSnackBar();
+            if(cart.items.length> 0)
+            Scaffold.of(context).showSnackBar(SnackBar(
+              backgroundColor: cart.totalAmount > 500
+                  ? Theme.of(context).primaryColor
+                  : Colors.red[300],
+              content: cart.totalAmount > 500
+                  ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                  child:Text('Delievry charge free'))
+                  : Row(
+                children: <Widget>[
+                  Container(
+                      decoration: BoxDecoration(
+                          border: Border(
+                              right: BorderSide(
+                                  color: Colors.white,
+                                  width: 1.0))),
+                      width: MediaQuery.of(context).size.width *
+                          1 /
+                          7,
+                      child: Text('Delivery charge \n50 BDT')),
+                  SizedBox(
+                    width: 5.0,
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width *
+                        4 /
+                        7,
+                    child: Text(
+                        'Shop more for free delivery charge.'),
+                  )
+                ],
+              ),
+              duration: Duration(seconds: 2),
+            ));
           },
         ),
       ),

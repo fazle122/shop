@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/auth.dart';
 import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/orders.dart';
+import 'package:shoptempdb/providers/productCategories.dart';
 import 'package:shoptempdb/providers/products.dart';
+import 'package:shoptempdb/providers/shipping_address.dart';
 import 'package:shoptempdb/screens/auth_screen.dart';
 import 'package:shoptempdb/screens/cart_screen.dart';
 import 'package:shoptempdb/screens/manage_product_screen.dart';
@@ -12,6 +14,7 @@ import 'package:shoptempdb/screens/product_detail_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 import 'package:shoptempdb/screens/profile_screen.dart';
 import 'package:shoptempdb/screens/splash_screen.dart';
+import 'package:shoptempdb/screens/test.dart';
 import 'package:shoptempdb/screens/user_products_screen.dart';
 
 void main() => runApp(MyApp());
@@ -22,8 +25,21 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider.value(
+          value: Auth(),
+        ),
+        ChangeNotifierProxyProvider<Auth,ShippingAddress>(
+          update: (ctx,auth,previousAddress) => ShippingAddress(
+            auth.token,
+            auth.userId,
+            previousAddress == null ? null:previousAddress.getShippingAddress
+          ),
+        ),
         ChangeNotifierProvider(
           create: (context) => Products(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => ProductCategories(),
         ),
         ChangeNotifierProvider.value(
           value: Cart(),
@@ -31,9 +47,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider.value(
           value: Orders(),
         ),
-        ChangeNotifierProvider.value(
-          value: Auth(),
-        ),
+
       ],
       child:
 
@@ -65,7 +79,7 @@ class MyApp extends StatelessWidget {
               accentColor: Colors.blueGrey
           ),
           home:FutureBuilder(
-            
+
             future:Future.delayed(Duration(seconds: 1)),
             builder: (context, authResultSnapshot) =>
             authResultSnapshot.connectionState ==
@@ -82,8 +96,39 @@ class MyApp extends StatelessWidget {
             ManageProductScreen.routeName: (context) =>  ManageProductScreen(),
             AuthScreen.routeName: (context) => AuthScreen(),
             Profilepage.routeName: (context) =>Profilepage(),
+            TestScreen.routeName: (context) =>TestScreen(),
           },
         )
+
+//        Consumer<Auth>(
+//          builder: (ctx, auth, child) => MaterialApp(
+//            debugShowCheckedModeBanner: false,
+//            title: 'Bepari',
+//            theme: ThemeData(
+//                primarySwatch: Colors.teal, accentColor: Colors.blueGrey),
+//            home: auth.isAuth
+//                ? ProductsOverviewScreen()
+//                : FutureBuilder(
+//              future: auth.tryAutoLogin(),
+//              builder: (ctx, authResultSnapshot) =>
+//              authResultSnapshot.connectionState ==
+//                  ConnectionState.waiting
+//                  ? SplashScreen()
+//                  : AuthScreen(),
+//            ),
+//            routes: {
+//              ProductsOverviewScreen.routeName: (context) => ProductsOverviewScreen(),
+//              ProductDetailScreen.routeName: (context) => ProductDetailScreen(),
+//              CartScreen.routeName: (context) =>  CartScreen(),
+//              OrdersScreen.routeName: (context) =>  OrdersScreen(),
+//              UserProductsScreen.routeName: (context) =>  UserProductsScreen(),
+//              ManageProductScreen.routeName: (context) =>  ManageProductScreen(),
+//              AuthScreen.routeName: (context) => AuthScreen(),
+//              Profilepage.routeName: (context) =>Profilepage(),
+//            },
+//          ),
+//        )
+
     );
   }
 }

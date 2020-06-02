@@ -25,7 +25,8 @@ class ProductDetailScreen extends StatelessWidget{
               child: Image.network(loadedProduct.imageUrl,fit: BoxFit.cover,),
             ),),
             SizedBox(height: 10,),
-            Text('\$${loadedProduct.price}',style: TextStyle(color: Colors.grey,fontSize: 20),),
+//            Text('\$${loadedProduct.price}',style: TextStyle(color: Colors.grey,fontSize: 20),),
+            Text('BDT ' + loadedProduct.price.toString() + '/' + loadedProduct.unit,style: TextStyle(color: Colors.grey,fontSize: 20),),
             cart.items.keys.contains(loadedProduct.id) ? Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -54,12 +55,33 @@ class ProductDetailScreen extends StatelessWidget{
             Container(
               padding: EdgeInsets.symmetric(horizontal:10),
               width: double.infinity,
-              child: Text(
-                loadedProduct.description,
-                textAlign: TextAlign.center,
-                softWrap: true,
-              ),
+              child:Column(
+                children: <Widget>[
+                  Text(
+                    loadedProduct.title,
+                    textAlign: TextAlign.start,
+                    softWrap: true,
+                    style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10.0,),
+                  loadedProduct.description.isNotEmpty?Text(
+                    loadedProduct.description,
+                    textAlign: TextAlign.start,
+                    softWrap: true,
+                    style: TextStyle(fontSize: 15.0),
+                  ):Text('No description found'),
+                ],
+              )
             )
+//            Container(
+//              padding: EdgeInsets.symmetric(horizontal:10),
+//              width: double.infinity,
+//              child: Text(
+//                loadedProduct.description,
+//                textAlign: TextAlign.center,
+//                softWrap: true,
+//              ),
+//            )
 
           ],
         ),

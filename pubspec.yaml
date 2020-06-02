@@ -28,6 +28,7 @@ dependencies:
   custom_switch: ^0.0.1
   shared_preferences: ^0.5.7
   http: ^0.12.0+4
+  dio: ^3.0.9
 
 
 

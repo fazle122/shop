@@ -94,17 +94,19 @@ class _AuthCardState extends State<AuthCard> {
       _isLoading = true;
     });
     try {
-      Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
+//      Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
 
-//      if (_authMode == AuthMode.Login) {
-//        // Log user in
-//        await Provider.of<Auth>(context, listen: false).login(
-//            _authData['email'], _authData['password']);
-//      } else {
-//        // Sign user up
-//        await Provider.of<Auth>(context, listen: false).signUp(
-//            _authData['email'], _authData['password']);
-//      }
+      if (_authMode == AuthMode.Login) {
+        // Log user in
+        await Provider.of<Auth>(context, listen: false).login(
+            _authData['email'], _authData['password']);
+        Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
+
+      } else {
+        // Sign user up
+        await Provider.of<Auth>(context, listen: false).signUp(
+            _authData['email'], _authData['password']);
+      }
     } on HttpException catch (error) {
       var errorMessage = 'Authentication failed';
       if (error.toString().contains('EMAIL_EXISTS')) {

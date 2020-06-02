@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shoptempdb/widgets/create_shippingAddress_dialog.dart';
 
 class Profilepage extends StatelessWidget{
   static const routeName = '/profile';
@@ -12,7 +13,7 @@ class Profilepage extends StatelessWidget{
           Container(
             height: 30.0,
             color: Colors.grey[300],
-            child: Center(child:Text('personal info')),
+            child: Center(child:Text('Shipping address')),
           ),
           ListTile(
             leading: Icon(Icons.phone),
@@ -22,8 +23,8 @@ class Profilepage extends StatelessWidget{
           ),
           Divider(),
           ListTile(
-            leading: Icon(Icons.email),
-            title: Text('test@gmail.com'),
+            leading: Icon(Icons.location_city),
+            title: Text('Mirpur'),
             onTap: (){
             },
           ),
@@ -32,7 +33,6 @@ class Profilepage extends StatelessWidget{
             leading: Icon(Icons.home),
             title: Text('76/3, Block-g, Road-2 \nUttora, Dhaka'),
             onTap: (){
-              Navigator.of(context).pushNamed(Profilepage.routeName);
             },
           ),
           Divider(),
@@ -43,7 +43,12 @@ class Profilepage extends StatelessWidget{
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25.0),
                   side: BorderSide(color: Colors.grey)),
-              onPressed: () {},
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    child: CreateShippingAddressDialog()
+                );
+              },
               color: Theme.of(context).primaryColor,
               textColor: Colors.white,
               child: Text("Edit info".toUpperCase(),

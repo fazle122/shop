@@ -66,7 +66,7 @@ class _CartItemWidgetState extends State<CartItemWidget>{
             ),
             title: Text(widget.title),
             subtitle: Text('Total : \$${(widget.price * widget.quantity)}'),
-//            trailing: Text('${(widget.quantity)}' + 'x'),
+//            trailing: Text('${(widget.quantity)}' + 'xx'),
           trailing: Container(
             width: 110.0,
             child: widget.quantity != null ? Row(
@@ -75,14 +75,88 @@ class _CartItemWidgetState extends State<CartItemWidget>{
                 IconButton(
                   icon: Icon(Icons.add),
                   onPressed: (){
-                    cart.addItem(widget.id, widget.title, widget.price);
+                    cart.addItem(widget.productId, widget.title, widget.price);
+                    Scaffold.of(context).hideCurrentSnackBar();
+                    if(cart.items.length> 0)
+                      Scaffold.of(context).showSnackBar(SnackBar(
+                        backgroundColor: cart.totalAmount > 500
+                            ? Theme.of(context).primaryColor
+                            : Colors.red[300],
+                        content: cart.totalAmount > 500
+                            ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                            child:Text('Delievry charge free'))
+                            : Row(
+                          children: <Widget>[
+                            Container(
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                        right: BorderSide(
+                                            color: Colors.white,
+                                            width: 1.0))),
+                                width:
+                                MediaQuery.of(context).size.width *
+                                    1 /
+                                    7,
+                                child:
+                                Text('Delivery charge \n50 BDT')),
+                            SizedBox(
+                              width: 5.0,
+                            ),
+                            Container(
+                              width: MediaQuery.of(context).size.width *
+                                  4 /
+                                  7,
+                              child: Text(
+                                  'Shop more for free delivery charge.'),
+                            )
+                          ],
+                        ),
+                        duration: Duration(seconds: 2),
+                      ));
                   },
                 ),
                 Text(widget.quantity.toString(),style: TextStyle(fontSize: 20.0),),
                 IconButton(
                   icon: Icon(Icons.remove),
                   onPressed: (){
-                    cart.removeSingleItem(widget.id);
+                    cart.removeSingleItem(widget.productId);
+                    Scaffold.of(context).hideCurrentSnackBar();
+                    if(cart.items.length> 0)
+                      Scaffold.of(context).showSnackBar(SnackBar(
+                        backgroundColor: cart.totalAmount > 500
+                            ? Theme.of(context).primaryColor
+                            : Colors.red[300],
+                        content: cart.totalAmount > 500
+                            ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                            child:Text('Delievry charge free'))
+                            : Row(
+                          children: <Widget>[
+                            Container(
+                                decoration: BoxDecoration(
+                                    border: Border(
+                                        right: BorderSide(
+                                            color: Colors.white,
+                                            width: 1.0))),
+                                width:
+                                MediaQuery.of(context).size.width *
+                                    1 /
+                                    7,
+                                child:
+                                Text('Delivery charge \n50 BDT')),
+                            SizedBox(
+                              width: 5.0,
+                            ),
+                            Container(
+                              width: MediaQuery.of(context).size.width *
+                                  4 /
+                                  7,
+                              child: Text(
+                                  'Shop more for free delivery charge.'),
+                            )
+                          ],
+                        ),
+                        duration: Duration(seconds: 2),
+                      ));
                   },
                 ),
               ],

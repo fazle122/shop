@@ -19,6 +19,24 @@ class ProductsOverviewScreen extends StatefulWidget {
 
 class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   var _showList = false;
+  var _isInit = true;
+  var _isLoading = false;
+
+  @override
+  void didChangeDependencies(){
+    if(_isInit) {
+      setState(() {
+        _isLoading = true;
+      });
+      Provider.of<Products>(context).fetchAndSetProducts().then((_){
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+    _isInit = false;
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -92,54 +110,60 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                           value: products[i],
                           child: ProductItemGridView(),
                         )),
-          )
+          ),
+          cart.items.length > 0 ?
+          Container(
+              height: 50.0,
+              color: Theme.of(context).primaryColor,
+              child: Row(
+                children: <Widget>[
+                  Container(
+                      width: MediaQuery.of(context).size.width * 5 / 7,
+                      padding: EdgeInsets.only(left: 20.0,top: 5.0),
+                      color: Theme.of(context).primaryColor,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Text('SubTotal: ' +
+                              cart.totalAmount.toStringAsFixed(2)),
+                          cart.totalAmount>500 ? Text('Delivery charge: 00.00 BDT'):Text('Delivery charge: 50.00 BDT'),
+                          cart.totalAmount>500 ?
+                          Text(
+                            'Total amount : ' +
+                                cart.totalAmount.toStringAsFixed(2),
+                            style: TextStyle(color: Colors.white),
+                          )
+                              :Text(
+                            'Total amount : ' +
+                                (cart.totalAmount + 50.00).toStringAsFixed(2),
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      )),
+                  Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width * 2 / 7,
+                    color: Theme.of(context).primaryColorDark,
+                    child: InkWell(
+                      child: Center(
+                        child: Text(
+                          'Check out',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context)
+                            .pushNamed(CartScreen.routeName);
+                      },
+                    ),
+                  ),
+                ],
+              )) :SizedBox(width: 0.0,height: 0.0,)
         ],
       ),
     );
   }
-
-
-//  Widget _searchBar(BuildContext context) {
-//    final productsData = Provider.of<Products>(context);
-//    final products = productsData.items;
-//    return Container(
-//      margin: EdgeInsets.all(5.0),
-//      decoration: BoxDecoration(
-//          borderRadius: BorderRadius.circular(4.0),
-//          border: Border.all(width: 1, color: Colors.grey)),
-//      child: Row(
-//        children: <Widget>[
-//          Expanded(
-//              flex: 1,
-//              child: Container(
-//                color: Colors.grey[350],
-//                child: IconButton(
-//                  icon: Icon(
-//                    Icons.cancel,
-//                    color: Theme.of(context).primaryColor,
-//                  ),
-//                  onPressed: () {
-//                    setState(() {
-//                      _showSearchBar = false;
-//                    });
-//                  },
-//                ),
-//              )),
-//          Expanded(
-//              flex: 7,
-//              child: TextField(
-//                autofocus: true,
-//                textInputAction: TextInputAction.search,
-//                onChanged: (val) {
-//                  initiateSearch(val, products);
-//                },
-//                decoration: InputDecoration(
-//                    contentPadding: EdgeInsets.only(left: 10.0),
-//                    hintText: 'Search by product name',
-//                    border: InputBorder.none),
-//              ))
-//        ],
-//      ),
-//    );
-//  }
 }
