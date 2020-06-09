@@ -3,6 +3,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:sqflite/sqflite.dart';
+import 'dart:io';
+import 'package:path/path.dart';
+import 'package:flutter/services.dart';
+
 
 class ApiService {
 
@@ -62,6 +67,54 @@ class ApiService {
       return responseData;
     }
     return responseData;
+  }
+
+
+  static Future<List<dynamic>> getDistrictDataFromLocalDB() async  {
+    var databasesPath = await getDatabasesPath();
+    var path = join(databasesPath, "areas.db");
+    var exists = await databaseExists(path);
+
+    if (!exists) {
+      try {
+        await Directory(dirname(path)).create(recursive: true);
+      } catch (_) {}
+
+      ByteData data = await rootBundle.load(join("assets", "areas.db"));
+      List<int> bytes =
+      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+      await File(path).writeAsBytes(bytes, flush: true);
+    } else {
+      print("Opening existing database");
+    }
+    var db = await openDatabase(path, readOnly: true);
+    var dbClient = await db;
+    List<dynamic> root = await dbClient.rawQuery('select DISTINCT district from ix_areas');
+    return root;
+  }
+
+
+  static Future<List<dynamic>> getAreaDataFromLocalDB(String district) async  {
+    var databasesPath = await getDatabasesPath();
+    var path = join(databasesPath, "areas.db");
+    var exists = await databaseExists(path);
+
+    if (!exists) {
+      try {
+        await Directory(dirname(path)).create(recursive: true);
+      } catch (_) {}
+
+      ByteData data = await rootBundle.load(join("assets", "areas.db"));
+      List<int> bytes =
+      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+      await File(path).writeAsBytes(bytes, flush: true);
+    } else {
+      print("Opening existing database");
+    }
+    var db = await openDatabase(path, readOnly: true);
+    var dbClient = await db;
+    List<dynamic> root = await dbClient.rawQuery('select id,location from ix_areas where district = "$district" ');
+    return root;
   }
 
   static Future<Map<String,dynamic>> getProductList() async {

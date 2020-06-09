@@ -14,64 +14,61 @@ class CreateShippingAddressDialog extends StatefulWidget {
 class _CreateShippingAddressDialogState extends State<CreateShippingAddressDialog>{
 
   TextEditingController _phoneEditController;
-  TextEditingController _mailEditController;
   TextEditingController _addressEditController;
+  String selectedArea;
+  String selectedDistrict;
 
   var _isInit = true;
   var _isLoading = false;
 
   @override
   void initState(){
-//    _phoneEditController.text = '+88-01797512457';
+    _phoneEditController = TextEditingController();
+    _addressEditController = TextEditingController();
     super.initState();
   }
 
   @override
   void didChangeDependencies(){
     if(_isInit) {
+      if (!mounted) return;
       setState(() {
         _isLoading = true;
       });
-      Provider.of<ShippingAddress>(context).fetchAreaList().then((_){
+      Provider.of<ShippingAddress>(context).fetchDistrictList().then((_){
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
       });
+//      Provider.of<ShippingAddress>(context).fetchAreaList().then((_){
+//        if (!mounted) return;
+//        setState(() {
+//          _isLoading = false;
+//        });
+//      });
     }
     _isInit = false;
     super.didChangeDependencies();
   }
 
 
-  Widget phoneField(data) {
+  Widget phoneField() {
     return TextField(
       controller: _phoneEditController,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-        prefixIcon: Icon(Icons.phone),
-        hintText: data,
+        suffixIcon: Icon(Icons.phone),
+        hintText: 'Phone number',
 //          border:
 //          OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))
       ),
     );
   }
 
-  Widget mailField(data) {
-    return TextField(
-      controller: _mailEditController,
-      keyboardType: TextInputType.emailAddress,
-      decoration: InputDecoration(
-        contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-        prefixIcon: Icon(Icons.mail),
-        hintText: data,
-//          border:
-//          OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))
-      ),
-    );
-  }
 
-  Widget addressField(data) {
+  Widget addressField() {
     return TextField(
       controller: _addressEditController,
       keyboardType: TextInputType.multiline,
@@ -79,54 +76,41 @@ class _CreateShippingAddressDialogState extends State<CreateShippingAddressDialo
       maxLines: 3,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-        prefixIcon: Icon(Icons.home),
-        hintText: data,
+        suffixIcon: Icon(Icons.home),
+        hintText: 'Home address',
 //          border:
 //          OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))
       ),
     );
   }
 
-  List<DropdownMenuItem> _menuItems(Map<dynamic, dynamic> items) {
-    List<DropdownMenuItem> itemWidgets = List();
-    items.forEach((key, value) {
-      itemWidgets.add(DropdownMenuItem(
-        value: key,
-        child: Text(value),
-      ));
-    });
-    return itemWidgets;
-  }
 
-  int selectedArea;
   @override
   Widget build(BuildContext context) {
     final shippingAddress = Provider.of<ShippingAddress>(context);
-    final cart = Provider.of<Cart>(context);
+    Map<String,dynamic> district = shippingAddress.allDistricts;
+    Map<String,dynamic> areas = Map();
     return AlertDialog(
       title: Center(child: Text('Shipping Address'),),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            phoneField('+88-01797512457'),
+            phoneField(),
+//            Container(
+//              child: Row(
+//                  children: <Widget>[
+//                    Expanded(child: phoneField(),),
+//                    Icon()
+//                  ],
+//              ),
+//            ),
             SizedBox(height: 15.0,),
-          DropdownButton(
-          isExpanded: true,
-          hint: Text('Select area'),
-          value: selectedArea,
-          onChanged: (newValue) {
-            setState(() {
-              selectedArea = newValue;
-              print(selectedArea);
-            });
-          },
-          items: _menuItems(shippingAddress.getAreaList),
-        ),
-
-//            mailField('test@gmail.com'),
+            DistrictDropDown(),
             SizedBox(height: 15.0,),
-            addressField('76/3, Block-g, Road-2 \nUttora, Dhaka'),
+            AreaDropDown(),
+            SizedBox(height: 15.0,),
+            addressField(),
             SizedBox(height: 25.0,),
             Container(
               child: RaisedButton(
@@ -134,7 +118,15 @@ class _CreateShippingAddressDialogState extends State<CreateShippingAddressDialo
                     borderRadius: BorderRadius.circular(25.0),
                     side: BorderSide(color: Colors.grey)),
                 onPressed: () {
-                  Provider.of<ShippingAddress>(context, listen: false).createShippingAddress(selectedArea,_addressEditController.text);
+                  print(shippingAddress.selectedDistrict);
+                  print(shippingAddress.selectedArea);
+                  print(_phoneEditController.text);
+                  print(_addressEditController.text);
+                  Provider.of<ShippingAddress>(context, listen: false).createShippingAddress(
+                      shippingAddress.selectedArea.toString(),
+                      _addressEditController.text,
+                      _phoneEditController.text,
+                  );
                   Navigator.of(context).pop();
                 },
                 color: Theme.of(context).primaryColor,
@@ -149,4 +141,86 @@ class _CreateShippingAddressDialogState extends State<CreateShippingAddressDialo
     );
   }
 
+}
+
+
+class DistrictDropDown extends StatelessWidget {
+
+  String selectedDistrict;
+  List<DropdownMenuItem> _districtMenuItems(Map<String, dynamic> items) {
+    List<DropdownMenuItem> itemWidgets = List();
+    items.forEach((key, value) {
+      itemWidgets.add(DropdownMenuItem(
+        value: value,
+        child: Text(value),
+      ));
+    });
+    return itemWidgets;
+  }
+
+  @override
+  Widget build(final BuildContext context) {
+    final shippingAddress = Provider.of<ShippingAddress>(context);
+
+    Map<String,dynamic> district = shippingAddress.allDistricts;
+    return Consumer<ShippingAddress>(
+      builder: (
+          final BuildContext context,
+          final ShippingAddress address,
+          final Widget child,
+          ) {
+        return DropdownButton(
+          isExpanded: true,
+          icon: Icon(Icons.location_city),
+          hint: Text('Select district'),
+          value: shippingAddress.selectedDistrict,
+          onChanged: (newValue) {
+            shippingAddress.selectedDistrict = newValue;
+            shippingAddress.selectedArea = null;
+          },
+          items: _districtMenuItems(district),
+        );
+      },
+    );
+  }
+}
+
+class AreaDropDown extends StatelessWidget {
+
+  String selectedArea;
+  List<DropdownMenuItem> _districtMenuItems(Map<String, dynamic> items) {
+    List<DropdownMenuItem> itemWidgets = List();
+    items.forEach((key, value) {
+      itemWidgets.add(DropdownMenuItem(
+        value: key,
+        child: Text(value),
+      ));
+    });
+    return itemWidgets;
+  }
+
+  @override
+  Widget build(final BuildContext context) {
+    final shippingAddress = Provider.of<ShippingAddress>(context);
+    Map<String,dynamic> district = shippingAddress.allAreas;
+    return Consumer<ShippingAddress>(
+      builder: (
+          final BuildContext context,
+          final ShippingAddress address,
+          final Widget child,
+          ) {
+        return DropdownButton(
+
+          isExpanded: true,
+          icon: Icon(Icons.local_gas_station),
+          hint: Text('Select area'),
+          value: shippingAddress.selectedArea,
+          onChanged: (newValue) {
+            shippingAddress.selectedArea = newValue;
+          },
+          items: _districtMenuItems(district),
+        );
+      },
+    );
+  }
 }

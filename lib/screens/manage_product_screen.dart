@@ -51,26 +51,27 @@ class _ManageProductScreenState extends State<ManageProductScreen> {
     _isInit = false;
     super.didChangeDependencies();
   }
-  
+
   void _updateImageUrl(){
     if(!_imageUrlFocusNode.hasFocus){
       if(!_imageUrlController.text.startsWith('http') && !_imageUrlController.text.startsWith('https') ||
           !_imageUrlController.text.endsWith('.png') && !_imageUrlController.text.endsWith('.jpg') && !_imageUrlController.text.endsWith('.jepg')){
         return;
       }
+      if (!mounted) return;
       setState(() {});
     }
   }
 
 
-  @override
-  void dispose() {
-    _imageUrlFocusNode.removeListener(_updateImageUrl);
-    _priceFocusNode.dispose();
-    _descriptionFocusNode.dispose();
-    _imageUrlController.dispose();
-    _imageUrlFocusNode.dispose();
-  }
+//  @override
+//  void dispose() {
+//    _imageUrlFocusNode.removeListener(_updateImageUrl);
+//    _priceFocusNode.dispose();
+//    _descriptionFocusNode.dispose();
+//    _imageUrlController.dispose();
+//    _imageUrlFocusNode.dispose();
+//  }
 
   void _saveForm(){
     final isValid = _form.currentState.validate();

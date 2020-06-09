@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/orders.dart';
+import 'package:shoptempdb/screens/shipping_address_screen.dart';
 import 'package:shoptempdb/widgets/cart_item.dart';
 import 'package:shoptempdb/widgets/confirm_order_dialog.dart';
+import 'package:dio/dio.dart';
+
 
 class CartScreen extends StatelessWidget {
   static const routeName = '/cart';
@@ -50,8 +53,8 @@ class CartScreen extends StatelessWidget {
                     onPressed: () {
                       showDialog(
                           context: context,
-//                          child: _confirmOrderDialog(context, cart)
-                          child: ConfirmOrderDialog()
+                          child: _confirmOrderDialog(context, cart)
+//                          child: ConfirmOrderDialog()
                       );
 //                      Provider.of<Orders>(context, listen: false).addOrder(
 //                          cart.items.values.toList(), cart.totalAmount);
@@ -120,11 +123,12 @@ class CartScreen extends StatelessWidget {
                             ),
                           ),
                           onTap: () {
-                            showDialog(
-                                context: context,
+                            Navigator.of(context).pushNamed(ShippingAddressScreen.routeName,arguments: cart);
+//                            showDialog(
+//                                context: context,
 //                                child: _confirmOrderDialog(context, cart)
-                                child: ConfirmOrderDialog()
-                            );
+////                                child: ConfirmOrderDialog()
+//                            );
                           },
                         ),
                       ),
@@ -141,7 +145,7 @@ class CartScreen extends StatelessWidget {
 
   Widget _confirmOrderDialog(BuildContext context, Cart cart) {
     return AlertDialog(
-                            title: Center(child: Text('Confirm Address'),),
+                            title: Center(child: Text('Confirm Order'),),
                             content: SingleChildScrollView(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
@@ -173,8 +177,17 @@ class CartScreen extends StatelessWidget {
                                           borderRadius: BorderRadius.circular(25.0),
                                           side: BorderSide(color: Colors.grey)),
                                       onPressed: () {
-                                        Provider.of<Orders>(context, listen: false).addOrder(
-                                            cart.items.values.toList(), cart.totalAmount);
+                                        FormData data = new FormData();
+                                        List<Cart>  ct = [];
+                                        ct = cart.items.entries.map((e) => Cart(id:e.key,cartItem:e.value)).toList();
+
+                                        for(int i = 0; i<ct.length; i++){
+                                          data.add('product_id[$i]', ct[i].cartItem.id);
+                                          data.add('quantity[$i]', ct[i].cartItem.quantity);
+                                        }
+
+
+                                        Provider.of<Orders>(context, listen: false).addOrder(data);
                                         cart.clear();
                                         Navigator.of(context).pop();
                                       },

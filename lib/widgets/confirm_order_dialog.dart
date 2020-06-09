@@ -95,8 +95,8 @@ class _ConfirmOrderDialogState extends State<ConfirmOrderDialog>{
                     borderRadius: BorderRadius.circular(25.0),
                     side: BorderSide(color: Colors.grey)),
                 onPressed: () {
-                  Provider.of<Orders>(context, listen: false).addOrder(
-                      cart.items.values.toList(), cart.totalAmount);
+//                  Provider.of<Orders>(context, listen: false).addOrder(
+//                      cart.items.values.toList(), cart.totalAmount);
                   cart.clear();
                   Navigator.of(context).pop();
                 },

@@ -13,6 +13,7 @@ import 'package:shoptempdb/screens/orders_screen.dart';
 import 'package:shoptempdb/screens/product_detail_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 import 'package:shoptempdb/screens/profile_screen.dart';
+import 'package:shoptempdb/screens/shipping_address_screen.dart';
 import 'package:shoptempdb/screens/splash_screen.dart';
 import 'package:shoptempdb/screens/test.dart';
 import 'package:shoptempdb/screens/user_products_screen.dart';
@@ -24,110 +25,61 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(
-          value: Auth(),
-        ),
-        ChangeNotifierProxyProvider<Auth,ShippingAddress>(
-          update: (ctx,auth,previousAddress) => ShippingAddress(
-            auth.token,
-            auth.userId,
-            previousAddress == null ? null:previousAddress.getShippingAddress
+        providers: [
+          ChangeNotifierProvider.value(
+            value: Auth(),
           ),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => Products(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => ProductCategories(),
-        ),
-        ChangeNotifierProvider.value(
-          value: Cart(),
-        ),
-        ChangeNotifierProvider.value(
-          value: Orders(),
-        ),
-
-      ],
-      child:
-
-//      Consumer<Auth>(
-//        builder: (context, auth, child) => MaterialApp(
-//          debugShowCheckedModeBanner: false,
-//          title: 'Bepari',
-//          theme: ThemeData(
-//              primarySwatch: Colors.teal, accentColor: Colors.blueGrey),
-//          home: auth.isAuth
-//              ? ProductsOverviewScreen()
-//              : FutureBuilder(
-//                  future: auth.tryAutoLogin(),
-//                  builder: (context, authResultSnapshot) =>
-//                      authResultSnapshot.connectionState ==
-//                              ConnectionState.waiting
-//                          ? SplashScreen()
-//                          : AuthScreen(),
-//                ),
-//        ),
-//      ),
-
-
-        MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'MyShop',
-          theme: ThemeData(
-              primarySwatch: Colors.teal,
-              accentColor: Colors.blueGrey
+          ChangeNotifierProvider(
+            create: (context) => Products(),
           ),
-          home:FutureBuilder(
-
-            future:Future.delayed(Duration(seconds: 1)),
-            builder: (context, authResultSnapshot) =>
-            authResultSnapshot.connectionState ==
-                ConnectionState.waiting
-                ? SplashScreen()
-                : ProductsOverviewScreen(),
+          ChangeNotifierProvider(
+            create: (context) => ProductCategories(),
           ),
-          routes: {
-            ProductsOverviewScreen.routeName: (context) => ProductsOverviewScreen(),
-            ProductDetailScreen.routeName: (context) => ProductDetailScreen(),
-            CartScreen.routeName: (context) =>  CartScreen(),
-            OrdersScreen.routeName: (context) =>  OrdersScreen(),
-            UserProductsScreen.routeName: (context) =>  UserProductsScreen(),
-            ManageProductScreen.routeName: (context) =>  ManageProductScreen(),
-            AuthScreen.routeName: (context) => AuthScreen(),
-            Profilepage.routeName: (context) =>Profilepage(),
-            TestScreen.routeName: (context) =>TestScreen(),
-          },
-        )
+          ChangeNotifierProvider.value(
+            value: Cart(),
+          ),
 
-//        Consumer<Auth>(
-//          builder: (ctx, auth, child) => MaterialApp(
-//            debugShowCheckedModeBanner: false,
-//            title: 'Bepari',
-//            theme: ThemeData(
-//                primarySwatch: Colors.teal, accentColor: Colors.blueGrey),
-//            home: auth.isAuth
-//                ? ProductsOverviewScreen()
-//                : FutureBuilder(
-//              future: auth.tryAutoLogin(),
-//              builder: (ctx, authResultSnapshot) =>
-//              authResultSnapshot.connectionState ==
-//                  ConnectionState.waiting
-//                  ? SplashScreen()
-//                  : AuthScreen(),
-//            ),
-//            routes: {
-//              ProductsOverviewScreen.routeName: (context) => ProductsOverviewScreen(),
-//              ProductDetailScreen.routeName: (context) => ProductDetailScreen(),
-//              CartScreen.routeName: (context) =>  CartScreen(),
-//              OrdersScreen.routeName: (context) =>  OrdersScreen(),
-//              UserProductsScreen.routeName: (context) =>  UserProductsScreen(),
-//              ManageProductScreen.routeName: (context) =>  ManageProductScreen(),
-//              AuthScreen.routeName: (context) => AuthScreen(),
-//              Profilepage.routeName: (context) =>Profilepage(),
-//            },
+          ChangeNotifierProxyProvider<Auth, ShippingAddress>(
+            update: (ctx, auth, previousAddress) => ShippingAddress(
+              auth.token,
+              auth.userId,
+              previousAddress == null ? [] : previousAddress.allShippingAddress,
+            ),
+          ),
+          ChangeNotifierProxyProvider<Auth, Orders>(
+            update: (ctx, auth, previousOrders) => Orders(
+              auth.token,
+              auth.userId,
+              previousOrders == null ? [] : previousOrders.orders,
+            ),
+          ),
+//          ChangeNotifierProvider.value(
+//            value: Orders(),
 //          ),
-//        )
+        ],
+      child:
+        Consumer<Auth>(
+          builder: (ctx, auth, child) => MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Bepari',
+            theme: ThemeData(primarySwatch: Colors.teal, accentColor: Colors.blueGrey),
+            home: SplashScreen(),
+//            FutureBuilder(
+//              future: auth.tryAutoLogin(),
+//              builder: (ctx, authResultSnapshot) => ProductsOverviewScreen(),
+//            ),
+            routes: {
+              ProductsOverviewScreen.routeName: (context) => ProductsOverviewScreen(),
+              ProductDetailScreen.routeName: (context) => ProductDetailScreen(),
+              CartScreen.routeName: (context) =>  CartScreen(),
+              OrdersScreen.routeName: (context) =>  OrdersScreen(),
+              AuthScreen.routeName: (context) => AuthScreen(),
+              Profilepage.routeName: (context) =>Profilepage(),
+              ShippingAddressScreen.routeName: (context) => ShippingAddressScreen(),
+//              TestScreen.routeName: (context) =>TestScreen(),
+            },
+          ),
+        )
 
     );
   }

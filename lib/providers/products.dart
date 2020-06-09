@@ -33,7 +33,7 @@ class Products with ChangeNotifier {
           category: allProduct[i]['product_category_id'].toString(),
           description: allProduct[i]['description'],
           unit: allProduct[i]['unit_name'],
-          price: double.parse(allProduct[i]['unit_price']),
+          price: allProduct[i]['unit_price'].toDouble(),
           imageUrl: 'https://www.jessicagavin.com/wp-content/uploads/2019/02/honey-1-600x900.jpg',
         );
         loadedProducts.add(product);

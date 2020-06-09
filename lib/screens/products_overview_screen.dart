@@ -25,10 +25,12 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
   @override
   void didChangeDependencies(){
     if(_isInit) {
+      if (!mounted) return;
       setState(() {
         _isLoading = true;
       });
       Provider.of<Products>(context).fetchAndSetProducts().then((_){
+        if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
@@ -59,6 +61,7 @@ class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
                     size: 20.0,
                   ),
             onPressed: () {
+              if (!mounted) return;
               setState(() {
                 _showList = !_showList;
               });

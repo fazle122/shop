@@ -67,24 +67,38 @@ class AuthCard extends StatefulWidget {
 
 class _AuthCardState extends State<AuthCard> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  AuthMode _authMode = AuthMode.Login;
+  AuthMode _authMode = AuthMode.Signup;
   Map<String, String> _authData = {
-    'email': '',
-    'password': '',
+    'mobile_no': '',
+    'otp': '',
   };
   var _isLoading = false;
-  final _passwordController = TextEditingController();
+  final _otpController = TextEditingController();
 
+//  @override
+//  void initState() {
+//    super.initState();
+//    Provider.of<Auth>(context);
+//  }
   void _showErrorDialog(String message) {
-    showDialog(context: context,
-        builder: (ctx) => AlertDialog(title: Text('An Error Occurred!'),content: Text(message),actions: <Widget>[
-          FlatButton(child: Text('ok'),onPressed: (){
-            Navigator.of(ctx).pop();
-          },)
-        ],));
+    showDialog(
+        context: context,
+        builder: (ctx) =>
+            AlertDialog(
+              title: Text('An Error Occurred!'),
+              content: Text(message),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('ok'),
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                  },
+                )
+              ],
+            ));
   }
 
-  Future<void> _submit() async {
+  Future<void> _submit(AuthMode mode) async {
     if (!_formKey.currentState.validate()) {
       // Invalid!
       return;
@@ -94,18 +108,15 @@ class _AuthCardState extends State<AuthCard> {
       _isLoading = true;
     });
     try {
-//      Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
-
-      if (_authMode == AuthMode.Login) {
+      if (mode == AuthMode.Login) {
         // Log user in
-        await Provider.of<Auth>(context, listen: false).login(
-            _authData['email'], _authData['password']);
+        await Provider.of<Auth>(context, listen: false)
+            .login(_authData['mobile_no'], _authData['otp']);
         Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
-
       } else {
         // Sign user up
-        await Provider.of<Auth>(context, listen: false).signUp(
-            _authData['email'], _authData['password']);
+        await Provider.of<Auth>(context, listen: false)
+            .signUp(_authData['mobile_no']);
       }
     } on HttpException catch (error) {
       var errorMessage = 'Authentication failed';
@@ -144,6 +155,7 @@ class _AuthCardState extends State<AuthCard> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<Auth>(context);
     final deviceSize = MediaQuery
         .of(context)
         .size;
@@ -153,9 +165,8 @@ class _AuthCardState extends State<AuthCard> {
       ),
       elevation: 8.0,
       child: Container(
-        height: _authMode == AuthMode.Signup ? 320 : 260,
-        constraints:
-        BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 320 : 260),
+        height: _authMode == AuthMode.Signup ? 200 : 250,
+//        constraints: BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 150 : 200),
         width: deviceSize.width * 0.75,
         padding: EdgeInsets.all(16.0),
         child: Form(
@@ -164,43 +175,52 @@ class _AuthCardState extends State<AuthCard> {
             child: Column(
               children: <Widget>[
                 TextFormField(
-                  decoration: InputDecoration(labelText: 'E-Mail/ID'),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value.isEmpty || !value.contains('@')) {
-                      return 'Invalid email!';
-                    }
-                  },
-                  onSaved: (value) {
-                    _authData['email'] = value;
-                  },
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                  controller: _passwordController,
-                  validator: (value) {
-                    if (value.isEmpty || value.length < 5) {
-                      return 'Password is too short!';
-                    }
-                  },
-                  onSaved: (value) {
-                    _authData['password'] = value;
-                  },
-                ),
-                if (_authMode == AuthMode.Signup)
-                  TextFormField(
-                    enabled: _authMode == AuthMode.Signup,
-                    decoration: InputDecoration(labelText: 'Confirm Password'),
-                    obscureText: true,
-                    validator: _authMode == AuthMode.Signup
-                        ? (value) {
-                      if (value != _passwordController.text) {
-                        return 'Passwords do not match!';
-                      }
-                    }
-                        : null,
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    hintText: 'Phone number',
+//                    labelText: 'Phone number',
                   ),
+                  keyboardType: TextInputType.emailAddress,
+//                  validator: (value) {
+//                    if (value.isEmpty || !value.contains('@')) {
+//                      return 'Invalid email!';
+//                    }
+//                  },
+                  onSaved: (value) {
+                    _authData['mobile_no'] = value;
+                  },
+                ),
+                auth.otp != null
+                    ? TextFormField(
+                  textAlign: TextAlign.center,
+                  decoration: InputDecoration(
+                    hintText: 'otp',
+//                    labelText: 'otp',
+                  ),
+                  obscureText: true,
+                  controller: _otpController,
+//                  validator: (value) {
+//                    if (value.isEmpty || value.length < 5) {
+//                      return 'Password is too short!';
+//                    }
+//                  },
+                  onSaved: (value) {
+                    _authData['otp'] = value;
+                  },
+                )
+                    : SizedBox(
+                  width: 0.0,
+                  height: 0.0,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+//                _authMode == AuthMode.Login? Text('otp'):SizedBox(height: 0.0,),
+                auth.otp != null
+                    ? Text(auth.otp)
+                    : SizedBox(
+                  height: 0.0,
+                ),
                 SizedBox(
                   height: 20,
                 ),
@@ -209,8 +229,15 @@ class _AuthCardState extends State<AuthCard> {
                 else
                   RaisedButton(
                     child:
-                    Text(_authMode == AuthMode.Login ? 'LOGIN' : 'SIGN UP'),
-                    onPressed: _submit,
+//                    Text(_authMode == AuthMode.Login ? 'LOGIN' : 'GET OTP'),
+                    Text(auth.otp != null ? 'LOGIN' : 'GET OTP'),
+                    onPressed: () {
+                      _switchAuthMode();
+                      FocusScope.of(context).requestFocus(new FocusNode());
+                      auth.otp != null
+                          ? _submit(AuthMode.Login)
+                          : _submit(AuthMode.Signup);
+                    },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
@@ -225,18 +252,15 @@ class _AuthCardState extends State<AuthCard> {
                         .button
                         .color,
                   ),
-                FlatButton(
-                  child: Text(
-                      '${_authMode == AuthMode.Login
-                          ? 'SIGNUP'
-                          : 'LOGIN'}'),
-                  onPressed: _switchAuthMode,
-                  padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 4),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  textColor: Theme
-                      .of(context)
-                      .primaryColor,
-                ),
+
+//                FlatButton(
+//                  child: Text(
+//                      '${_authMode == AuthMode.Login ? 'SIGNUP' : 'LOGIN'}'),
+//                  onPressed: _switchAuthMode,
+//                  padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 4),
+//                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+//                  textColor: Theme.of(context).primaryColor,
+//                ),
               ],
             ),
           ),

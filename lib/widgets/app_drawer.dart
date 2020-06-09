@@ -4,19 +4,54 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/auth.dart';
 import 'package:shoptempdb/providers/productCategories.dart';
-import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/screens/auth_screen.dart';
 import 'package:shoptempdb/screens/orders_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 import 'package:shoptempdb/screens/profile_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shoptempdb/screens/test.dart';
-import 'package:shoptempdb/screens/user_products_screen.dart';
 
 
 
 
-class AppDrawer extends StatelessWidget{
+class AppDrawer extends StatefulWidget {
+  @override
+  _AppDrawerState createState() => _AppDrawerState();
+}
+
+class _AppDrawerState extends State<AppDrawer>{
   PageStorageKey _key;
+  String token;
+  String userId;
+
+
+//  @override
+//  void initState(){
+//    super.initState();
+//    authenticateUser();
+//  }
+
+//  @override
+//  void didChangeDependencies(){
+//    Provider.of<Auth>(context).tryAutoLogin();
+//    super.didChangeDependencies();
+//  }
+
+//  void authenticateUser() async {
+//    final prefs = await SharedPreferences.getInstance();
+//    if (prefs.containsKey('userData')) {
+//      final extractedUserData = json.decode(prefs.getString('userData')) as Map<String, Object>;
+//      final expiryDate = DateTime.parse(extractedUserData['expiryDate']);
+//      if (!mounted) return;
+//      setState(() {
+//        token = extractedUserData['token'];
+//        userId = extractedUserData['userId'];
+//      });
+//    }
+//  }
+
+
+
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<Auth>(context);
@@ -33,6 +68,7 @@ class AppDrawer extends StatelessWidget{
             decoration: BoxDecoration(
               color: Theme.of(context).primaryColor,),
             child: Stack(children: <Widget>[
+
               Positioned(
                   top: 20.0,
                   left: 30.0,
@@ -44,10 +80,11 @@ class AppDrawer extends StatelessWidget{
                         backgroundImage: AssetImage('assets/profile.png'),
                       ),
                       SizedBox(height: 5.0,),
-                      auth.token != null ? Text('ABC'):Text('Guest User',style: TextStyle(color: Theme.of(context).textSelectionColor),),
+                      auth.userId != null ? Text(auth.userId):Text('Guest User'),
                     ],
                   )
               ),
+
               auth.token == null ?Positioned(
                   top: 20.0,
                   right: 30.0,
@@ -112,34 +149,13 @@ class AppDrawer extends StatelessWidget{
         ),
 
 
-//          ExpansionTile(
-//
-//              leading: Icon(Icons.category),
-//              title: new Text('Category'),
-//              backgroundColor: Theme.of(context).accentColor.withOpacity(0.025),
-//              children: <Widget>[
-//                new ListTile(
-//                  leading: Icon(Icons.local_grocery_store),
-//                  title: const Text('Food'),
-//                  onTap: () {
-//                    Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName,arguments: 'Food');
-//                  },
-//                ),
-//                new ListTile(
-//                  leading: Icon(Icons.local_grocery_store),
-//                  title: const Text('Grocery'),
-//                  onTap: () {
-//                    Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName,arguments: 'Grocery');
-//                  },
-//                ),
-//              ]
-//          ),
           Divider(),
           ListTile(
             leading: Icon(Icons.payment),
             title: Text('Orders'),
             onTap: (){
               Navigator.of(context).pushReplacementNamed(OrdersScreen.routeName);
+//              Navigator.of(context).pushReplacementNamed(TestScreen.routeName);
             },
           ),
           Divider(),
@@ -154,9 +170,10 @@ class AppDrawer extends StatelessWidget{
           ListTile(
             leading: Icon(Icons.power_settings_new),
             title: Text('Logout'),
-            onTap: (){
-//              Navigator.of(context).pushNamed(AuthScreen.routeName);
-              Navigator.of(context).pushNamed(TestScreen.routeName);
+            onTap: () async{
+              await Provider.of<Auth>(context, listen: false).logout();
+              Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
+
             },
           ),
           Divider(),
