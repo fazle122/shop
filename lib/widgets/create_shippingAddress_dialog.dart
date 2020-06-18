@@ -3,9 +3,13 @@ import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
+import 'package:dio/dio.dart';
+import 'package:shoptempdb/screens/products_overview_screen.dart';
 
 
 class CreateShippingAddressDialog extends StatefulWidget {
+  final Cart cart;
+  CreateShippingAddressDialog({this.cart});
 
   @override
   _CreateShippingAddressDialogState createState() => _CreateShippingAddressDialogState();
@@ -118,16 +122,49 @@ class _CreateShippingAddressDialogState extends State<CreateShippingAddressDialo
                     borderRadius: BorderRadius.circular(25.0),
                     side: BorderSide(color: Colors.grey)),
                 onPressed: () {
-                  print(shippingAddress.selectedDistrict);
-                  print(shippingAddress.selectedArea);
-                  print(_phoneEditController.text);
-                  print(_addressEditController.text);
-                  Provider.of<ShippingAddress>(context, listen: false).createShippingAddress(
+                  if(widget.cart.items.length <=0) {
+                    print(shippingAddress.selectedDistrict);
+                    print(shippingAddress.selectedArea);
+                    print(_phoneEditController.text);
+                    print(_addressEditController.text);
+                    Provider.of<ShippingAddress>(context, listen: false)
+                        .createShippingAddress(
                       shippingAddress.selectedArea.toString(),
                       _addressEditController.text,
                       _phoneEditController.text,
-                  );
-                  Navigator.of(context).pop();
+                    );
+                    Navigator.of(context).pop();
+                  }else{
+                    FormData data = new FormData();
+                    List<Cart>  ct = [];
+                    ct = widget.cart.items.entries.map((e) => Cart(id:e.key,cartItem:e.value)).toList();
+
+                    for(int i = 0; i<ct.length; i++){
+                      data.add('product_id[$i]', ct[i].cartItem.id);
+                      data.add('quantity[$i]', ct[i].cartItem.quantity);
+                      data.add('unit_price[$i]', ct[i].cartItem.price);
+                      data.add('is_non_inventory[$i]', ct[i].cartItem.isNonInventory);
+                      data.add('discount[$i]', ct[i].cartItem.discount);
+                    }
+                    data.add('area_id', shippingAddress.selectedArea.toString());
+                    data.add('shipping_address_line', _addressEditController.text);
+                    data.add('mobile_no', _phoneEditController.text);
+                    Provider.of<Orders>(context, listen: false).addOrder(data);
+                    widget.cart.clear();
+                    Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
+//                    if(selctedAddressId != null) {
+//                      Provider.of<Orders>(context, listen: false).addOrder(data);
+//                      widget.cart.clear();
+//                      Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
+//                    }else{
+//                      Scaffold.of(context).showSnackBar(SnackBar(
+//                        backgroundColor: Theme.of(context).primaryColor,
+//                        content: Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+//                            child:Text('Please select a deliver address or create new one')),
+//                        duration: Duration(seconds: 2),
+//                      ));
+//                    }
+                  }
                 },
                 color: Theme.of(context).primaryColor,
                 textColor: Colors.white,

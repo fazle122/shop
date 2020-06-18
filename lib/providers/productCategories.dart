@@ -9,12 +9,14 @@ class ProductCategoryItem {
   final String name;
   final String parents;
   final String parentsName;
+  final String categoryImage;
 
   ProductCategoryItem({
     @required this.id,
     @required this.name,
     @required this.parents,
     @required this.parentsName,
+    @required this.categoryImage,
   });
 }
 
@@ -26,7 +28,7 @@ class ProductCategories with ChangeNotifier {
   }
 
   Future<void> fetchProductsCategory() async {
-    var url = 'http://new.bepari.net/demo/api/V1/product-catalog/product-category/list-product-category';
+    var url = 'http://new.bepari.net/demo/api/V1.0/product-catalog/product-category/list-product-category';
     final List<ProductCategoryItem> allCategory = [];
     final response = await http.get(url);
     final data = json.decode(response.body) as Map<String, dynamic>;
@@ -40,6 +42,7 @@ class ProductCategories with ChangeNotifier {
         name: catData[i]['name'],
         parents: catData[i]['parents'],
         parentsName: catData[i]['parents_names'],
+        categoryImage: catData[i]['thumb_image'],
       );
       allCategory.add(cats);
     }
@@ -47,8 +50,11 @@ class ProductCategories with ChangeNotifier {
     notifyListeners();
   }
 
+
+
+ /// ---------------------- old ----------------------
 //  Future<void> fetchProductsCategory() async {
-//    var url = 'http://new.bepari.net/demo/api/V1/product-catalog/product-category/list-product-category';
+//    var url = 'http://new.bepari.net/demo/api/V1.0/product-catalog/product-category/list-product-category';
 //    try {
 //      final response = await http.get(url);
 //      final data = json.decode(response.body) as Map<String, dynamic>;

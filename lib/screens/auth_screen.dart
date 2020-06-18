@@ -3,6 +3,8 @@ import 'package:shoptempdb/models/http_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/auth.dart';
+import 'package:shoptempdb/providers/cart.dart';
+import 'package:shoptempdb/screens/cart_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 
 enum AuthMode { Signup, Login }
@@ -75,11 +77,7 @@ class _AuthCardState extends State<AuthCard> {
   var _isLoading = false;
   final _otpController = TextEditingController();
 
-//  @override
-//  void initState() {
-//    super.initState();
-//    Provider.of<Auth>(context);
-//  }
+
   void _showErrorDialog(String message) {
     showDialog(
         context: context,
@@ -98,7 +96,7 @@ class _AuthCardState extends State<AuthCard> {
             ));
   }
 
-  Future<void> _submit(AuthMode mode) async {
+  Future<void> _submit(AuthMode mode,Cart cart) async {
     if (!_formKey.currentState.validate()) {
       // Invalid!
       return;
@@ -112,7 +110,9 @@ class _AuthCardState extends State<AuthCard> {
         // Log user in
         await Provider.of<Auth>(context, listen: false)
             .login(_authData['mobile_no'], _authData['otp']);
-        Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
+        cart.items.length <= 0 ?
+        Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName)
+        :Navigator.of(context).pushNamed(CartScreen.routeName);
       } else {
         // Sign user up
         await Provider.of<Auth>(context, listen: false)
@@ -156,6 +156,7 @@ class _AuthCardState extends State<AuthCard> {
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<Auth>(context);
+    final cart = Provider.of<Cart>(context);
     final deviceSize = MediaQuery
         .of(context)
         .size;
@@ -235,8 +236,8 @@ class _AuthCardState extends State<AuthCard> {
                       _switchAuthMode();
                       FocusScope.of(context).requestFocus(new FocusNode());
                       auth.otp != null
-                          ? _submit(AuthMode.Login)
-                          : _submit(AuthMode.Signup);
+                          ? _submit(AuthMode.Login,cart)
+                          : _submit(AuthMode.Signup,cart);
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),

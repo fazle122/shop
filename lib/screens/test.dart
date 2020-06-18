@@ -1,235 +1,167 @@
-import 'dart:collection';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-// Model ---------------------------------------------------
-
-class SingleSelectCountry with ChangeNotifier {
-  final List<String> _items = <String>[
-    "Argentina",
-    "Belgium",
-    "Brazil",
-    "Denmark",
-    "England",
-    "France",
-    "Finland",
-    "Germany",
-    "Holland",
-    "Ireland",
-    "Norway",
-    "Poland",
-    "Scotland",
-    "Spain",
-    "Sweden",
-    "Switzerland",
-    "Wales",
-  ];
-
-  String _selectedItem;
-
-  UnmodifiableListView<String> get items {
-    return UnmodifiableListView(this._items);
-  }
-
-  String get selected {
-    return this._selectedItem;
-  }
-
-  set selected(final String item) {
-    this._selectedItem = item;
-    this.notifyListeners();
-  }
-}
-
-// User Interface ------------------------------------------
-
-void main() {
-  return runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: MyHomePage(),
-    );
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  @override
-  Widget build(final BuildContext context) {
-    // The provider has to be in the widget tree higher than
-    // both `CountryDropDown` and `UserOffers`.
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<SingleSelectCountry>(
-          create: (final BuildContext context) {
-            return SingleSelectCountry();
-          },
-        ),
-      ],
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('My Home Page'),
-        ),
-        body: Restrictions(),
-      ),
-    );
-  }
-}
-
-class Restrictions extends StatelessWidget {
-  @override
-  Widget build(final BuildContext context) {
-    return Column(
-      children: <Widget>[
-        CountryDropDown(),
-        UserOffers(),
-      ],
-    );
-  }
-}
-
-class CountryDropDown extends StatelessWidget {
-  @override
-  Widget build(final BuildContext context) {
-    return Consumer<SingleSelectCountry>(
-      builder: (
-          final BuildContext context,
-          final SingleSelectCountry singleSelectCountry,
-          final Widget child,
-          ) {
-        return DropdownButton<String>(
-          hint: const Text("Not selected"),
-          icon: const Icon(Icons.flight),
-          value: singleSelectCountry.selected,
-          onChanged: (final String newValue) {
-            singleSelectCountry.selected = newValue;
-          },
-          items: singleSelectCountry.items.map<DropdownMenuItem<String>>(
-                (final String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            },
-          ).toList(),
-        );
-      },
-    );
-  }
-}
-
-class UserOffers extends StatelessWidget {
-  @override
-  Widget build(final BuildContext context) {
-    return Consumer<SingleSelectCountry>(
-      builder: (
-          final BuildContext context,
-          final SingleSelectCountry singleSelectCountry,
-          final Widget child,
-          ) {
-        return Text(singleSelectCountry.selected ?? '');
-      },
-    );
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//import 'package:flutter/cupertino.dart';
 //import 'package:flutter/material.dart';
 //import 'package:provider/provider.dart';
-//import 'package:shoptempdb/providers/orders.dart';
-//import 'package:shoptempdb/widgets/app_drawer.dart';
-//import 'package:shoptempdb/widgets/order_item.dart';
+//import 'package:shoptempdb/providers/cart.dart';
+//import 'package:shoptempdb/providers/product.dart';
 //
-//
-//class TestScreen extends StatefulWidget {
-//
-//  static const routeName = '/test';
-//
-//  @override
-//  _TestScreenState createState() => _TestScreenState();
+//class CartItemWidget extends StatefulWidget {
+//  _CartItemWidgetState createState() => _CartItemWidgetState();
 //}
 //
-//class _TestScreenState extends State<TestScreen>{
-//
-////  var _showList = false;
-////  var _isInit = true;
-////  var _isLoading = false;
-////
-////  @override
-////  void didChangeDependencies(){
-////    if(_isInit) {
-////      setState(() {
-////        _isLoading = true;
-////      });
-////      Provider.of<Orders>(context).fetchAndSetOrders().then((_){
-////        setState(() {
-////          _isLoading = false;
-////        });
-////      });
-////    }
-////    _isInit = false;
-////    super.didChangeDependencies();
-////  }
+//class _CartItemWidgetState extends State<CartItemWidget>{
 //
 //  @override
 //  Widget build(BuildContext context) {
-////    final orderData = Provider.of<Orders>(context);
+////    final product = Provider.of<Product>(context, listen: false);
+//    final cart = Provider.of<Cart>(context,listen: false);
+//    final cartItem = cart.items as CartItem;
 //
-//    return Scaffold(
-//      appBar: AppBar(title: Text('Test Screen'),),
-//      drawer: AppDrawer(),
-//      body:
-//
-////      _isLoading?Center(child:CircularProgressIndicator()):Column(
-////        children: <Widget>[
-////          orderData.orders.length > 0 ? Container(
-////                child:ListView.builder(
-////                  itemCount: orderData.orders.length,
-////                  itemBuilder: (context, i) =>
-////                      OrderItemWidget(orderData.orders[i]),
-////                ),
-////              ):Container(child: Center(child: Text('No previous orders'),),),
-////        ],
-////      )
-//
-//      FutureBuilder(
-//        future: Provider.of<Orders>(context,listen: false).fetchAndSetOrders(),
-//          builder: (context,dataSnapshot) {
-//            if(dataSnapshot.connectionState == ConnectionState.waiting) {
-//              return Center(child: CircularProgressIndicator(),);
-//            }else{
-//              if(dataSnapshot.error != null){
-//                return Center(child: Text('error occurred'),);
-//              }else{
-//                return Consumer<Orders>(builder: (context,data,child) => ListView.builder(
-//                  itemCount: data.orders.length,
-//                  itemBuilder: (context,i) => Text(data.orders[i].invoiceAmount.toString()),
-//                ),);
-//              }
-//            }
-//          }
+//    return Dismissible(
+//      key:ValueKey(cartItem.id),
+//      direction: DismissDirection.endToStart,
+//      background: Container(
+//        color: Theme.of(context).errorColor,
+//        child: Icon(Icons.delete,color: Colors.white,size: 40,),
+//        alignment: Alignment.centerRight,
+//        padding: EdgeInsets.only(right: 20),
+//        margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
+//      ),
+//      confirmDismiss: (direction){
+//        return   showDialog(
+//            context: context,
+//            builder: (context) => AlertDialog(
+//              title: Text('Are you sure?'),
+//              content: Text('Do you want to remove the item form the cart?'),
+//              actions: <Widget>[
+//                FlatButton(child: Text('No'), onPressed: (){Navigator.of(context).pop(false);},),
+//                FlatButton(child: Text('Yes'), onPressed: (){Navigator.of(context).pop(true);},),
+//              ],
+//            )
+//        );
+//      },
+//      onDismissed: (direction){
+//        Provider.of<Cart>(context,listen: false).removeItem(cartItem.productId);
+//      },
+//      child: Card(
+//        margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
+//        child: Padding(
+//          padding: EdgeInsets.all(8),
+//          child: ListTile(
+//            leading: CircleAvatar(
+//              child: Padding(
+//                padding: EdgeInsets.all(5),
+//                child: FittedBox(
+//                  child: Text('\$$widget.price'),
+//                ),
+//              ),
+//            ),
+//            title: Text(cartItem.title),
+//            subtitle: Text('Total : \$${(cartItem.price * cartItem.quantity)}'),
+////            trailing: Text('${(widget.quantity)}' + 'xx'),
+//            trailing: Container(
+//              width: 110.0,
+//              child: cartItem.quantity != null ? Row(
+//                mainAxisAlignment: MainAxisAlignment.end,
+//                children: <Widget>[
+//                  IconButton(
+//                    icon: Icon(Icons.add),
+//                    onPressed: (){
+//                      cart.addItem(cartItem.productId, cartItem.title, cartItem.price,cartItem.isNonInventory,cartItem.discount,cartItem.discountId,cartItem.discountType);
+//                      Scaffold.of(context).hideCurrentSnackBar();
+//                      if(cart.items.length> 0)
+//                        Scaffold.of(context).showSnackBar(SnackBar(
+//                          backgroundColor: cart.totalAmount > 500
+//                              ? Theme.of(context).primaryColor
+//                              : Colors.red[300],
+//                          content: cart.totalAmount > 500
+//                              ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+//                              child:Text('Delievry charge free'))
+//                              : Row(
+//                            children: <Widget>[
+//                              Container(
+//                                  decoration: BoxDecoration(
+//                                      border: Border(
+//                                          right: BorderSide(
+//                                              color: Colors.white,
+//                                              width: 1.0))),
+//                                  width:
+//                                  MediaQuery.of(context).size.width *
+//                                      1 /
+//                                      7,
+//                                  child:
+//                                  Text('Delivery charge \n50 BDT')),
+//                              SizedBox(
+//                                width: 5.0,
+//                              ),
+//                              Container(
+//                                width: MediaQuery.of(context).size.width *
+//                                    4 /
+//                                    7,
+//                                child: Text(
+//                                    'Shop more for free delivery charge.'),
+//                              )
+//                            ],
+//                          ),
+//                          duration: Duration(seconds: 2),
+//                        ));
+//                    },
+//                  ),
+//                  Text(cartItem.quantity.toString(),style: TextStyle(fontSize: 20.0),),
+//                  IconButton(
+//                    icon: Icon(Icons.remove),
+//                    onPressed: (){
+//                      cart.removeSingleItem(cartItem.productId);
+//                      Scaffold.of(context).hideCurrentSnackBar();
+//                      if(cart.items.length> 0)
+//                        Scaffold.of(context).showSnackBar(SnackBar(
+//                          backgroundColor: cart.totalAmount > 500
+//                              ? Theme.of(context).primaryColor
+//                              : Colors.red[300],
+//                          content: cart.totalAmount > 500
+//                              ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+//                              child:Text('Delievry charge free'))
+//                              : Row(
+//                            children: <Widget>[
+//                              Container(
+//                                  decoration: BoxDecoration(
+//                                      border: Border(
+//                                          right: BorderSide(
+//                                              color: Colors.white,
+//                                              width: 1.0))),
+//                                  width:
+//                                  MediaQuery.of(context).size.width *
+//                                      1 /
+//                                      7,
+//                                  child:
+//                                  Text('Delivery charge \n50 BDT')),
+//                              SizedBox(
+//                                width: 5.0,
+//                              ),
+//                              Container(
+//                                width: MediaQuery.of(context).size.width *
+//                                    4 /
+//                                    7,
+//                                child: Text(
+//                                    'Shop more for free delivery charge.'),
+//                              )
+//                            ],
+//                          ),
+//                          duration: Duration(seconds: 2),
+//                        ));
+//                    },
+//                  ),
+//                ],
+//              ):IconButton(
+//                color: Theme.of(context).accentColor,
+//                icon: Icon(Icons.shopping_cart),
+//                onPressed: () {
+////                  cart.addItem(widget.id, widget.title, widget.price,widget.isNonInventory,widget.discount,widget.discountId,widget.discountType);
+//                },
+//              ),
+//            ),
+//          ),
+//        ),
 //      ),
 //    );
 //  }
-//
 //}

@@ -22,7 +22,34 @@ class AddressItem{
     @required this.customerId,
     @required this.phoneNumber,
   });
+}
 
+class ProfileItem{
+  final String id;
+  final String name;
+  final String displayName;
+  final String gender;
+  final String email;
+  final String mobileNumber;
+  final String address;
+  final String city;
+  final String areaId;
+  final String contactPerson;
+  final String contactPersonMobileNumber;
+
+  ProfileItem({
+    @required this.id,
+    @required this.name,
+    @required this.displayName,
+    @required this.gender,
+    @required this.email,
+    @required this.mobileNumber,
+    @required this.address,
+    @required this.city,
+    @required this.areaId,
+    @required this.contactPerson,
+    @required this.contactPersonMobileNumber,
+  });
 }
 
 class ShippingAddress with ChangeNotifier{
@@ -34,7 +61,11 @@ class ShippingAddress with ChangeNotifier{
 
   Map<String,dynamic> _districtList = Map();
   Map<String,dynamic> _areaList = Map();
+  ProfileItem _profileItem;
 
+  ProfileItem get profileInfo{
+    return _profileItem;
+  }
 
   List<AddressItem> get allShippingAddress{
     return [..._allShippingAddress];
@@ -112,8 +143,14 @@ class ShippingAddress with ChangeNotifier{
     notifyListeners();
   }
 
+  Future<String> fetchAreaName(String areaId) async {
+    String area = await ApiService.getAreaNameFromLocalDB(areaId);
+    return area;
+    notifyListeners();
+  }
+
 //  Future<void> fetchAreaList() async {
-//    var url = 'http://new.bepari.net/demo/api/V1/crm/customer/list-shipping-address';
+//    var url = 'http://new.bepari.net/demo/api/V1.0/crm/customer/list-shipping-address';
 //    Map<int, dynamic> areaData = Map();
 //    try {
 //      final response = await http.get(url);
@@ -133,7 +170,7 @@ class ShippingAddress with ChangeNotifier{
 
   Future<void> createShippingAddress(String areaId, String address,String phone) async {
     var responseData;
-    String qString = "http://new.bepari.net/demo/api/V1/crm/customer/create-shipping-address";
+    String qString = "http://new.bepari.net/demo/api/V1.0/crm/customer/create-shipping-address";
     Map<String, String> headers = {
       'Authorization': 'Bearer ' + authToken,
       'Content-Type': 'application/json',
@@ -161,8 +198,115 @@ class ShippingAddress with ChangeNotifier{
     }
   }
 
+  Future<void> updateProfileInfo(ProfileItem newInfo) async {
+    var responseData;
+    String qString = "http://new.bepari.net/demo/api/V1.0/access-control/user/update-profile";
+    Map<String, String> headers = {
+      'Authorization': 'Bearer ' + authToken,
+      'Content-Type': 'application/json',
+    };
+
+    final Map<String, dynamic> authData = {
+      'name':newInfo.name,
+//      'mobile_no': newInfo.mobileNumber,
+      'email':newInfo.email,
+//      'address': newInfo.address,
+
+    };
+//    try {
+//      final http.Response response = await http.post(
+//        qString,
+//        body: json.encode(authData),
+//        headers: headers,
+//      );
+//      responseData = json.decode(response.body);
+//
+//      if (responseData['error'] != null) {
+//        throw HttpException(responseData['error']['message']);
+//      }
+//      notifyListeners();
+//    } catch (error) {
+//      throw error;
+//    }
+  }
+
+  Future<Map<String,dynamic>> updateProfileInfo1(String address,String phone,String name,String email,String district) async {
+    var responseData;
+    String qString = "http://new.bepari.net/demo/api/V1.0/access-control/user/update-profile";
+    Map<String, String> headers = {
+      'Authorization': 'Bearer ' + authToken,
+      'Content-Type': 'application/json',
+    };
+
+    final Map<String, dynamic> authData = {
+      'address': address,
+      'mobile_no': phone,
+      'name':name,
+      'email':email,
+      'city':district,
+//      'areaId':areaId
+    };
+    try {
+      final http.Response response = await http.post(
+        qString,
+        body: json.encode(authData),
+        headers: headers,
+      );
+      responseData = json.decode(response.body);
+
+      if (response.statusCode != 200) {
+        return responseData;
+      }
+
+      notifyListeners();
+      return null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  ProfileItem getProfileInfo(){
+    return _profileItem;
+  }
+
+  Future<void> fetchProfileInfo() async {
+    print('fetch profile');
+
+    var url = 'http://new.bepari.net/demo/api/V1.0/access-control/user/show-profile';
+    Map<String, String> headers = {
+      'Authorization': 'Bearer ' + authToken,
+      'Content-Type': 'application/json',
+    };
+    try {
+      final http.Response response = await http.get(
+        url,
+        headers: headers,
+      );
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      if (data == null) {
+        return;
+      }
+      var alldata = data['data']['profile'];
+        final ProfileItem info = ProfileItem(
+          id: alldata['id'].toString(),
+          name: alldata['name'],
+          displayName: alldata['display_name'],
+          gender: alldata['gender'],
+          email: alldata['email'],
+          mobileNumber: alldata['mobile'].toString(),
+          address: alldata['address'],
+          areaId: alldata['area_id'].toString(),
+          contactPerson: alldata['contact_person'],
+          contactPersonMobileNumber: alldata['contact_person_contact_no'],
+        );
+      _profileItem = info;
+      notifyListeners();
+    } catch (error) {throw (error);
+    }
+  }
+
   Future<void> fetchShippingAddress() async {
-    var url = 'http://new.bepari.net/demo/api/V1/crm/customer/list-shipping-address';
+    var url = 'http://new.bepari.net/demo/api/V1.0/crm/customer/list-shipping-address';
     Map<String, String> headers = {
       'Authorization': 'Bearer ' + authToken,
       'Content-Type': 'application/json',

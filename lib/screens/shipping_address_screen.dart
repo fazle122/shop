@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/cart.dart';
+import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
+import 'package:shoptempdb/screens/products_overview_screen.dart';
 import 'package:shoptempdb/widgets/app_drawer.dart';
 import 'package:shoptempdb/widgets/create_shippingAddress_dialog.dart';
 import 'package:shoptempdb/widgets/order_item.dart';
 import 'package:shoptempdb/widgets/shipping_address_item.dart';
+import 'package:dio/dio.dart';
+
 
 class ShippingAddressScreen extends StatefulWidget {
   static const routeName = '/shipping_address';
@@ -83,7 +87,7 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
               onPressed: () {
                 showDialog(
                     context: context,
-                    child: CreateShippingAddressDialog()
+                    child: CreateShippingAddressDialog(cart:cart)
                 );
               },
               color: Theme.of(context).primaryColor,
@@ -102,7 +106,31 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
                   borderRadius: BorderRadius.circular(25.0),
                   side: BorderSide(color: Colors.grey)),
               onPressed: () {
-                print(selctedAddressId);
+                FormData data = new FormData();
+                List<Cart>  ct = [];
+                ct = cart.items.entries.map((e) => Cart(id:e.key,cartItem:e.value)).toList();
+
+                for(int i = 0; i<ct.length; i++){
+                  data.add('product_id[$i]', ct[i].cartItem.id);
+                  data.add('quantity[$i]', ct[i].cartItem.quantity);
+                  data.add('unit_price[$i]', ct[i].cartItem.price);
+                  data.add('is_non_inventory[$i]', ct[i].cartItem.isNonInventory);
+                  data.add('discount[$i]', ct[i].cartItem.discount);
+                }
+                data.add('customer_shipping_address_id', selctedAddressId);
+                if(selctedAddressId != null) {
+                  Provider.of<Orders>(context, listen: false).addOrder(data);
+                  cart.clear();
+                  Navigator.of(context).pushNamed(
+                      ProductsOverviewScreen.routeName);
+                }else{
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    content: Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                        child:Text('Please select a deliver address or create new one')),
+                    duration: Duration(seconds: 2),
+                  ));
+                }
               },
               color: Theme.of(context).primaryColor,
               textColor: Colors.white,
@@ -112,37 +140,6 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
           ),
         ],
       ),
-//      body: FutureBuilder(
-//          future: Provider.of<ShippingAddress>(context,listen: false).fetchShippingAddress(),
-//          builder: (context,dataSnapshot) {
-//            if(dataSnapshot.connectionState == ConnectionState.waiting) {
-//              return Center(child: CircularProgressIndicator(),);
-//            }else{
-//              if(dataSnapshot.error != null){
-//                return Center(child: Text('error occurred'),);
-//              }else{
-//                return Consumer<ShippingAddress>(builder: (context,addressData,child) =>
-//                Column(
-//                  children: <Widget>[
-//                    Container(
-//                      padding: EdgeInsets.all(20.0),
-//                      child: Text("Shipping Addresses"),
-//                    ),
-//                    Column(
-//                      children: createRadioListUsers(addressData.allShippingAddress),
-//                    ),
-//                  ],
-//                )
-////                    ListView.builder(
-////                  itemCount: addressData.allShippingAddress.length,
-////                  itemBuilder: (context,i) => ShippingAddressItemWidget(addressData.allShippingAddress[i]),
-////                ),
-//
-//                );
-//              }
-//            }
-//          }
-//      ),
     );
   }
 }

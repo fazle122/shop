@@ -12,11 +12,16 @@ import 'package:flutter/services.dart';
 class ApiService {
 
   static final String BASE_URL = "http://new.bepari.net/demo/"; //dev
-  static final String CDN_URl = "http://devcdn.baniadam.info/"; //dev
+  static final String CDN_URl = "http://new.bepari.net/"; //dev
+
+//  for product --- http://new.bepari.net/product-catalog-images/product/def-thumb.png
+//  for category --- http://new.bepari.net/product-catalog-images/category/def-cat-thumb.png
+
   static final Dio dioService = new Dio();
 
+
   static Future<Map<String, dynamic>> login(String email, String password) async {
-    String qString = ApiService.BASE_URL + "api/V1/access-control/login";
+    String qString = ApiService.BASE_URL + "api/V1.0/access-control/login";
     var responseData;
 
     final Map<String, dynamic> authData = {
@@ -90,6 +95,7 @@ class ApiService {
     var db = await openDatabase(path, readOnly: true);
     var dbClient = await db;
     List<dynamic> root = await dbClient.rawQuery('select DISTINCT district from ix_areas');
+    db.close();
     return root;
   }
 
@@ -114,12 +120,26 @@ class ApiService {
     var db = await openDatabase(path, readOnly: true);
     var dbClient = await db;
     List<dynamic> root = await dbClient.rawQuery('select id,location from ix_areas where district = "$district" ');
+    db.close();
     return root;
+  }
+
+  static getAreaNameFromLocalDB(String areaId) async  {
+    var databasesPath = await getDatabasesPath();
+    var path = join(databasesPath, "areas.db");
+    var db = await openDatabase(path, readOnly: true);
+
+    var dbClient = await db;
+    var result = await dbClient.rawQuery('select district from ix_areas where location = "$areaId" ');
+
+
+    db.close();
+    return result;
   }
 
   static Future<Map<String,dynamic>> getProductList() async {
 
-    String qString = BASE_URL + "api/V1/product-catalog/product/list-product";
+    String qString = BASE_URL + "api/V1.0/product-catalog/product/list-product";
 
     Map<String, String> headers = {
       'Content-Type': 'application/json',

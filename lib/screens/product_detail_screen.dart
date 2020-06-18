@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/cart.dart';
-import 'package:shoptempdb/providers/product.dart';
 import 'package:shoptempdb/providers/products.dart';
 
 
@@ -33,7 +32,7 @@ class ProductDetailScreen extends StatelessWidget{
                 IconButton(
                   icon: Icon(Icons.add),
                   onPressed: (){
-                    cart.addItem(loadedProduct.id, loadedProduct.title, loadedProduct.price);
+                    cart.addItem(loadedProduct.id, loadedProduct.title, loadedProduct.price,loadedProduct.isNonInventory,loadedProduct.discount,loadedProduct.discountId,loadedProduct.discountType,);
                   },
                 ),
                 Text(cart.items[loadedProduct.id].quantity.toString(),style: TextStyle(fontSize: 15.0),),
@@ -48,7 +47,7 @@ class ProductDetailScreen extends StatelessWidget{
               color: Theme.of(context).accentColor,
               icon: Icon(Icons.shopping_cart),
               onPressed: () {
-                cart.addItem(loadedProduct.id, loadedProduct.title, loadedProduct.price);
+                cart.addItem(loadedProduct.id, loadedProduct.title, loadedProduct.price,loadedProduct.isNonInventory,loadedProduct.discount,loadedProduct.discountId,loadedProduct.discountType);
               },
             ),
             SizedBox(height: 10,),

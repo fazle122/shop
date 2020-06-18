@@ -57,7 +57,7 @@ class _ProductItemListViewState extends State<ProductItemListView>{
             IconButton(
               icon: Icon(Icons.add),
               onPressed: (){
-                cart.addItem(product.id, product.title, product.price);
+                cart.addItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
                 Scaffold.of(context).hideCurrentSnackBar();
                 if(cart.items.length> 0)
                   Scaffold.of(context).showSnackBar(SnackBar(
@@ -92,7 +92,8 @@ class _ProductItemListViewState extends State<ProductItemListView>{
                     ],
                   ),
                   duration: Duration(seconds: 2),
-                ));
+                )
+                  );
               },
             ),
              Text(cart.items[product.id].quantity.toString(),style: TextStyle(fontSize: 20.0),),
@@ -142,7 +143,7 @@ class _ProductItemListViewState extends State<ProductItemListView>{
           color: Theme.of(context).accentColor,
           icon: Icon(Icons.shopping_cart),
           onPressed: () {
-            cart.addItem(product.id, product.title, product.price);
+            cart.addItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
             Scaffold.of(context).hideCurrentSnackBar();
             if(cart.items.length> 0)
             Scaffold.of(context).showSnackBar(SnackBar(

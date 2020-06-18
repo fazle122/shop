@@ -3,9 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/product.dart';
+import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/screens/product_detail_screen.dart';
 
-class ProductItemGridView extends StatelessWidget {
+class ProductItemGridView extends StatefulWidget {
+  @override
+  _ProductItemGridView  createState() => _ProductItemGridView();
+}
+
+class _ProductItemGridView extends State<ProductItemGridView>{
+
+
   @override
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
@@ -109,7 +117,7 @@ class ProductItemGridView extends StatelessWidget {
             IconButton(
               icon: Icon(Icons.add),
               onPressed: (){
-                cart.addItem(product.id, product.title, product.price);
+                cart.addItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
                 Scaffold.of(context).hideCurrentSnackBar();
                 if(cart.items.length> 0)
                   Scaffold.of(context).showSnackBar(SnackBar(
@@ -197,7 +205,7 @@ class ProductItemGridView extends StatelessWidget {
                     color: Theme.of(context).accentColor,
                     icon: Icon(Icons.shopping_cart),
                     onPressed: () {
-                      cart.addItem(product.id, product.title, product.price);
+                      cart.addItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
                       Scaffold.of(context).hideCurrentSnackBar();
                       if(cart.items.length> 0)
                         Scaffold.of(context).showSnackBar(SnackBar(
