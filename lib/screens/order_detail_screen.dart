@@ -60,8 +60,17 @@ class OrderDetailScreen extends StatelessWidget {
                         child: ListView.builder(
                           itemCount: orderDetailData.singOrderItem.invoiceItem.length,
                           itemBuilder: (context, i) => ListTile(
-                            title: Text(orderDetailData.singOrderItem.invoiceItem[i].productName),
-                            subtitle: Text(orderDetailData.singOrderItem.invoiceItem[i].quantity.toString()),
+                            title: Text('Item name:' + orderDetailData.singOrderItem.invoiceItem[i].productName),
+                            subtitle: ListTile(
+                              title: Text('Quantity:'  + orderDetailData.singOrderItem.invoiceItem[i].quantity.toString()),
+                              subtitle: Text(
+                                  'price:' + orderDetailData.singOrderItem.invoiceItem[i].quantity.toString() + 'x'
+                                      + orderDetailData.singOrderItem.invoiceItem[i].unitPrice.toString()  + ' = '
+                                      + (orderDetailData.singOrderItem.invoiceItem[i].quantity * orderDetailData.singOrderItem.invoiceItem[i].unitPrice).toString()
+                                      + ' BDT'
+
+                              ),
+                            ),
                           ),
                         )
                     ),

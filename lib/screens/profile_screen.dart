@@ -7,6 +7,8 @@ import 'package:shoptempdb/widgets/app_drawer.dart';
 import 'package:shoptempdb/widgets/create_shippingAddress_dialog.dart';
 import 'package:shoptempdb/widgets/profile_update_dialog.dart';
 
+import '../base_state.dart';
+
 
 
 
@@ -154,7 +156,7 @@ class ProfilePage extends StatefulWidget {
   _ProfilePageState createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends BaseState<ProfilePage> {
 
   var _isInit = true;
   var _isLoading = false;

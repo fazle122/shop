@@ -129,7 +129,7 @@ class Orders with ChangeNotifier{
 
 
 
-  void addOrder(FormData formData) async{
+  Future<Map<String,dynamic>> addOrder(FormData formData) async{
 
     Dio dioService = new Dio();
     final url = ApiService.BASE_URL +  'api/V1.0/accounts/invoice/create-invoice';
@@ -147,6 +147,11 @@ class Orders with ChangeNotifier{
     final responseData = response.data;
     print(responseData);
     notifyListeners();
+    if(response.statusCode == 200) {
+      return response.data;
+    }else{
+      return null;
+    }
   }
 
   void cancelOrder(String orderId,String reason) async{
@@ -208,7 +213,8 @@ class Orders with ChangeNotifier{
         );
         loadedOrders.add(orders);
       }
-      _orders = loadedOrders.reversed.toList();
+//      _orders = loadedOrders.reversed.toList();
+      _orders = loadedOrders;
       }else{
         _orders = [];
       }
@@ -281,5 +287,46 @@ class Orders with ChangeNotifier{
       );
     _orderItem = orderItem;
     notifyListeners();
+  }
+
+  Future<void> fetchCompletedOrders() async {
+    print('fetch orders');
+    final url = 'http://new.bepari.net/demo/api/V1.0/accounts/invoice/list-invoice';
+
+
+    Dio dioService = new Dio();
+    dioService.options.headers = {
+      'Authorization': 'Bearer ' + authToken,
+      'Content-Type': 'application/json',
+    };
+    try {
+      final Response response = await dioService.get(url,);
+      final List<OrderItem> loadedOrders = [];
+//      final extractedData = json.decode(response.data) as Map<String, dynamic>;
+      final extractedData = response.data;
+      if (extractedData == null) {
+        return;
+      }
+
+      if(extractedData['data']['invoices'].length > 0){
+        var allOrders = extractedData['data']['invoices']['data'];
+        for (int i = 0; i < allOrders.length; i++) {
+          final OrderItem orders = OrderItem(
+            id: allOrders[i]['id'],
+            invoiceAmount: allOrders[i]['invoice_amount'].toDouble(),
+            totalDue: allOrders[i]['total_due'].toDouble(),
+            dateTime: DateTime.parse(allOrders[i]['invoice_date']),
+          );
+          loadedOrders.add(orders);
+        }
+        _orders = loadedOrders;
+      }else{
+        _orders = [];
+      }
+      notifyListeners();
+    }
+    catch (error) {
+      throw (error);
+    }
   }
 }

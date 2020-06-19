@@ -5,7 +5,7 @@ import 'package:shoptempdb/providers/auth.dart';
 import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/screens/auth_screen.dart';
-import 'package:shoptempdb/screens/shipping_address_screen.dart';
+import 'package:shoptempdb/screens/confirm_order_screen.dart';
 import 'package:shoptempdb/widgets/cart_item.dart';
 import 'package:shoptempdb/widgets/confirm_order_dialog.dart';
 import 'package:dio/dio.dart';

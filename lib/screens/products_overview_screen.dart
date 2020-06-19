@@ -11,6 +11,8 @@ import 'package:shoptempdb/widgets/filter_item.dart';
 import 'package:shoptempdb/widgets/product_item_grid_view.dart';
 import 'package:shoptempdb/widgets/product_item_list_view.dart';
 
+import '../base_state.dart';
+
 class ProductsOverviewScreen extends StatefulWidget {
   static const routeName = 'all-products';
 
@@ -18,7 +20,7 @@ class ProductsOverviewScreen extends StatefulWidget {
   _ProductsOverviewScreenState createState() => _ProductsOverviewScreenState();
 }
 
-class _ProductsOverviewScreenState extends State<ProductsOverviewScreen> {
+class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
   var _showList = false;
   var _isInit = true;
   var _isLoading = false;

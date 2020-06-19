@@ -7,6 +7,8 @@ import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/screens/cart_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 
+import '../base_state.dart';
+
 enum AuthMode { Signup, Login }
 
 class AuthScreen extends StatelessWidget {
@@ -67,7 +69,7 @@ class AuthCard extends StatefulWidget {
   _AuthCardState createState() => _AuthCardState();
 }
 
-class _AuthCardState extends State<AuthCard> {
+class _AuthCardState extends BaseState<AuthCard> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   AuthMode _authMode = AuthMode.Signup;
   Map<String, String> _authData = {

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/orders.dart';
+import 'package:shoptempdb/screens/completed_orders_screen.dart';
 import 'package:shoptempdb/screens/order_detail_screen.dart';
 import 'package:shoptempdb/widgets/app_drawer.dart';
 import 'package:shoptempdb/widgets/order_item.dart';
 import 'package:intl/intl.dart';
+
+import '../base_state.dart';
 
 
 ///------------last and working class-----------------------
@@ -52,7 +55,7 @@ class OrdersScreen extends StatefulWidget {
 
 }
 
-class _OrdersScreenState extends State<OrdersScreen>{
+class _OrdersScreenState extends BaseState<OrdersScreen>{
 
   var _isInit = true;
   var _isLoading = false;
@@ -81,7 +84,28 @@ class _OrdersScreenState extends State<OrdersScreen>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('My orders'),),
+      appBar: AppBar(
+        title: Text('Pending orders'),
+        actions: <Widget>[
+          PopupMenuButton<String>(
+            onSelected: (val) async {
+              switch (val) {
+                case 'COMPLETED_ORDERS':
+                  Navigator.of(context).pushNamed(CompletedOrdersScreen.routeName);
+                  break;
+
+              }
+            },
+            itemBuilder: (BuildContext context) =>
+            <PopupMenuItem<String>>[
+              PopupMenuItem<String>(
+                value: 'COMPLETED_ORDERS',
+                child: Text('Completed orders'),
+              ),
+            ],
+          ),
+        ],
+      ),
       drawer: AppDrawer(),
       body:_isLoading? Center(child: CircularProgressIndicator(),)
           : Consumer<Orders>(builder: (context,orderData,child) =>

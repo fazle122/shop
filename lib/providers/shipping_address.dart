@@ -254,11 +254,12 @@ class ShippingAddress with ChangeNotifier{
       );
       responseData = json.decode(response.body);
 
+
+
+      notifyListeners();
       if (response.statusCode != 200) {
         return responseData;
       }
-
-      notifyListeners();
       return null;
     } catch (error) {
       throw error;

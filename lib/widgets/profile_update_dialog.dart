@@ -232,10 +232,10 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
                     const errorMessage = 'Some thing wrong, please try again later';
                     _showErrorDialog(errorMessage);
                   }
-//                  shippingAddress.selectedDistrict = null;
-//                  shippingAddress.selectedArea = null;
-//                  print('test');
-//                  Navigator.of(context).pop();
+                  shippingAddress.selectedDistrict = null;
+                  shippingAddress.selectedArea = null;
+                  print('test');
+                  Navigator.of(context).pop();
                 },
                 color: Theme.of(context).primaryColor,
                 textColor: Colors.white,

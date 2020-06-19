@@ -4,6 +4,7 @@ import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
 import 'package:dio/dio.dart';
+import 'package:shoptempdb/screens/orders_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 
 
@@ -95,9 +96,9 @@ class _CreateShippingAddressDialogState extends State<CreateShippingAddressDialo
     Map<String,dynamic> district = shippingAddress.allDistricts;
     Map<String,dynamic> areas = Map();
     return AlertDialog(
-      title: Center(child: Text('Shipping Address'),),
+      title: Center(child: Text('Delivery Address'),),
       content: SingleChildScrollView(
-        child: Column(
+        child: _isLoading?Center(child: CircularProgressIndicator(),):Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             phoneField(),
@@ -116,12 +117,15 @@ class _CreateShippingAddressDialogState extends State<CreateShippingAddressDialo
             SizedBox(height: 15.0,),
             addressField(),
             SizedBox(height: 25.0,),
+            Center(child: Text('** all fields are mandatory',style: TextStyle(color: Colors.red,fontSize: 12.0),),),
+            SizedBox(height: 10.0,),
             Container(
               child: RaisedButton(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25.0),
                     side: BorderSide(color: Colors.grey)),
-                onPressed: () {
+                onPressed: () async{
+
                   if(widget.cart.items.length <=0) {
                     print(shippingAddress.selectedDistrict);
                     print(shippingAddress.selectedArea);
@@ -149,21 +153,83 @@ class _CreateShippingAddressDialogState extends State<CreateShippingAddressDialo
                     data.add('area_id', shippingAddress.selectedArea.toString());
                     data.add('shipping_address_line', _addressEditController.text);
                     data.add('mobile_no', _phoneEditController.text);
-                    Provider.of<Orders>(context, listen: false).addOrder(data);
-                    widget.cart.clear();
-                    Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
-//                    if(selctedAddressId != null) {
-//                      Provider.of<Orders>(context, listen: false).addOrder(data);
-//                      widget.cart.clear();
-//                      Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
-//                    }else{
-//                      Scaffold.of(context).showSnackBar(SnackBar(
-//                        backgroundColor: Theme.of(context).primaryColor,
-//                        content: Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-//                            child:Text('Please select a deliver address or create new one')),
-//                        duration: Duration(seconds: 2),
-//                      ));
-//                    }
+
+                    if(
+                        shippingAddress.selectedArea == null ||
+                            _addressEditController.text == null  || _addressEditController.text == '' || _addressEditController.text.isEmpty ||
+                            _phoneEditController.text == null || _phoneEditController.text == '' || _phoneEditController.text.isEmpty){
+                      showDialog(
+                          context: context,
+                          builder: (ctx) =>
+                              AlertDialog(
+                                title: Text('Required data confirmation'),
+                                content: Text('Please provide all necessary data'),
+                                actions: <Widget>[
+                                  FlatButton(
+                                    child: Text('ok'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              ));
+                    }else {
+                      setState(() {
+                        _isLoading = true;
+                      });
+                      final response = await Provider.of<Orders>(
+                          context, listen: false).addOrder(data);
+                      if (response != null) {
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        widget.cart.clear();
+                        shippingAddress.selectedDistrict = null;
+                        shippingAddress.selectedArea = null;
+                        showDialog(
+                            context: context,
+                            builder: (ctx) =>
+                                AlertDialog(
+                                  title: Text('Order confirmation'),
+                                  content: Text(response['msg']),
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      child: Text('view order'),
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(
+                                            OrdersScreen.routeName);
+                                      },
+                                    ),
+                                    FlatButton(
+                                      child: Text('create another'),
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(
+                                            ProductsOverviewScreen.routeName);
+                                      },
+                                    )
+                                  ],
+                                ));
+                      } else {
+                        showDialog(
+                            context: context,
+                            builder: (ctx) =>
+                                AlertDialog(
+                                  title: Text('Order confirmation'),
+                                  content: Text(
+                                      'something went wrong!!! Please try again'),
+                                  actions: <Widget>[
+                                    FlatButton(
+                                      child: Text('ok'),
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(
+                                            ProductsOverviewScreen.routeName);
+                                      },
+                                    ),
+                                  ],
+                                ));
+                      }
+                    }
+
                   }
                 },
                 color: Theme.of(context).primaryColor,
