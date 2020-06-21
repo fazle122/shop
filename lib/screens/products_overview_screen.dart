@@ -27,31 +27,18 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
 
   ScrollController _scrollController = new ScrollController();
   int pageCount = 1;
+  int oldPageCount;
   List<Product> finalProduct = [];
 
-//  @override
-//  void didChangeDependencies(){
-////    if(_isInit) {
-////      setState(() {
-////        _isLoading = true;
-////      });
-////      Provider.of<Products>(context).fetchAndSetProducts(pageCount).then((_){
-////        setState(() {
-////          _isLoading = false;
-////        });
-////      });
-////    }
-////    _isInit = false;
-////  getData();
-//    super.didChangeDependencies();
-//  }
 
   @override
   void didChangeDependencies() {
-    final cat = ModalRoute.of(context).settings.arguments as String;
-    if(pageCount == 1) {
-      print(cat.toString());
-
+    final cat = ModalRoute
+        .of(context)
+        .settings
+        .arguments as String;
+//    oldPageCount = pageCount;
+    if (pageCount == 1) {
       if (_isInit) {
         setState(() {
           _isLoading = true;
@@ -60,29 +47,36 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
             pageCount).then((data) {
           setState(() {
             finalProduct = data;
+            oldPageCount = 0;
             _isLoading = false;
           });
         });
       }
+      _isInit = false;
     }
-    _isInit = false;
-//    if(pageCount< lastpage)
+
       _scrollController.addListener(() {
+        if (pageCount - oldPageCount == 1 || oldPageCount - pageCount == 1)
+        {
+        _isInit = true;
+        //    if(pageCount< lastPage)
         if (_scrollController.position.pixels ==
             _scrollController.position.maxScrollExtent) {
           setState(() {
             pageCount += 1;
           });
-          getData();
+          getData('increment');
         }
-        if(pageCount>0)
-        if (_scrollController.position.pixels ==
-            _scrollController.position.minScrollExtent) {
-          setState(() {
-            pageCount -= 1;
-          });
-          getData();
+        if (pageCount > 0)
+          if (_scrollController.position.pixels ==
+              _scrollController.position.minScrollExtent) {
+            setState(() {
+              pageCount -= 1;
+            });
+            getData('decrement');
+          }
         }
+
       });
 
     super.didChangeDependencies();
@@ -90,8 +84,9 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
 
 
 
-  List<Product> getData() {
-//    if (_isInit) {
+  List<Product> getData(String type) {
+
+    if(_isInit){
       setState(() {
         _isLoading = true;
       });
@@ -100,31 +95,31 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
         setState(() {
           finalProduct = data;
           _isLoading = false;
+          type == 'increment' ?oldPageCount += 1:oldPageCount -= 1;
         });
       });
-//    }
+    }
     _isInit = false;
 
-    final productsData = Provider.of<Products>(context, listen: false);
-//    List<Product> products = productsData.items;
-
-    List<Product> tempProduct = [];
-    tempProduct = productsData.items;
-
-    if (tempProduct == null || tempProduct.isEmpty) {
-      if (productsData.items.isNotEmpty) {
-        animateScrollBump();
-      }
-    } else {
-      setState(() {
-        _isLoading = false;
-        productsData.items.addAll(tempProduct);
-        finalProduct = productsData.items;
-        _isInit = true;
-      });
-    }
-
-    return productsData.items;
+//    final productsData = Provider.of<Products>(context, listen: false);
+////    List<Product> products = productsData.items;
+//
+//    List<Product> tempProduct = [];
+//    tempProduct = productsData.items;
+//
+//    if (tempProduct == null || tempProduct.isEmpty) {
+//      if (productsData.items.isNotEmpty) {
+//        animateScrollBump();
+//      }
+//    } else {
+//      setState(() {
+//        _isLoading = false;
+//        productsData.items.addAll(tempProduct);
+//        finalProduct = productsData.items;
+//      });
+//    }
+//
+  return finalProduct;
   }
 
   @override

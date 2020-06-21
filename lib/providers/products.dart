@@ -19,6 +19,7 @@ class Products with ChangeNotifier {
         'http://new.bepari.net/demo/api/V1.0/product-catalog/product/list-product?page=$pageCount';
     try {
       final response = await http.get(url);
+      if(response.statusCode != 200){return null;}
       final data = json.decode(response.body) as Map<String, dynamic>;
       if (data == null) {
         return null;
