@@ -6,10 +6,13 @@ import 'package:shoptempdb/providers/shipping_address.dart';
 import 'package:shoptempdb/screens/orders_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 import 'package:shoptempdb/widgets/app_drawer.dart';
-import 'package:shoptempdb/widgets/create_shippingAddress_dialog.dart';
+import 'package:shoptempdb/widgets/create_shippingAddress_dialog1.dart';
 import 'package:shoptempdb/widgets/order_item.dart';
 import 'package:shoptempdb/widgets/shipping_address_item.dart';
 import 'package:dio/dio.dart';
+import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import 'package:intl/intl.dart';
+
 
 import '../base_state.dart';
 
@@ -25,6 +28,8 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
   AddressItem selectedAddress;
   String selctedAddressId;
   bool _isloading = false;
+  DateTime date = DateTime.now();
+  final format = DateFormat('yyyy-MM-dd');
 
   @override
   void initState() {
@@ -44,6 +49,7 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
     for (AddressItem data in address) {
       widgets.add(
         RadioListTile(
+
           value: data,
           groupValue: selectedAddress,
           title: Text(data.shippingAddress),
@@ -76,20 +82,60 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('Shipping address'),
+        title: Text('Confirm order'),
       ),
       drawer: AppDrawer(),
       body: _isloading? Center(child: CircularProgressIndicator(),):Column(
         children: <Widget>[
           Container(
-            padding: EdgeInsets.all(15.0),
-            child: Text("Choose Address"),
+            height: 30.0,
+            color: Colors.grey[300],
+            child: Center(child: Text('Delivery date')),
+          ),
+          SizedBox(
+            height: 5.0,
+          ),
+          DateTimeField(
+            textAlign: TextAlign.start,
+            format: format,
+            onChanged: (dt) {
+              setState(() {
+                date = dt;
+              });
+            },
+            decoration: InputDecoration(
+                labelText: 'Select date',
+                prefixIcon: Icon(
+                  Icons.date_range,
+                  color: Theme.of(context).primaryColorDark,
+                ),
+                contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+
+//                border: OutlineInputBorder(
+//                    borderRadius:
+//                    BorderRadius.circular(5.0))
+            ),
+            onShowPicker: (context, currentValue) {
+              return showDatePicker(
+                  context: context,
+                  firstDate: DateTime(1900),
+                  initialDate: currentValue ?? DateTime.now(),
+                  lastDate: DateTime(2100));
+            },
           ),
           SizedBox(
             height: 10.0,
           ),
           Container(
-            height: 350.0,
+            height: 30.0,
+            color: Colors.grey[300],
+            child: Center(child: Text('Previous delivery addresses')),
+          ),
+          SizedBox(
+            height: 5.0,
+          ),
+          Container(
+            height: 300.0,
             child: ListView(
               children: createRadioListUsers(shippingData.allShippingAddress),
             ),

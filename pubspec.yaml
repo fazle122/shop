@@ -34,6 +34,7 @@ dependencies:
 #  sqflite: ^1.1.6+3
   access_settings_menu: ^0.0.1
   connectivity: ^0.4.8+6
+  datetime_picker_formfield: ^1.0.0
 
 
 dev_dependencies:

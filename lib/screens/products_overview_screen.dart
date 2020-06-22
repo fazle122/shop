@@ -179,7 +179,7 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
               children: <Widget>[
                 Expanded(
                   child: _showList
-                      ? products.length > 0
+                      ?  products != null && products.length > 0
                           ? ListView.builder(
                               padding: const EdgeInsets.all(10.0),
                               controller: _scrollController,
@@ -192,7 +192,7 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
                           : Center(
                               child: Text('No item found'),
                             )
-                      : products.length > 0
+                      : products != null && products.length > 0
                           ? GridView.builder(
                               controller: _scrollController,
                               padding: const EdgeInsets.all(10.0),
