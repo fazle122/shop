@@ -77,9 +77,9 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
       'contactPerson': _currentProfile.contactPerson,
       'contactPersonMobileNumber': _currentProfile.contactPersonMobileNumber,
     };
-    setState(() {
-      selectedDistrict = _initValues['city'];
-    });
+//    setState(() {
+//      selectedDistrict = _initValues['city'];
+//    });
 //    getAreaName(_currentProfile.areaId);
     super.didChangeDependencies();
   }

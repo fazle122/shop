@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shoptempdb/data_helper/api_service.dart';
 import 'package:shoptempdb/providers/cart.dart';
@@ -168,9 +169,11 @@ class ShippingAddress with ChangeNotifier{
 //    }
 //  }
 
-  Future<void> createShippingAddress(String areaId, String address,String phone) async {
+
+    Future<void> createShippingAddress(String areaId, String address,String phone) async {
     var responseData;
     String qString = "http://new.bepari.net/demo/api/V1.0/crm/customer/create-shipping-address";
+
     Map<String, String> headers = {
       'Authorization': 'Bearer ' + authToken,
       'Content-Type': 'application/json',
@@ -193,6 +196,69 @@ class ShippingAddress with ChangeNotifier{
         throw HttpException(responseData['error']['message']);
       }
       notifyListeners();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  Future<Map<String,dynamic>> createShippingAddress1(String shippingAddressId,FormData data) async {
+    String qString;
+    Dio dioService = new Dio();
+    if(shippingAddressId != null){
+      qString = "http://new.bepari.net/demo/api/V1.0/crm/customer/update-shipping-address/$shippingAddressId";
+
+    }else {
+      qString = "http://new.bepari.net/demo/api/V1.0/crm/customer/create-shipping-address";
+    }
+
+    dioService.options.headers = {
+      'Authorization': 'Bearer ' + authToken,
+      'Content-Type': 'application/json',
+    };
+
+    try {
+      final Response response = await dioService.post(
+        qString,
+        data: data,
+      );
+      final responseData = response.data;
+
+      if (responseData['error'] != null) {
+        throw HttpException(responseData['error']['message']);
+      }
+      notifyListeners();
+      if(response.statusCode == 200) {
+        return response.data;
+      }else{
+        return null;
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  Future<Map<String,dynamic>> deleteShippingAddress(String shippingAddressId) async {
+    Dio dioService = new Dio();
+    String qString = "http://new.bepari.net/demo/api/V1.0/crm/customer/delete-shipping-address/$shippingAddressId";
+
+    dioService.options.headers = {
+      'Authorization': 'Bearer ' + authToken,
+      'Content-Type': 'application/json',
+    };
+
+    try {
+      final Response response = await dioService.delete(qString);
+      final responseData = response.data;
+
+      if (responseData['error'] != null) {
+        throw HttpException(responseData['error']['message']);
+      }
+      notifyListeners();
+      if(response.statusCode == 200) {
+        return response.data;
+      }else{
+        return null;
+      }
     } catch (error) {
       throw error;
     }

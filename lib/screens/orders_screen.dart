@@ -142,7 +142,7 @@ class _OrdersScreenState extends BaseState<OrdersScreen>{
 //                          _isLoading = true;
 //                        });
                          await Provider.of<Orders>(context,listen: false).cancelOrder(orderData.orders[i].id.toString(),'test');
-
+                         if (!mounted) return;
                         setState(() {
                           _isInit = true;
                         });
