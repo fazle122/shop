@@ -80,6 +80,27 @@ class _OrdersScreenState extends BaseState<OrdersScreen>{
     super.didChangeDependencies();
   }
 
+  String convert12(String str) {
+    String finalTime;
+    int h1 = int.parse(str.substring(0, 1)) - 0;
+    int h2 = int.parse(str.substring(1, 2));
+    int hh = h1 * 10 + h2;
+
+    String Meridien;
+    if (hh < 12) {
+      Meridien = " AM";
+    } else
+      Meridien = " PM";
+    hh %= 12;
+    if (hh == 0 && Meridien == ' PM') {
+      finalTime = '12' + str.substring(2);
+    } else {
+      finalTime = hh.toString() + str.substring(2);
+    }
+    finalTime = finalTime + Meridien;
+    return finalTime;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -152,10 +173,12 @@ class _OrdersScreenState extends BaseState<OrdersScreen>{
                         child: Column(
                           children: <Widget>[
                             ListTile(
-                              title: Text('\$${orderData.orders[i].invoiceAmount}'),
-                              subtitle: Text(
-                                DateFormat('dd/MM/yyyy hh:mm').format(orderData.orders[i].dateTime),
+                              title: Text(
+                                DateFormat('EEEE, MMM d, ').format(orderData.orders[i].dateTime) +
+                                    convert12(DateFormat('hh:mm').format(orderData.orders[i].dateTime)),
                               ),
+                              subtitle: Text('Total amount: ' +'\$${orderData.orders[i].invoiceAmount}'),
+
                               onTap: (){
                                 Navigator.of(context).pushNamed(OrderDetailScreen.routeName,
                                     arguments: orderData.orders[i].id);

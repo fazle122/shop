@@ -35,7 +35,7 @@ dependencies:
   access_settings_menu: ^0.0.1
   connectivity: ^0.4.8+6
   datetime_picker_formfield: ^1.0.0
-
+  image_picker: ^0.6.7+2
 
 dev_dependencies:
   flutter_test:
