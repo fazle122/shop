@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
 import 'package:shoptempdb/screens/profile_update_screen.dart';
 import 'package:shoptempdb/widgets/app_drawer.dart';
-import 'package:shoptempdb/widgets/create_shippingAddress_dialog.dart';
-import 'package:shoptempdb/widgets/profile_update_dialog1.dart';
+import 'package:shoptempdb/widgets/create_shippingAddress_dialog_old.dart';
+import 'package:shoptempdb/widgets/profile_update_dialog.dart';
 
 import '../base_state.dart';
 

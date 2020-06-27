@@ -263,48 +263,77 @@ class _UpdateShippingAddressDialogState
           final ShippingAddress address,
           final Widget child,
           ) {
-        return Stack(
-          children: <Widget>[
-            Container(
-                decoration: ShapeDecoration(
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(width: 1.0, style: BorderStyle.solid),
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  ),
-                ),
-                padding: EdgeInsets.only(left: 44.0, right: 10.0),
-//              margin: EdgeInsets.only(left: 16.0, right: 16.0),
-                child: DropdownButtonFormField(
+        return DropdownButtonFormField(
 
-                  isExpanded: true,
-//                icon: Icon(Icons.location_city),
-                  hint: Text('Select district'),
-                  value: shippingAddress.selectedDistrict,
-                  onSaved: (value){
-                    shippingAddress.selectedDistrict = value;
-                  },
-                  validator: (value){
-                    if (value == null) {
-                      return 'please choose district';
-                    }
-                    return null;
-                  },
-                  onChanged: (newValue) {
-                    shippingAddress.selectedDistrict = newValue;
-                    shippingAddress.selectedArea = null;
-                  },
-                  items: _districtMenuItems(district),
-                )),
-            Container(
-              padding: EdgeInsets.only(top: 24.0, left: 12.0),
-              child: Icon(
-                Icons.location_city,
-                color: Theme.of(context).primaryColor,
-//              size: 20.0,
-              ),
+          isExpanded: true,
+        decoration: InputDecoration(
+            prefixIcon: Icon(
+              Icons.location_city,
+              color: Theme.of(context).primaryColor,
             ),
-          ],
+            border: OutlineInputBorder(),
+//                enabledBorder: UnderlineInputBorder(
+//                    borderSide: BorderSide(color: Colors.white))
+          ),
+          hint: Text('Select district'),
+          value: shippingAddress.selectedDistrict,
+          onSaved: (value){
+            shippingAddress.selectedDistrict = value;
+          },
+          validator: (value){
+            if (value == null) {
+              return 'please choose district';
+            }
+            return null;
+          },
+          onChanged: (newValue) {
+            shippingAddress.selectedDistrict = newValue;
+            shippingAddress.selectedArea = null;
+          },
+          items: _districtMenuItems(district),
         );
+//        return Stack(
+//          children: <Widget>[
+//            Container(
+//                decoration: ShapeDecoration(
+//                  shape: RoundedRectangleBorder(
+//                    side: BorderSide(width: 1.0, style: BorderStyle.solid),
+//                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+//                  ),
+//                ),
+//                padding: EdgeInsets.only(left: 44.0, right: 10.0),
+////              margin: EdgeInsets.only(left: 16.0, right: 16.0),
+//                child: DropdownButtonFormField(
+//
+//                  isExpanded: true,
+////                icon: Icon(Icons.location_city),
+//                  hint: Text('Select district'),
+//                  value: shippingAddress.selectedDistrict,
+//                  onSaved: (value){
+//                    shippingAddress.selectedDistrict = value;
+//                  },
+//                  validator: (value){
+//                    if (value == null) {
+//                      return 'please choose district';
+//                    }
+//                    return null;
+//                  },
+//                  onChanged: (newValue) {
+//                    shippingAddress.selectedDistrict = newValue;
+//                    shippingAddress.selectedArea = null;
+//                  },
+//                  items: _districtMenuItems(district),
+//                )),
+//            Container(
+//              padding: EdgeInsets.only(top: 24.0, left: 12.0),
+//              child: Icon(
+//                Icons.location_city,
+//                color: Theme.of(context).primaryColor,
+////              size: 20.0,
+//              ),
+//            ),
+//          ],
+//        );
       },
     );
   }
@@ -316,47 +345,83 @@ class _UpdateShippingAddressDialogState
           final ShippingAddress address,
           final Widget child,
           ) {
-        return Stack(
-          children: <Widget>[
-            Container(
-                decoration: ShapeDecoration(
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(width: 1.0, style: BorderStyle.solid),
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  ),
-                ),
-                padding: EdgeInsets.only(left: 44.0, right: 10.0),
-//              margin: EdgeInsets.only(left: 16.0, right: 16.0),
-                child: DropdownButtonFormField(
-                  isExpanded: true,
-//                icon: Icon(Icons.local_gas_station),
-                  hint: Text('Select area'),
-                  value: shippingAddress.selectedArea,
-                  onSaved: (value){
-                    shippingAddress.selectedArea = value;
-
-                  },
-                  validator: (value){
-                    if (value == null) {
-                      return 'please choose area';
-                    }
-                    return null;
-                  },
-                  onChanged: (newValue) {
-                    shippingAddress.selectedArea = newValue;
-                  },
-                  items: _areaMenuItems(areas),
-                )),
-            Container(
-              margin: EdgeInsets.only(top: 24.0, left: 12.0),
-              child: Icon(
-                Icons.local_gas_station,
-                color: Theme.of(context).primaryColor,
-//              size: 20.0,
-              ),
+        return DropdownButtonFormField(
+          isExpanded: true,
+          decoration: InputDecoration(
+            prefixIcon: Icon(
+              Icons.local_gas_station,
+              color: Theme.of(context).primaryColor,
             ),
-          ],
+            border: OutlineInputBorder(),
+//                enabledBorder: UnderlineInputBorder(
+//                    borderSide: BorderSide(color: Colors.white))
+          ),
+          hint: Text('Select area'),
+          value: shippingAddress.selectedArea,
+          onSaved: (value){
+            shippingAddress.selectedArea = value;
+
+          },
+          validator: (value){
+            if (value == null) {
+              return 'please choose area';
+            }
+            return null;
+          },
+          onChanged: (newValue) {
+            shippingAddress.selectedArea = newValue;
+          },
+          items: _areaMenuItems(areas),
         );
+//        return Stack(
+//          children: <Widget>[
+//            Container(
+//                decoration: ShapeDecoration(
+//                  shape: RoundedRectangleBorder(
+//                    side: BorderSide(width: 1.0, style: BorderStyle.solid),
+//                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+//                  ),
+//                ),
+//                padding: EdgeInsets.only(left: 44.0, right: 10.0),
+////              margin: EdgeInsets.only(left: 16.0, right: 16.0),
+//                child: DropdownButtonFormField(
+//                  isExpanded: true,
+//                decoration: InputDecoration(
+//            prefixIcon: Icon(
+//              Icons.local_gas_station,
+//              color: Theme.of(context).primaryColor,
+//            ),
+//            border: OutlineInputBorder(),
+////                enabledBorder: UnderlineInputBorder(
+////                    borderSide: BorderSide(color: Colors.white))
+//          ),
+//                  hint: Text('Select area'),
+//                  value: shippingAddress.selectedArea,
+//                  onSaved: (value){
+//                    shippingAddress.selectedArea = value;
+//
+//                  },
+//                  validator: (value){
+//                    if (value == null) {
+//                      return 'please choose area';
+//                    }
+//                    return null;
+//                  },
+//                  onChanged: (newValue) {
+//                    shippingAddress.selectedArea = newValue;
+//                  },
+//                  items: _areaMenuItems(areas),
+//                )),
+//            Container(
+//              margin: EdgeInsets.only(top: 24.0, left: 12.0),
+//              child: Icon(
+//                Icons.local_gas_station,
+//                color: Theme.of(context).primaryColor,
+////              size: 20.0,
+//              ),
+//            ),
+//          ],
+//        );
       },
     );
   }
