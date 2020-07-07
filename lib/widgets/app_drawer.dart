@@ -188,11 +188,13 @@ class _AppDrawerState extends State<AppDrawer> {
               Divider(),
               ListTile(
                 leading: Icon(Icons.power_settings_new),
+
                 title: Text('Logout'),
                 onTap: () async {
                   await Provider.of<Auth>(context, listen: false).logout();
-                  Navigator.of(context)
-                      .pushNamed(ProductsOverviewScreen.routeName);
+                  final auth = Provider.of<Auth>(context, listen: false);
+                  auth.otp = null;
+                  Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
                 },
               )
             ],

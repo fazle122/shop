@@ -95,7 +95,7 @@ class ApiService {
     var db = await openDatabase(path, readOnly: true);
     var dbClient = await db;
     List<dynamic> root = await dbClient.rawQuery('select DISTINCT district from ix_areas');
-    db.close();
+//    db.close();
     return root;
   }
 
@@ -120,7 +120,7 @@ class ApiService {
     var db = await openDatabase(path, readOnly: true);
     var dbClient = await db;
     List<dynamic> root = await dbClient.rawQuery('select id,location from ix_areas where district = "$district" ');
-    db.close();
+//    db.close();
     return root;
   }
 
@@ -130,11 +130,11 @@ class ApiService {
     var db = await openDatabase(path, readOnly: true);
 
     var dbClient = await db;
-    var result = await dbClient.rawQuery('select district from ix_areas where location = "$areaId" ');
+    List<dynamic> result = await dbClient.rawQuery('select * from ix_areas where id = "$areaId" ');
+    final location = result.map((data) => data['location']);
 
-
-    db.close();
-    return result;
+//    db.close();
+    return location.elementAt(0).toString();
   }
 
   static Future<Map<String,dynamic>> getProductList() async {

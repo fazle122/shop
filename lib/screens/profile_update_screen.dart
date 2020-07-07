@@ -15,6 +15,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
   final _form = GlobalKey<FormState>();
   String selectedDistrict;
   String selectedArea;
+  String selectedAreaFromLocal;
 
   var _currentProfile = ProfileItem(
     id: '',
@@ -58,14 +59,14 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
     setState(() {
       selectedDistrict = _initValues['city'];
     });
-//    getAreaName(_currentProfile.areaId);
+    getAreaName(_currentProfile.areaId);
     super.didChangeDependencies();
   }
 
-  getAreaName(int areaId) async{
+  getAreaName(String areaId) async{
     final data = await Provider.of<ShippingAddress>(context, listen: false).fetchAreaName(areaId.toString());
     setState(() {
-      selectedArea = data;
+      selectedAreaFromLocal = data;
     });
   }
 

@@ -139,14 +139,16 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
                     trailing: IconButton(
                       icon: Icon(Icons.edit),
                       onPressed: () async {
-//                        Navigator.pushReplacement(context, MaterialPageRoute(
-//                          builder: (context) => TestWidget(addressItem: data,)
-//                        ));
                         await showDialog(
                             context: context,
-                            child: UpdateShippingAddressDialog(
+                            child: TestWidget(
                               addressItem: data,
                             ));
+//                        await showDialog(
+//                            context: context,
+//                            child: UpdateShippingAddressDialog(
+//                              addressItem: data,
+//                            ));
                         if (!mounted) return;
                         setState(() {
                           _isInit = true;

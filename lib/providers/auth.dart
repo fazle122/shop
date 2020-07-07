@@ -22,6 +22,11 @@ class Auth with ChangeNotifier {
     return _otp;
   }
 
+   set otp(final String val){
+     this._otp = val;
+     this.notifyListeners();
+  }
+
   String get token {
     return _token;
   }

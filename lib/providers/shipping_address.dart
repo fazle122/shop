@@ -11,6 +11,7 @@ import 'package:shoptempdb/models/http_exception.dart';
 
 class AddressItem{
   final String id;
+  final String city;
   final String areaId;
   final String shippingAddress;
   final String customerId;
@@ -18,6 +19,7 @@ class AddressItem{
 
   AddressItem({
     @required this.id,
+    @required this.city,
     @required this.areaId,
     @required this.shippingAddress,
     @required this.customerId,
@@ -145,9 +147,10 @@ class ShippingAddress with ChangeNotifier{
   }
 
   Future<String> fetchAreaName(String areaId) async {
-    String area = await ApiService.getAreaNameFromLocalDB(areaId);
-    return area;
-    notifyListeners();
+    var area = await ApiService.getAreaNameFromLocalDB(areaId);
+    print(area.toString());
+    return area.toString();
+//    notifyListeners();
   }
 
 //  Future<void> fetchAreaList() async {
@@ -170,7 +173,7 @@ class ShippingAddress with ChangeNotifier{
 //  }
 
 
-    Future<void> createShippingAddress(String areaId, String address,String phone) async {
+  Future<void> createShippingAddress(String areaId, String address,String phone) async {
     var responseData;
     String qString = "http://new.bepari.net/demo/api/V1.0/crm/customer/create-shipping-address";
 
@@ -296,7 +299,7 @@ class ShippingAddress with ChangeNotifier{
 //    }
   }
 
-  Future<Map<String,dynamic>> updateProfileInfo1(String address,String phone,String name,String email,String district) async {
+  Future<Map<String,dynamic>> updateProfileInfo1(String address,String phone,String name,String email,String district,int areaId) async {
     var responseData;
     String qString = "http://new.bepari.net/demo/api/V1.0/access-control/user/update-profile";
     Map<String, String> headers = {
@@ -310,7 +313,7 @@ class ShippingAddress with ChangeNotifier{
       'name':name,
       'email':email,
       'city':district,
-//      'areaId':areaId
+      'area_id':areaId
     };
     try {
       final http.Response response = await http.post(
@@ -362,6 +365,7 @@ class ShippingAddress with ChangeNotifier{
           email: alldata['email'],
           mobileNumber: alldata['mobile'].toString(),
           address: alldata['address'],
+          city: alldata['city'],
           areaId: alldata['area_id'].toString(),
           contactPerson: alldata['contact_person'],
           contactPersonMobileNumber: alldata['contact_person_contact_no'],
@@ -392,6 +396,7 @@ class ShippingAddress with ChangeNotifier{
       for(int  i=0; i<alldata.length;i++){
         final AddressItem address = AddressItem(
           id: alldata[i]['id'].toString(),
+          city:alldata[i]['city'],
           shippingAddress: alldata[i]['shipping_address_line'],
           areaId: alldata[i]['area_id'].toString(),
           customerId: alldata[i]['customer_id'].toString(),

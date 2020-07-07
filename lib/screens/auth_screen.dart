@@ -111,7 +111,10 @@ class _AuthCardState extends BaseState<AuthCard> {
       if (mode == AuthMode.Login) {
         // Log user in
         await Provider.of<Auth>(context, listen: false).login(_authData['mobile_no'], _authData['otp']);
-        _switchAuthMode();
+//        _switchAuthMode();
+        setState(() {
+          _authMode = AuthMode.Signup;
+        });
         cart.items.length <= 0 ?
         Navigator.of(context).pushReplacementNamed(ProductsOverviewScreen.routeName)
         :Navigator.of(context).pushReplacementNamed(CartScreen.routeName);

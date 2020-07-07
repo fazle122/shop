@@ -134,6 +134,7 @@ class _CreateShippingAddressDialogState
             ct[i].cartItem.isNonInventory);
         data.add('discount[$i]', ct[i].cartItem.discount);
       }
+      data.add('city',shippingAddress.selectedDistrict);
       data.add('area_id', shippingAddress.selectedArea.toString());
       data.add('shipping_address_line', homeAddress);
       data.add('mobile_no', mobileNumber);

@@ -6,6 +6,7 @@ import 'dart:convert';
 
 class Products with ChangeNotifier {
   List<Product> _items = [];
+  int lastPageCount;
   var _showFavoritesOnly = false;
 
   List<Product> get items {
@@ -13,10 +14,56 @@ class Products with ChangeNotifier {
     return [..._items];
   }
 
-  Future<List<Product>> fetchAndSetProducts(int pageCount) async {
+  int get lastPageNo{
+    return lastPageCount;
+  }
+
+
+
+  Future<List<Product>> fetchAndSetProducts(int pageCount,int catId) async {
     print('test');
     var url =
-        'http://new.bepari.net/demo/api/V1.0/product-catalog/product/list-product?page=$pageCount';
+        'http://new.bepari.net/demo/api/V1.0/product-catalog/product/list-product?page_size=50&page=$pageCount&category_id=$catId';
+    try {
+      final response = await http.get(url);
+      if(response.statusCode != 200){return null;}
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      if (data == null) {
+        return null;
+      }
+      final List<Product> loadedProducts = [];
+      var allProduct = data['data']['data'];
+      for (int i = 0; i < allProduct.length; i++) {
+        final Product product = Product(
+          id: allProduct[i]['id'].toString(),
+          title: allProduct[i]['name'],
+//          category: allProduct[i]['category_name'],
+          category: allProduct[i]['product_category_id'].toString(),
+          description: allProduct[i]['description'],
+          unit: allProduct[i]['unit_name'],
+          price: allProduct[i]['unit_price'].toDouble(),
+          isNonInventory: allProduct[i]['is_non_inventory'],
+          discount: allProduct[i]['discount_amount'].toDouble(),
+          discountType: allProduct[i]['discount_type'],
+          discountId: allProduct[i]['discount_id'],
+          imageUrl: ApiService.CDN_URl + 'product-catalog-images/product/' +allProduct[i]['thumb_image'],
+//          imageUrl: 'https://www.jessicagavin.com/wp-content/uploads/2019/02/honey-1-600x900.jpg',
+        );
+        loadedProducts.add(product);
+      }
+      lastPageCount = data['data']['last_page'];
+      _items = loadedProducts;
+      notifyListeners();
+      return  _items;
+    } catch (error) {
+      throw (error);
+    }
+  }
+
+  Future<List<Product>> searchAndSetProducts({String keyword}) async {
+    print('test');
+    var url =
+        'http://new.bepari.net/demo/api/V1.0/product-catalog/product/list-product?page_size=100&keyword=$keyword';
     try {
       final response = await http.get(url);
       if(response.statusCode != 200){return null;}
@@ -52,9 +99,9 @@ class Products with ChangeNotifier {
     }
   }
 
-  List<Product> get favoriteItems {
-    return _items.where((prodItem) => prodItem.isFavorite).toList();
-  }
+//  List<Product> get favoriteItems {
+//    return _items.where((prodItem) => prodItem.isFavorite).toList();
+//  }
 
   Product findById(String id) {
     return _items.firstWhere((prod) => prod.id == id);

@@ -38,6 +38,7 @@ class _UpdateShippingAddressDialogState
     id: '',
     customerId: '',
     phoneNumber: '',
+    city:'',
     areaId: '',
     shippingAddress: '',
   );

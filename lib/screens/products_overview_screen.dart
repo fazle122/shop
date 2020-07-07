@@ -27,30 +27,42 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
 
   ScrollController _scrollController = new ScrollController();
   int pageCount = 1;
+  int lastPage;
+  String keyword= '';
   int oldPageCount;
   List<Product> finalProduct = [];
 
 
   @override
   void didChangeDependencies() {
-    final cat = ModalRoute
-        .of(context)
-        .settings
-        .arguments as String;
-//    oldPageCount = pageCount;
+    final products = Provider.of<Products>(context, listen: false);
+    final cat = ModalRoute.of(context).settings.arguments as String;
     if (pageCount == 1) {
       if (_isInit) {
         setState(() {
           _isLoading = true;
         });
+        if(cat != null){
+          Provider.of<Products>(context, listen: false).fetchAndSetProducts(
+              pageCount,int.parse(cat)).then((data) {
+            setState(() {
+              finalProduct = data;
+              lastPage = products.lastPageNo;
+              oldPageCount = 0;
+              _isLoading = false;
+            });
+          });
+        }else {
         Provider.of<Products>(context, listen: false).fetchAndSetProducts(
-            pageCount).then((data) {
+            pageCount,0).then((data) {
           setState(() {
             finalProduct = data;
+            lastPage = products.lastPageNo;
             oldPageCount = 0;
             _isLoading = false;
           });
         });
+      }
       }
       _isInit = false;
     }
@@ -59,7 +71,7 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
         if (pageCount - oldPageCount == 1 || oldPageCount - pageCount == 1)
         {
         _isInit = true;
-        //    if(pageCount< lastPage)
+            if(pageCount < lastPage)
         if (_scrollController.position.pixels ==
             _scrollController.position.maxScrollExtent) {
           setState(() {
@@ -85,19 +97,32 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
 
 
   List<Product> getData(String type) {
-
+    final cat = ModalRoute.of(context).settings.arguments as String;
     if(_isInit){
       setState(() {
         _isLoading = true;
       });
-      Provider.of<Products>(context, listen: false).fetchAndSetProducts(pageCount)
-          .then((data) {
-        setState(() {
-          finalProduct = data;
-          _isLoading = false;
-          type == 'increment' ?oldPageCount += 1:oldPageCount -= 1;
+      if(cat != null) {
+        Provider.of<Products>(context, listen: false).fetchAndSetProducts(
+            pageCount, int.parse(cat))
+            .then((data) {
+          setState(() {
+            finalProduct = data;
+            _isLoading = false;
+            type == 'increment' ? oldPageCount += 1 : oldPageCount -= 1;
+          });
         });
-      });
+      }else{
+        Provider.of<Products>(context, listen: false).fetchAndSetProducts(
+            pageCount, 0)
+            .then((data) {
+          setState(() {
+            finalProduct = data;
+            _isLoading = false;
+            type == 'increment' ? oldPageCount += 1 : oldPageCount -= 1;
+          });
+        });
+      }
     }
     _isInit = false;
 
@@ -126,8 +151,7 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
   Widget build(BuildContext context) {
 //    final productsData = Provider.of<Products>(context);
 //    final cat = ModalRoute.of(context).settings.arguments as String;
-//    final products = cat != null ? productsData.items.where((data) => data.category == cat).toList():productsData.items;
-//    final products = getData();
+//    final products = cat != null ? productsData.items.where((data) => data.category == cat).toList():finalProduct;
     final products = finalProduct;
     final cart = Provider.of<Cart>(context);
     return Scaffold(

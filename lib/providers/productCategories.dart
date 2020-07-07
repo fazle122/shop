@@ -28,14 +28,14 @@ class ProductCategories with ChangeNotifier {
   }
 
   Future<void> fetchProductsCategory() async {
-    var url = 'http://new.bepari.net/demo/api/V1.0/product-catalog/product-category/list-product-category';
+    var url = 'http://new.bepari.net/demo/api/V1.0/product-catalog/product-category/list-product-category?page_size=all';
     final List<ProductCategoryItem> allCategory = [];
     final response = await http.get(url);
     final data = json.decode(response.body) as Map<String, dynamic>;
     if (data == null) {
       return;
     }
-    var catData = data['data']['data'];
+    var catData = data['data'];
     for (int i = 0; i < catData.length; i++) {
       final ProductCategoryItem cats = ProductCategoryItem(
         id: catData[i]['id'].toString(),
