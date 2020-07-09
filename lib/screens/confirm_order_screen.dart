@@ -90,6 +90,7 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
                   confirmDismiss: (direction) {
                     return showDialog(
                         context: context,
+                        barrierDismissible: false,
                         builder: (context) => AlertDialog(
                               title: Text('Are you sure?'),
                               content:
@@ -139,16 +140,17 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
                     trailing: IconButton(
                       icon: Icon(Icons.edit),
                       onPressed: () async {
-                        await showDialog(
-                            context: context,
-                            child: TestWidget(
-                              addressItem: data,
-                            ));
 //                        await showDialog(
 //                            context: context,
-//                            child: UpdateShippingAddressDialog(
+//                            child: TestWidget(
 //                              addressItem: data,
 //                            ));
+                        await showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            child: UpdateShippingAddressDialog(
+                              addressItem: data,
+                            ));
                         if (!mounted) return;
                         setState(() {
                           _isInit = true;
@@ -320,6 +322,7 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
                           if(cart.items.length > 0) {
                             showDialog(
                                 context: context,
+                                barrierDismissible: false,
                                 child: CreateShippingAddressDialog(cart: cart));
                           }else{
                             _scaffoldKey.currentState.showSnackBar(_snackBar('Please add item to cart'));
@@ -379,6 +382,7 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
 //                    Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
                                 showDialog(
                                     context: context,
+                                    barrierDismissible: false,
                                     builder: (ctx) => AlertDialog(
                                           title: Text('Order confirmation'),
                                           content: Text(response['msg']),

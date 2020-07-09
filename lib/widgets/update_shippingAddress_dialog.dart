@@ -27,6 +27,7 @@ class _UpdateShippingAddressDialogState
   TextEditingController _addressEditController;
   String selectedArea;
   String selectedDistrict;
+  String selectedAreaFromLocal;
 
   var _isInit = true;
   var _isLoading = false;
@@ -46,6 +47,7 @@ class _UpdateShippingAddressDialogState
     'id': '',
     'customerId': '',
     'phoneNumber': '',
+    'city': '',
     'areaId': 0,
     'shippingAddress': '',
   };
@@ -67,12 +69,23 @@ class _UpdateShippingAddressDialogState
         'id': widget.addressItem.id,
         'customerId': widget.addressItem.customerId,
         'phoneNumber': widget.addressItem.phoneNumber,
+        'city': widget.addressItem.city,
         'areaId': int.parse(widget.addressItem.areaId),
         'shippingAddress': widget.addressItem.shippingAddress,
       };
     }
+    getAreaName(widget.addressItem.areaId);
+
     _isInit = false;
     super.didChangeDependencies();
+  }
+
+  getAreaName(String areaId) async {
+    final data = await Provider.of<ShippingAddress>(context, listen: false)
+        .fetchAreaName(areaId.toString());
+    setState(() {
+      selectedAreaFromLocal = data;
+    });
   }
 
 
@@ -130,133 +143,6 @@ class _UpdateShippingAddressDialogState
     );
   }
 
-  Future<void> _saveForm(var shippingAddress) async {
-    final isValid = _form.currentState.validate();
-    if (!isValid) {
-      return;
-    }
-    _form.currentState.save();
-    setState(() {
-      _isLoading = true;
-    });
-    FormData data = new FormData();
-    data.add('area_id', shippingAddress.selectedArea.toString());
-    data.add('shipping_address_line', homeAddress);
-    data.add('mobile_no', mobileNumber);
-
-    setState(() {
-      _isLoading = true;
-    });
-    final response = await Provider.of<ShippingAddress>(context, listen: false).createShippingAddress1(widget.addressItem.id.toString(),data);
-    if (response != null) {
-      setState(() {
-        _isLoading = false;
-      });
-      shippingAddress.selectedDistrict = null;
-      shippingAddress.selectedArea = null;
-      Navigator.of(context).pop();
-    } else {
-      showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text('Order confirmation'),
-            content: Text(
-                'something went wrong!!! Please try again'),
-            actions: <Widget>[
-              FlatButton(
-                child: Text('ok'),
-                onPressed: () {
-                  Navigator.of(context).pushNamed(
-                      ProductsOverviewScreen
-                          .routeName);
-                },
-              ),
-            ],
-          ));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final shippingAddress = Provider.of<ShippingAddress>(context);
-
-    Map<String, dynamic> district = shippingAddress.allDistricts;
-    Map<String, dynamic> areas = Map();
-    return AlertDialog(
-      title: Center(
-        child: Text('Update address'),
-      ),
-      content: SingleChildScrollView(
-        child: _isLoading
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
-            :
-        Form(key:_form,
-        child:Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            phoneField(),
-            SizedBox(
-              height: 15.0,
-            ),
-//                  DistrictDropDown(),
-            districtDropdown(shippingAddress,shippingAddress.allDistricts),
-            SizedBox(
-              height: 15.0,
-            ),
-//                  AreaDropDown(),
-            areaDropdown(shippingAddress,shippingAddress.allAreas),
-            SizedBox(
-              height: 15.0,
-            ),
-            addressField(),
-            SizedBox(
-              height: 25.0,
-            ),
-            Container(
-              child: RaisedButton(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25.0),
-                    side: BorderSide(color: Colors.grey)),
-                color: Theme.of(context).primaryColor,
-                textColor: Colors.white,
-                child: Text("Confirm".toUpperCase(),
-                    style: TextStyle(fontSize: 14)),
-                onPressed: () async{
-                  await _saveForm(shippingAddress);
-                },
-              ),
-            )
-          ],
-        ),)
-
-      ),
-    );
-  }
-
-  List<DropdownMenuItem> _districtMenuItems(Map<String, dynamic> items) {
-    List<DropdownMenuItem> itemWidgets = List();
-    items.forEach((key, value) {
-      itemWidgets.add(DropdownMenuItem(
-        value: value,
-        child: Text(value),
-      ));
-    });
-    return itemWidgets;
-  }
-
-  List<DropdownMenuItem> _areaMenuItems(Map<String, dynamic> items) {
-    List<DropdownMenuItem> itemWidgets = List();
-    items.forEach((key, value) {
-      itemWidgets.add(DropdownMenuItem(
-        value: key,
-        child: Text(value),
-      ));
-    });
-    return itemWidgets;
-  }
-
   Widget districtDropdown(var shippingAddress,Map<String, dynamic> district){
     return Consumer<ShippingAddress>(
       builder: (
@@ -267,7 +153,7 @@ class _UpdateShippingAddressDialogState
         return DropdownButtonFormField(
 
           isExpanded: true,
-        decoration: InputDecoration(
+          decoration: InputDecoration(
             prefixIcon: Icon(
               Icons.location_city,
               color: Theme.of(context).primaryColor,
@@ -276,12 +162,22 @@ class _UpdateShippingAddressDialogState
 //                enabledBorder: UnderlineInputBorder(
 //                    borderSide: BorderSide(color: Colors.white))
           ),
-          hint: Text('Select district'),
+          hint: _initValues['city'] != null ?Text(_initValues['city']):Text('select city'),
           value: shippingAddress.selectedDistrict,
           onSaved: (value){
-            shippingAddress.selectedDistrict = value;
+//            shippingAddress.selectedDistrict = value;
+            if(shippingAddress.selectedDistrict == null) {
+              shippingAddress.selectedDistrict = _initValues['city'];
+            }else{
+              shippingAddress.selectedDistrict = value;
+            }
           },
           validator: (value){
+            if (shippingAddress.selectedDistrict == null) {
+              value = _initValues['city'];
+            } else {
+              value = shippingAddress.selectedDistrict;
+            }
             if (value == null) {
               return 'please choose district';
             }
@@ -290,6 +186,9 @@ class _UpdateShippingAddressDialogState
           onChanged: (newValue) {
             shippingAddress.selectedDistrict = newValue;
             shippingAddress.selectedArea = null;
+            setState(() {
+              selectedAreaFromLocal = null;
+            });
           },
           items: _districtMenuItems(district),
         );
@@ -357,13 +256,25 @@ class _UpdateShippingAddressDialogState
 //                enabledBorder: UnderlineInputBorder(
 //                    borderSide: BorderSide(color: Colors.white))
           ),
-          hint: Text('Select area'),
+          hint: selectedAreaFromLocal != null ? Text(selectedAreaFromLocal):Text('Select area'),
           value: shippingAddress.selectedArea,
           onSaved: (value){
-            shippingAddress.selectedArea = value;
-
+//            shippingAddress.selectedArea = value;
+            if(shippingAddress.selectedArea == null) {
+              shippingAddress.selectedArea = _initValues['areaId'].toString();
+            }else{
+              shippingAddress.selectedArea = value;
+            }
           },
           validator: (value){
+            if(shippingAddress.selectedDistrict != null && shippingAddress.selectedArea == null){
+              return 'please update area';
+            }
+            if (shippingAddress.selectedArea == null) {
+              value = _initValues['areaId'].toString();
+            } else {
+              value = shippingAddress.selectedArea;
+            }
             if (value == null) {
               return 'please choose area';
             }
@@ -426,6 +337,151 @@ class _UpdateShippingAddressDialogState
       },
     );
   }
+
+  Future<void> _saveForm(var shippingAddress) async {
+    final isValid = _form.currentState.validate();
+    if (!isValid) {
+      return;
+    }
+    _form.currentState.save();
+    setState(() {
+      _isLoading = true;
+    });
+    FormData data = new FormData();
+    data.add('city',shippingAddress.selectedDistrict);
+    data.add('area_id', shippingAddress.selectedArea.toString());
+    data.add('shipping_address_line', homeAddress);
+    data.add('mobile_no', mobileNumber);
+
+    setState(() {
+      _isLoading = true;
+    });
+    final response = await Provider.of<ShippingAddress>(context, listen: false).createShippingAddress1(widget.addressItem.id.toString(),data);
+    if (response != null) {
+      setState(() {
+        _isLoading = false;
+      });
+      shippingAddress.selectedDistrict = null;
+      shippingAddress.selectedArea = null;
+      Navigator.of(context).pop();
+    } else {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: Text('Order confirmation'),
+            content: Text(
+                'something went wrong!!! Please try again'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('ok'),
+                onPressed: () {
+                  Navigator.of(context).pushNamed(
+                      ProductsOverviewScreen
+                          .routeName);
+                },
+              ),
+            ],
+          ));
+    }
+  }
+
+  Future<bool> _onBackPressed() {
+    final shippingAddress = Provider.of<ShippingAddress>(context,listen: false);
+    setState(() {
+      shippingAddress.selectedDistrict = null;
+    });
+    Navigator.of(context).pop();
+
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final shippingAddress = Provider.of<ShippingAddress>(context);
+
+    Map<String, dynamic> district = shippingAddress.allDistricts;
+    Map<String, dynamic> areas = Map();
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: AlertDialog(
+
+        title: Center(
+          child: Text('Update address'),
+        ),
+        content: SingleChildScrollView(
+            child: _isLoading
+                ? Center(
+              child: CircularProgressIndicator(),
+            )
+                :
+            Form(key:_form,
+              child:Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  phoneField(),
+                  SizedBox(
+                    height: 15.0,
+                  ),
+//                  DistrictDropDown(),
+                  districtDropdown(shippingAddress,shippingAddress.allDistricts),
+                  SizedBox(
+                    height: 15.0,
+                  ),
+//                  AreaDropDown(),
+                  areaDropdown(shippingAddress,shippingAddress.allAreas),
+                  SizedBox(
+                    height: 15.0,
+                  ),
+                  addressField(),
+                  SizedBox(
+                    height: 25.0,
+                  ),
+                  Container(
+                    child: RaisedButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                          side: BorderSide(color: Colors.grey)),
+                      color: Theme.of(context).primaryColor,
+                      textColor: Colors.white,
+                      child: Text("Confirm".toUpperCase(),
+                          style: TextStyle(fontSize: 14)),
+                      onPressed: () async{
+                        await _saveForm(shippingAddress);
+                      },
+                    ),
+                  )
+                ],
+              ),)
+
+        ),
+      ),
+    );
+
+  }
+
+  List<DropdownMenuItem> _districtMenuItems(Map<String, dynamic> items) {
+    List<DropdownMenuItem> itemWidgets = List();
+    items.forEach((key, value) {
+      itemWidgets.add(DropdownMenuItem(
+        value: value,
+        child: Text(value),
+      ));
+    });
+    return itemWidgets;
+  }
+
+  List<DropdownMenuItem> _areaMenuItems(Map<String, dynamic> items) {
+    List<DropdownMenuItem> itemWidgets = List();
+    items.forEach((key, value) {
+      itemWidgets.add(DropdownMenuItem(
+        value: key,
+        child: Text(value),
+      ));
+    });
+    return itemWidgets;
+  }
+
+
 }
 
 

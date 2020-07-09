@@ -178,6 +178,7 @@ class _CreateShippingAddressDialogState
         } else {
           showDialog(
               context: context,
+              barrierDismissible: false,
               builder: (ctx) => AlertDialog(
                 title: Text('Order confirmation'),
                 content: Text(
@@ -194,7 +195,14 @@ class _CreateShippingAddressDialogState
                 ],
               ));
         }
+  }
 
+  Future<bool> _onBackPressed() {
+    final shippingAddress = Provider.of<ShippingAddress>(context,listen: false);
+    setState(() {
+      shippingAddress.selectedDistrict = null;
+    });
+    Navigator.of(context).pop();
 
   }
 
@@ -204,43 +212,45 @@ class _CreateShippingAddressDialogState
 
     Map<String, dynamic> district = shippingAddress.allDistricts;
     Map<String, dynamic> areas = Map();
-    return AlertDialog(
-      title: Center(
-        child: Text('Delivery Address'),
-      ),
-      content: SingleChildScrollView(
-        child: _isLoading
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
-            :
-        Form(key:_form,
-        child:Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            phoneField(),
-            SizedBox(
-              height: 15.0,
-            ),
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: AlertDialog(
+        title: Center(
+          child: Text('Delivery Address'),
+        ),
+        content: SingleChildScrollView(
+            child: _isLoading
+                ? Center(
+              child: CircularProgressIndicator(),
+            )
+                :
+            Form(key:_form,
+              child:Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  phoneField(),
+                  SizedBox(
+                    height: 15.0,
+                  ),
 //                  DistrictDropDown(),
-            districtDropdown(shippingAddress,shippingAddress.allDistricts),
-            SizedBox(
-              height: 15.0,
-            ),
+                  districtDropdown(shippingAddress,shippingAddress.allDistricts),
+                  SizedBox(
+                    height: 15.0,
+                  ),
 //                  AreaDropDown(),
-            areaDropdown(shippingAddress,shippingAddress.allAreas),
-            SizedBox(
-              height: 15.0,
-            ),
-            addressField(),
-            SizedBox(
-              height: 25.0,
-            ),
-            Container(
-              child: RaisedButton(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25.0),
-                    side: BorderSide(color: Colors.grey)),
+                  areaDropdown(shippingAddress,shippingAddress.allAreas),
+                  SizedBox(
+                    height: 15.0,
+                  ),
+                  addressField(),
+                  SizedBox(
+                    height: 25.0,
+                  ),
+                  Container(
+                    child: RaisedButton(
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25.0),
+                          side: BorderSide(color: Colors.grey)),
 
 //                onPressed: () async {
 //                  if (widget.cart.items.length <= 0) {
@@ -357,18 +367,19 @@ class _CreateShippingAddressDialogState
 //                    }
 //                  }
 //                },
-                color: Theme.of(context).primaryColor,
-                textColor: Colors.white,
-                child: Text("Confirm".toUpperCase(),
-                    style: TextStyle(fontSize: 14)),
-                onPressed: () async{
-                  await _saveForm(shippingAddress);
-                },
-              ),
-            )
-          ],
-        ),)
+                      color: Theme.of(context).primaryColor,
+                      textColor: Colors.white,
+                      child: Text("Confirm".toUpperCase(),
+                          style: TextStyle(fontSize: 14)),
+                      onPressed: () async{
+                        await _saveForm(shippingAddress);
+                      },
+                    ),
+                  )
+                ],
+              ),)
 
+        ),
       ),
     );
   }

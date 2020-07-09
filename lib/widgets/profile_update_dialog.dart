@@ -468,57 +468,69 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
     Navigator.of(context).pop();
   }
 
+  Future<bool> _onBackPressed() {
+    final shippingAddress = Provider.of<ShippingAddress>(context,listen: false);
+    setState(() {
+      shippingAddress.selectedDistrict = null;
+    });
+    Navigator.of(context).pop();
+
+  }
+
   @override
   Widget build(BuildContext context) {
     final shippingAddress = Provider.of<ShippingAddress>(context);
     Map<String, dynamic> district = shippingAddress.allDistricts;
     Map<String, dynamic> areas = Map();
-    return AlertDialog(
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: AlertDialog(
 //      title: Center(
 //        child: Text('Profile info'),
 //      ),
-      title: Center(
-          child: InkWell(
-        onTap: () {
-          showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                    title: Text('Choose option'),
-                    content: SingleChildScrollView(
-                      child: ListBody(
-                        children: <Widget>[
-                          GestureDetector(
-                            child: Text('Gallery'),
-                            onTap: () {
-                              _openGallery(context);
-                            },
-                          ),
-                          SizedBox(
-                            height: 30.0,
-                          ),
-                          GestureDetector(
-                            child: Text('Camera'),
-                            onTap: () {
-                              _openCamera(context);
-                            },
-                          ),
-                        ],
+        title: Center(
+            child: InkWell(
+              onTap: () {
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => AlertDialog(
+                      title: Text('Choose option'),
+                      content: SingleChildScrollView(
+                        child: ListBody(
+                          children: <Widget>[
+                            GestureDetector(
+                              child: Text('Gallery'),
+                              onTap: () {
+                                _openGallery(context);
+                              },
+                            ),
+                            SizedBox(
+                              height: 30.0,
+                            ),
+                            GestureDetector(
+                              child: Text('Camera'),
+                              onTap: () {
+                                _openCamera(context);
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ));
-        },
-        child: Container(
-          width: 70.0,
-          height: 65.0,
+                    ));
+              },
+              child: Container(
+                width: 70.0,
+                height: 65.0,
 //          decoration: BoxDecoration(
 //            shape: BoxShape.circle,
 //            color: Colors.orange,
 //          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              imageFile == null
-                  ? Center(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    imageFile == null
+                        ? Center(
                       child: Container(
                         height: 50.0,
                         width: 50.0,
@@ -526,58 +538,58 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
                           shape: BoxShape.circle,
                           image: _initValues.containsKey('imageUrl')
                               ? NetworkImage(
-                                  'http://new.bepari.net/product-catalog-images/category/' +
-                                      'value')
+                              'http://new.bepari.net/product-catalog-images/category/' +
+                                  'value')
                               : DecorationImage(
-                                  alignment: Alignment.center,
-                                  matchTextDirection: true,
-                                  repeat: ImageRepeat.noRepeat,
-                                  image: AssetImage('assets/profile.png'),
-                                ),
+                            alignment: Alignment.center,
+                            matchTextDirection: true,
+                            repeat: ImageRepeat.noRepeat,
+                            image: AssetImage('assets/profile.png'),
+                          ),
                         ),
                       ),
                     )
-                  : Container(
-                      width: 50.0,
-                      height: 50.0,
-                      decoration: new BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: new DecorationImage(
-                            fit: BoxFit.fill,
-                            image: FileImage(imageFile),
-                          ))),
-              Positioned(
-                right: 5,
-                bottom: 5,
-                child: Container(
-                  padding: EdgeInsets.all(2.0),
-                  // color: Theme.of(context).accentColor,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10.0),
-                    color: Colors.transparent,
-                  ),
-                  constraints: BoxConstraints(
-                    maxWidth: 18,
-                    maxHeight: 18,
-                  ),
-                  child: Icon(
-                    Icons.camera_alt,
-                    size: 20,
-                  ),
+                        : Container(
+                        width: 50.0,
+                        height: 50.0,
+                        decoration: new BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: new DecorationImage(
+                              fit: BoxFit.fill,
+                              image: FileImage(imageFile),
+                            ))),
+                    Positioned(
+                      right: 5,
+                      bottom: 5,
+                      child: Container(
+                        padding: EdgeInsets.all(2.0),
+                        // color: Theme.of(context).accentColor,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10.0),
+                          color: Colors.transparent,
+                        ),
+                        constraints: BoxConstraints(
+                          maxWidth: 18,
+                          maxHeight: 18,
+                        ),
+                        child: Icon(
+                          Icons.camera_alt,
+                          size: 20,
+                        ),
+                      ),
+                    )
+                  ],
                 ),
-              )
-            ],
-          ),
-        ),
-      )),
-      content: SingleChildScrollView(
-          child: Form(
-        key: _form,
-        child: selectedAreaFromLocal == null
-            ? Center(
+              ),
+            )),
+        content: SingleChildScrollView(
+            child: Form(
+              key: _form,
+              child: selectedAreaFromLocal == null
+                  ? Center(
                 child: CircularProgressIndicator(),
               )
-            : Column(
+                  : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   nameField(),
@@ -621,13 +633,15 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
                   )
                 ],
               ),
-      )),
+            )),
+      ),
     );
   }
 
   void _showErrorDialog(String message) {
     showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (ctx) => AlertDialog(
               title: Text('An Error Occurred!'),
               content: Text(message),

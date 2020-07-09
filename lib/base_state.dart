@@ -56,6 +56,7 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> {
             if (!isOnline) {
               showDialog(
                 context: context,
+                barrierDismissible: false,
                 builder: (BuildContext context) => _connectionDialog(context),
               );
 

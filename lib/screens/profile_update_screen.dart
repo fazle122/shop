@@ -84,6 +84,7 @@ class _ProfileUpdateScreenState extends State<ProfileUpdateScreen> {
     } catch (error) {
       await showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (ctx) => AlertDialog(
           title: Text('An error occurred!'),
           content: Text(error.toString()),

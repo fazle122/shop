@@ -43,6 +43,7 @@ class _CartItemWidgetState extends State<CartItemWidget>{
       confirmDismiss: (direction){
         return   showDialog(
             context: context,
+            barrierDismissible: false,
             builder: (context) => AlertDialog(
               title: Text('Are you sure?'),
               content: Text('Do you want to remove the item form the cart?'),

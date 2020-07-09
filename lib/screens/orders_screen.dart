@@ -148,6 +148,7 @@ class _OrdersScreenState extends BaseState<OrdersScreen>{
                       confirmDismiss: (direction){
                         return   showDialog(
                             context: context,
+                            barrierDismissible: false,
                             builder: (context) => AlertDialog(
                               title: Text('Are you sure?'),
                               content: Text('Do you want to cancel this order?'),

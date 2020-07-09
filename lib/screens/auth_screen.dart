@@ -83,6 +83,7 @@ class _AuthCardState extends BaseState<AuthCard> {
   void _showErrorDialog(String message) {
     showDialog(
         context: context,
+        barrierDismissible: false,
         builder: (ctx) =>
             AlertDialog(
               title: Text('An Error Occurred!'),

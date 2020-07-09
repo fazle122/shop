@@ -241,6 +241,7 @@ class _ProfilePageState extends BaseState<ProfilePage> {
 
                         await showDialog(
                             context: context,
+                            barrierDismissible: false,
                             child: ProfileUpdateDialog(profileInfo.profileInfo)
 //                      child: ProfileUpdateDialog()
                         );

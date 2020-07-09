@@ -109,7 +109,7 @@ class CartScreen extends StatelessWidget {
                 children: <Widget>[
                   Container(
                       width: MediaQuery.of(context).size.width * 5 / 7,
-                      padding: EdgeInsets.only(left: 20.0,top: 5.0),
+                      padding: EdgeInsets.only(left: 20.0,top: 2.0),
                       color: Theme.of(context).primaryColor,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
