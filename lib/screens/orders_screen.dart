@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/screens/completed_orders_screen.dart';
 import 'package:shoptempdb/screens/order_detail_screen.dart';
 import 'package:shoptempdb/widgets/app_drawer.dart';
+import 'package:shoptempdb/widgets/order_fiter_dialog.dart';
 import 'package:shoptempdb/widgets/order_item.dart';
 import 'package:intl/intl.dart';
 
@@ -59,7 +61,7 @@ class _OrdersScreenState extends BaseState<OrdersScreen>{
 
   var _isInit = true;
   var _isLoading = false;
-
+  Map<String, dynamic> filters = Map();
 
 
   @override
@@ -69,7 +71,7 @@ class _OrdersScreenState extends BaseState<OrdersScreen>{
       setState(() {
         _isLoading = true;
       });
-      Provider.of<Orders>(context).fetchAndSetOrders().then((_){
+      Provider.of<Orders>(context).fetchAndSetOrders(filters).then((_){
         if (!mounted) return;
         setState(() {
           _isLoading = false;
@@ -78,6 +80,22 @@ class _OrdersScreenState extends BaseState<OrdersScreen>{
     }
     _isInit = false;
     super.didChangeDependencies();
+  }
+
+  getData(Map<String,dynamic> filters){
+    if(_isInit) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = true;
+      });
+      Provider.of<Orders>(context,listen: false).fetchAndSetOrders(filters).then((_){
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+    _isInit = false;
   }
 
   String convert12(String str) {
@@ -101,6 +119,14 @@ class _OrdersScreenState extends BaseState<OrdersScreen>{
     return finalTime;
   }
 
+  Future<Map<String, dynamic>> _orderFilterDialog() async {
+    return showDialog<Map<String, dynamic>>(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) => OrderFilterDialog(),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +140,16 @@ class _OrdersScreenState extends BaseState<OrdersScreen>{
                 case 'COMPLETED_ORDERS':
                   Navigator.of(context).pushNamed(CompletedOrdersScreen.routeName);
                   break;
+                case 'FILTER':
+                  var newFilter = await _orderFilterDialog();
+                  if(newFilter != null){
+                    setState(() {
+                      filters = newFilter;
+                      _isInit = true;
+                    });
+                  }
+                  getData(filters);
+                  break;
 
               }
             },
@@ -122,6 +158,10 @@ class _OrdersScreenState extends BaseState<OrdersScreen>{
               PopupMenuItem<String>(
                 value: 'COMPLETED_ORDERS',
                 child: Text('Completed orders'),
+              ),
+              PopupMenuItem<String>(
+                value: 'FILTER',
+                child: Text('Filter'),
               ),
             ],
           ),

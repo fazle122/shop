@@ -20,6 +20,7 @@ class CompletedOrdersScreen extends StatefulWidget {
 class _CompletedOrdersScreenState extends BaseState<CompletedOrdersScreen> {
   var _isInit = true;
   var _isLoading = false;
+  Map<String,dynamic> filters = Map();
 
   @override
   void didChangeDependencies() {
@@ -28,7 +29,7 @@ class _CompletedOrdersScreenState extends BaseState<CompletedOrdersScreen> {
       setState(() {
         _isLoading = true;
       });
-      Provider.of<Orders>(context).fetchAndSetOrders().then((_) {
+      Provider.of<Orders>(context).fetchAndSetOrders(filters).then((_) {
         if (!mounted) return;
         setState(() {
           _isLoading = false;

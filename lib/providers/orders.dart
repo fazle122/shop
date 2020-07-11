@@ -183,11 +183,24 @@ class Orders with ChangeNotifier{
     }
   }
 
-  Future<void> fetchAndSetOrders() async {
+  Future<void> fetchAndSetOrders(Map<String,dynamic> filters) async {
     print('fetch orders');
-    final url = 'http://new.bepari.net/demo/api/V1.0/accounts/invoice/list-invoice';
+    String url = 'http://new.bepari.net/demo/api/V1.0/accounts/invoice/list-invoice?';
 
-
+    if (filters != null) {
+//      if (filters.containsKey('status') && filters['status'] == 'Pending') {
+//        qString += '&status[]=' + 'Requested for Cancellation';
+//      }
+      if (filters.containsKey('invoice_from_date') && filters['invoice_from_date'] != 'null') {
+        url += 'invoice_from_date=' + filters['invoice_from_date'].toString();
+      }
+      if (filters.containsKey('invoice_to_date') && filters['invoice_to_date'] != 'null') {
+        url += '&invoice_to_date=' + filters['invoice_to_date'].toString();
+      }
+//      if (currentPage != null) {
+//        qString += '&page=$currentPage';
+//      }
+    }
     Dio dioService = new Dio();
     dioService.options.headers = {
       'Authorization': 'Bearer ' + authToken,
