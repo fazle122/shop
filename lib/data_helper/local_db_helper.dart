@@ -1,12 +1,10 @@
-import 'dart:async';
 import 'package:shoptempdb/providers/cart.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
+import 'package:shoptempdb/providers/cart.dart';
+import 'package:sqflite/sqflite.dart' as sql;
+import 'package:path/path.dart' as path;
+import 'package:sqflite/sqlite_api.dart';
 
-class DatabaseHelper {
-  static final DatabaseHelper _instance = new DatabaseHelper.internal();
-
-  factory DatabaseHelper() => _instance;
+class DBHelper {
 
   final String tableCart = 'cartTable';
   final String columnId = 'id';
@@ -19,104 +17,90 @@ class DatabaseHelper {
   final String columnDiscountType = 'discountType';
   final String columnDiscountId = 'discountId';
 
-  static Database _db;
 
-  DatabaseHelper.internal();
+  static Future<Database> database() async {
+    final dbPath = await sql.getDatabasesPath();
+    return sql.openDatabase(path.join(dbPath, 'carts.db'),
+        onCreate: (db, version) {
+          return db.execute(
+              'CREATE TABLE cartTable('
+                  'id INTEGER PRIMARY KEY AUTOINCREMENT, productId TEXT, title TEXT,quantity INTEGER,price NUMERIC,isNonInventory INTEGER,discount NUMERIC,discountType TEXT,discountId TEXT)');
+        }, version: 1);
+  }
 
-  Future<Database> get db async {
-    if (_db != null) {
-      return _db;
+  static Future<bool> isProductExist(String id) async {
+    final db = await DBHelper.database();
+    var result = await db.rawQuery(
+        'SELECT * FROM cartTable WHERE productId = $id');
+
+    if (result.length != 0) {
+      return true;
     }
-    _db = await initDb();
-
-    return _db;
+    else {
+      return false;
+    }
   }
 
-  initDb() async {
-    String databasesPath = await getDatabasesPath();
-    String path = join(databasesPath, 'carts.db');
-
-//    await deleteDatabase(path); // just for testing
-
-    var db = await openDatabase(path, version: 1, onCreate: _onCreate);
-    return db;
+  static Future<void> insert(String table, Map<String, Object> data) async {
+    final db = await DBHelper.database();
+    db.insert(
+      table,
+      data,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
-
-  void _onCreate(Database db, int newVersion) async {
-    await db.execute(
-        'CREATE TABLE $tableCart('
-            '$columnId INTEGER PRIMARY KEY, $columnProductId TEXT, $columnTitle TEXT,$columnQuantity INTEGER,$columnPrice NUMERIC,$columnIsNonInventory INTEGER,$columnDiscount NUMERIC,$columnDiscountType TEXT,$columnDiscountId TEXT)');
+  static Future<void> increaseItemQuantity(String table,
+      Map<String, Object> data) async {
+    final db = await DBHelper.database();
+    db.rawUpdate(
+        'UPDATE cartTable SET quantity = quantity+1 WHERE productId = ${data['productId']}');
   }
 
-  Future<int> addCartItem(CartItem cart) async {
-    var dbClient = await db;
-    var result = await dbClient.insert(tableCart, cart.toMap());
-    return result;
-  }
-
-  Future<List> getAllCartItems() async {
-    var dbClient = await db;
-//    var result = await dbClient.query(tableCart, columns: [columnId, columnTitle, columnDescription]);
-    var result = await dbClient.rawQuery('SELECT * FROM $tableCart');
-
-    return result.toList();
-  }
-
-  Future<int> updateCartItem(CartItem cart) async {
-    var dbClient = await db;
-    return await dbClient.update(tableCart, cart.toMap(), where: "$columnId = ?", whereArgs: [cart.id]);
-//    return await dbClient.rawUpdate(
-//        'UPDATE $tableNote SET $columnTitle = \'${note.title}\', $columnDescription = \'${note.description}\' WHERE $columnId = ${note.id}');
-  }
+  static Future<void> decreaseItemQuantity(String productId) async {
+    final db = await DBHelper.database();
+    db.rawUpdate(
+        'UPDATE cartTable SET quantity = quantity-1 WHERE productId = $productId');
 
 
-  Future<int> deleteCartItem(int id) async {
-    var dbClient = await db;
-    return await dbClient.delete(tableCart, where: '$columnId = ?', whereArgs: [id]);
-//    return await dbClient.rawDelete('DELETE FROM $tableNote WHERE $columnId = $id');
-  }
-
-  Future<bool> isProductExist(String id) async{
-    var dbClient = await db;
-    int count = Sqflite.firstIntValue(await dbClient.rawQuery("SELECT * FROM $tableCart WHERE id=" + id + ";"));
-      var result = dbClient.rawQuery("SELECT * FROM $tableCart WHERE id=" + id + ";");
-
-      if (count != 0)
-      {
-//        dbClient.close();
-        return true;
-      }
-      else
-      {
-//        dbClient.close();
-        return false;
-      }
-  }
-
-
-  Future<int> getCount() async {
-    var dbClient = await db;
-    return Sqflite.firstIntValue(await dbClient.rawQuery('SELECT COUNT(*) FROM $tableCart'));
-  }
-
-  Future close() async {
-    var dbClient = await db;
-    return dbClient.close();
-  }
-
-//  Future<CartItem> getNote(int id) async {
-//    var dbClient = await db;
-//    List<Map> result = await dbClient.query(tableCart,
-//        columns: [columnId, columnTitle, columnDescription],
-//        where: '$columnId = ?',
-//        whereArgs: [id]);
-////    var result = await dbClient.rawQuery('SELECT * FROM $tableNote WHERE $columnId = $id');
-//
-//    if (result.length > 0) {
-//      return new Note.fromMap(result.first);
+//    CartItem item = await getSingleData(data['productId']);
+//    int quantity = item.quantity;
+//    if(quantity == 1){
+//      db.rawDelete('DELETE FROM cartTable WHERE productId = ${data['productId']}');
+//    }else {
+//      db.rawUpdate('UPDATE cartTable SET quantity = quantity-1 WHERE productId = ${data['productId']}');
 //    }
-//
-//    return null;
-//  }
+
+  }
+
+  static Future<void> deleteCartItm(String productId) async {
+    final db = await DBHelper.database();
+    await db.rawDelete(
+        'DELETE FROM cartTable WHERE productId = $productId');
+  }
+
+
+  static Future<List<Map<String, dynamic>>> getData(String table) async {
+    final db = await DBHelper.database();
+    return await db.query(table);
+  }
+
+  static Future<CartItem> getSingleData(String productId) async {
+    final db = await DBHelper.database();
+    final result = await db.rawQuery(
+        'SELECT * FROM cartTable WHERE productId = $productId');
+    if (result.length > 0) {
+      return await new CartItem.fromJson(result.first);
+    }
+    return null;
+  }
+
+
+  static Future<void> clearCart() async {
+    final db = await DBHelper.database();
+    await db.rawQuery('DELETE  FROM cartTable');
+//    db.rawDelete('DELETE * from cartTable ');
+  }
+
 }
+

@@ -55,7 +55,7 @@ class _CartItemWidgetState extends State<CartItemWidget>{
         );
       },
       onDismissed: (direction){
-        Provider.of<Cart>(context,listen: false).removeItem(widget.productId);
+        Provider.of<Cart>(context,listen: false).removeCartItemRow(widget.productId);
       },
       child: Card(
         margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
@@ -125,7 +125,7 @@ class _CartItemWidgetState extends State<CartItemWidget>{
                   IconButton(
                     icon: Icon(Icons.remove),
                     onPressed: (){
-                      cart.removeSingleItem(widget.productId);
+                      cart.removeSingleItem(widget.productId, widget.title, widget.price,widget.isNonInventory,widget.discount,widget.discountId,widget.discountType);
                       Scaffold.of(context).hideCurrentSnackBar();
                       if(cart.items.length> 0)
                         Scaffold.of(context).showSnackBar(SnackBar(

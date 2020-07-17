@@ -28,12 +28,12 @@ class _ConfirmOrderDialogState extends State<ConfirmOrderDialog>{
       controller: _phoneEditController,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
-          contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-          prefixIcon: Icon(Icons.phone),
-          hintText: data,
+        contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+        prefixIcon: Icon(Icons.phone),
+        hintText: data,
 //          border:
 //          OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))
-          ),
+      ),
     );
   }
 
@@ -97,7 +97,7 @@ class _ConfirmOrderDialogState extends State<ConfirmOrderDialog>{
                 onPressed: () {
 //                  Provider.of<Orders>(context, listen: false).addOrder(
 //                      cart.items.values.toList(), cart.totalAmount);
-                  cart.clear();
+//                  cart.clear();
                   Navigator.of(context).pop();
                 },
                 color: Theme.of(context).primaryColor,

@@ -45,6 +45,7 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
         if(cat != null){
           Provider.of<Products>(context, listen: false).fetchAndSetProducts(
               pageCount,int.parse(cat)).then((data) {
+
             setState(() {
               finalProduct = data;
               lastPage = products.lastPageNo;
@@ -53,32 +54,32 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
             });
           });
         }else {
-        Provider.of<Products>(context, listen: false).fetchAndSetProducts(
-            pageCount,0).then((data) {
-          setState(() {
-            finalProduct = data;
-            lastPage = products.lastPageNo;
-            oldPageCount = 0;
-            _isLoading = false;
+          Provider.of<Products>(context, listen: false).fetchAndSetProducts(
+              pageCount,0).then((data) {
+            setState(() {
+              finalProduct = data;
+              lastPage = products.lastPageNo;
+              oldPageCount = 0;
+              _isLoading = false;
+            });
           });
-        });
-      }
+        }
       }
       _isInit = false;
     }
 
-      _scrollController.addListener(() {
-        if (pageCount - oldPageCount == 1 || oldPageCount - pageCount == 1)
-        {
+    _scrollController.addListener(() {
+      if (pageCount - oldPageCount == 1 || oldPageCount - pageCount == 1)
+      {
         _isInit = true;
-            if(pageCount < lastPage)
-        if (_scrollController.position.pixels ==
-            _scrollController.position.maxScrollExtent) {
-          setState(() {
-            pageCount += 1;
-          });
-          getData('increment');
-        }
+        if(pageCount < lastPage)
+          if (_scrollController.position.pixels ==
+              _scrollController.position.maxScrollExtent) {
+            setState(() {
+              pageCount += 1;
+            });
+            getData('increment');
+          }
         if (pageCount > 0)
           if (_scrollController.position.pixels ==
               _scrollController.position.minScrollExtent) {
@@ -87,9 +88,9 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
             });
             getData('decrement');
           }
-        }
+      }
 
-      });
+    });
 
     super.didChangeDependencies();
   }
@@ -144,7 +145,7 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
 //      });
 //    }
 //
-  return finalProduct;
+    return finalProduct;
   }
 
   @override
@@ -153,7 +154,7 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
 //    final cat = ModalRoute.of(context).settings.arguments as String;
 //    final products = cat != null ? productsData.items.where((data) => data.category == cat).toList():finalProduct;
     final products = finalProduct;
-    final cart = Provider.of<Cart>(context);
+    final cart = Provider.of<Cart>(context,listen: false);
     return Scaffold(
       appBar: AppBar(
         title: Text('Bepari'),
@@ -161,13 +162,13 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
           IconButton(
             icon: !_showList
                 ? Icon(
-                    Icons.list,
-                    size: 25.0,
-                  )
+              Icons.list,
+              size: 25.0,
+            )
                 : Icon(
-                    Icons.grid_on,
-                    size: 20.0,
-                  ),
+              Icons.grid_on,
+              size: 20.0,
+            ),
             onPressed: () {
               if (!mounted) return;
               setState(() {
@@ -200,107 +201,107 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : Column(
-              children: <Widget>[
-                Expanded(
-                  child: _showList
-                      ?  products != null && products.length > 0
-                          ? ListView.builder(
-                              padding: const EdgeInsets.all(10.0),
-                              controller: _scrollController,
-                              itemCount: products.length,
-                              itemBuilder: (context, i) =>
-                                  ChangeNotifierProvider.value(
-                                    value: products[i],
-                                    child: ProductItemListView(),
-                                  ))
-                          : Center(
-                              child: Text('No item found'),
-                            )
-                      : products != null && products.length > 0
-                          ? GridView.builder(
-                              controller: _scrollController,
-                              padding: const EdgeInsets.all(10.0),
-                              itemCount: products.length,
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 3 / 2,
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
-                              ),
-                              itemBuilder: (context, i) =>
-                                  ChangeNotifierProvider.value(
-                                    value: products[i],
-                                    child: ProductItemGridView(),
-                                  ))
-                          : Center(
-                              child: Text('No item found'),
-                            ),
+        children: <Widget>[
+          Expanded(
+            child: _showList
+                ?  products != null && products.length > 0
+                ? ListView.builder(
+                padding: const EdgeInsets.all(10.0),
+                controller: _scrollController,
+                itemCount: products.length,
+                itemBuilder: (context, i) =>
+                    ChangeNotifierProvider.value(
+                      value: products[i],
+                      child: ProductItemListView(),
+                    ))
+                : Center(
+              child: Text('No item found'),
+            )
+                : products != null && products.length > 0
+                ? GridView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(10.0),
+                itemCount: products.length,
+                gridDelegate:
+                SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 2/2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
                 ),
-                cart.items.length > 0
-                    ? Container(
-                        height: 50.0,
-                        color: Theme.of(context).primaryColor,
-                        child: Row(
-                          children: <Widget>[
-                            Container(
-                                width:
-                                    MediaQuery.of(context).size.width * 5 / 7,
-                                padding: EdgeInsets.only(left: 20.0, top: 2.0),
-                                color: Theme.of(context).primaryColor,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: <Widget>[
-                                    Text('SubTotal: ' +
-                                        cart.totalAmount.toStringAsFixed(2)),
-                                    cart.totalAmount > 500
-                                        ? Text('Delivery charge: 00.00 BDT')
-                                        : Text('Delivery charge: 50.00 BDT'),
-                                    cart.totalAmount > 500
-                                        ? Text(
-                                            'Total amount : ' +
-                                                cart.totalAmount
-                                                    .toStringAsFixed(2),
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          )
-                                        : Text(
-                                            'Total amount : ' +
-                                                (cart.totalAmount + 50.00)
-                                                    .toStringAsFixed(2),
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          ),
-                                  ],
-                                )),
-                            Container(
-                              height: MediaQuery.of(context).size.height,
-                              width: MediaQuery.of(context).size.width * 2 / 7,
-                              color: Theme.of(context).primaryColorDark,
-                              child: InkWell(
-                                child: Center(
-                                  child: Text(
-                                    'Check out',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                                onTap: () {
-                                  Navigator.of(context)
-                                      .pushNamed(CartScreen.routeName);
-                                },
-                              ),
-                            ),
-                          ],
-                        ))
-                    : SizedBox(
-                        width: 0.0,
-                        height: 0.0,
-                      )
-              ],
+                itemBuilder: (context, i) =>
+                    ChangeNotifierProvider.value(
+                      value: products[i],
+                      child: ProductItemGridView(),
+                    ))
+                : Center(
+              child: Text('No item found'),
             ),
+          ),
+          cart.items.length > 0
+              ? Container(
+              height: 50.0,
+              color: Theme.of(context).primaryColor,
+              child: Row(
+                children: <Widget>[
+                  Container(
+                      width:
+                      MediaQuery.of(context).size.width * 5 / 7,
+                      padding: EdgeInsets.only(left: 20.0, top: 2.0),
+                      color: Theme.of(context).primaryColor,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Text('SubTotal: ' +
+                              cart.totalAmount.toStringAsFixed(2)),
+                          cart.totalAmount > 500
+                              ? Text('Delivery charge: 00.00 BDT')
+                              : Text('Delivery charge: 50.00 BDT'),
+                          cart.totalAmount > 500
+                              ? Text(
+                            'Total amount : ' +
+                                cart.totalAmount
+                                    .toStringAsFixed(2),
+                            style:
+                            TextStyle(color: Colors.white),
+                          )
+                              : Text(
+                            'Total amount : ' +
+                                (cart.totalAmount + 50.00)
+                                    .toStringAsFixed(2),
+                            style:
+                            TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      )),
+                  Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width * 2 / 7,
+                    color: Theme.of(context).primaryColorDark,
+                    child: InkWell(
+                      child: Center(
+                        child: Text(
+                          'Check out',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context)
+                            .pushNamed(CartScreen.routeName);
+                      },
+                    ),
+                  ),
+                ],
+              ))
+              : SizedBox(
+            width: 0.0,
+            height: 0.0,
+          )
+        ],
+      ),
     );
   }
   void animateScrollBump() {

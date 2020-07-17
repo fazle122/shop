@@ -38,6 +38,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void didChangeDependencies() {
     Provider.of<Auth>(context).tryAutoLogin();
+    Provider.of<Cart>(context,listen: false).fetchAndSetCartItems();
 //    Future.delayed(Duration(seconds: 2), () {
 //      Navigator.of(context).pushReplacementNamed(ProductsOverviewScreen.routeName);
 //    });

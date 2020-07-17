@@ -6,6 +6,7 @@ import 'package:shoptempdb/providers/auth.dart';
 import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/screens/cart_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
+import 'package:shoptempdb/screens/verifty_user.dart';
 
 import '../base_state.dart';
 
@@ -78,6 +79,8 @@ class _AuthCardState extends BaseState<AuthCard> {
   };
   var _isLoading = false;
   final _otpController = TextEditingController();
+  final _phoneController = TextEditingController();
+
 
 
   void _showErrorDialog(String message) {
@@ -181,6 +184,7 @@ class _AuthCardState extends BaseState<AuthCard> {
             child: Column(
               children: <Widget>[
                 TextFormField(
+                  controller: _phoneController,
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
                     hintText: 'Phone number',
@@ -237,12 +241,18 @@ class _AuthCardState extends BaseState<AuthCard> {
                     child:
 //                    Text(_authMode == AuthMode.Login ? 'LOGIN' : 'GET OTP'),
                     Text(auth.otp != null ? 'LOGIN' : 'GET OTP'),
-                    onPressed: () {
-                      _switchAuthMode();
-                      FocusScope.of(context).requestFocus(new FocusNode());
-                      auth.otp != null
-                          ? _submit(AuthMode.Login,cart)
-                          : _submit(AuthMode.Signup,cart);
+                    onPressed: () async{
+                      await _submit(AuthMode.Signup,cart);
+                      if(_phoneController.text.isNotEmpty)
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => VerifyPhone(phoneNumber: _phoneController.text)),
+                      );
+//                      _switchAuthMode();
+//                      FocusScope.of(context).requestFocus(new FocusNode());
+//                      auth.otp != null
+//                          ? _submit(AuthMode.Login,cart)
+//                          : _submit(AuthMode.Signup,cart);
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),

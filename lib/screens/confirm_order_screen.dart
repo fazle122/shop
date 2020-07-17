@@ -61,7 +61,7 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
 
   List<Widget> createRadioListUsers(List<AddressItem> address) {
     var innerBorder =
-        Border.all(width: 1.0, color: Colors.grey.withOpacity(0.3));
+    Border.all(width: 1.0, color: Colors.grey.withOpacity(0.3));
     var outerBorder = Border.all(width: 3.0, color: Colors.grey.withOpacity(0));
     List<Widget> widgets = [];
     for (AddressItem data in address) {
@@ -92,24 +92,24 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
                         context: context,
                         barrierDismissible: false,
                         builder: (context) => AlertDialog(
-                              title: Text('Are you sure?'),
-                              content:
-                                  Text('Do you want to cancel this order?'),
-                              actions: <Widget>[
-                                FlatButton(
-                                  child: Text('No'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop(false);
-                                  },
-                                ),
-                                FlatButton(
-                                  child: Text('Yes'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop(true);
-                                  },
-                                ),
-                              ],
-                            ));
+                          title: Text('Are you sure?'),
+                          content:
+                          Text('Do you want to cancel this order?'),
+                          actions: <Widget>[
+                            FlatButton(
+                              child: Text('No'),
+                              onPressed: () {
+                                Navigator.of(context).pop(false);
+                              },
+                            ),
+                            FlatButton(
+                              child: Text('Yes'),
+                              onPressed: () {
+                                Navigator.of(context).pop(true);
+                              },
+                            ),
+                          ],
+                        ));
                   },
                   onDismissed: (direction) async {
                     if (!mounted) return;
@@ -188,7 +188,7 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
 //                  },
 //                ),
 //              )),
-            ),
+        ),
       ));
     }
     return widgets;
@@ -215,216 +215,217 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
         drawer: AppDrawer(),
         body: _isLoading
             ? Center(
-                child: CircularProgressIndicator(),
-              )
+          child: CircularProgressIndicator(),
+        )
             : SingleChildScrollView(
-                child: Column(
+          child: Column(
+            children: <Widget>[
+              Container(
+                height: 30.0,
+                color: Colors.grey[300],
+                child: Center(child: Text('Delivery date')),
+              ),
+              SizedBox(
+                height: 5.0,
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: 50.0,
+//                      padding: EdgeInsets.only(left: 5.0,right: 5.0),
+                child: Row(
                   children: <Widget>[
                     Container(
-                      height: 30.0,
-                      color: Colors.grey[300],
-                      child: Center(child: Text('Delivery date')),
-                    ),
-                    SizedBox(
-                      height: 5.0,
+                        height: 48.0,
+                        width: MediaQuery.of(context).size.width * 1/5,
+                        color: Theme.of(context).primaryColor,
+                        child:IconButton(
+                          icon:Icon(Icons.date_range),
+                          color: Colors.white,
+                          onPressed: (){
+
+                          },
+                        )
                     ),
                     Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: 50.0,
-//                      padding: EdgeInsets.only(left: 5.0,right: 5.0),
-                      child: Row(
-                        children: <Widget>[
-                          Container(
-                            height: 48.0,
-                              width: MediaQuery.of(context).size.width * 1/5,
-                            color: Theme.of(context).primaryColor,
-                            child:IconButton(
-                              icon:Icon(Icons.date_range),
-                              color: Colors.white,
-                              onPressed: (){
+                      width: MediaQuery.of(context).size.width * 4/5,
+                      child: DateTimeField(
+                        textAlign: TextAlign.start,
+                        format: format,
+                        onChanged: (dt) {
+                          setState(() {
+                            date = dt;
+                          });
+                        },
+                        decoration: InputDecoration(
 
-                              },
-                            )
-                          ),
-                          Container(
-                            width: MediaQuery.of(context).size.width * 4/5,
-                            child: DateTimeField(
-                              textAlign: TextAlign.start,
-                              format: format,
-                              onChanged: (dt) {
-                                setState(() {
-                                  date = dt;
-                                });
-                              },
-                              decoration: InputDecoration(
-
-                                  labelText: 'Select date',
+                            labelText: 'Select date',
 //                        prefixIcon: Icon(
 //                          Icons.date_range,
 //                          color: Theme.of(context).primaryColorDark,
 //                        ),
-                                  contentPadding:
-                                  EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+                            contentPadding:
+                            EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
 
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.horizontal(left: Radius.zero))
-                              ),
-                              onShowPicker: (context, currentValue) {
-                                return showDatePicker(
-                                    context: context,
-                                    firstDate: DateTime(1900),
-                                    initialDate: currentValue ?? DateTime.now(),
-                                    lastDate: DateTime(2100));
-                              },
-                            ),
-                          )
-                        ],
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.horizontal(left: Radius.zero))
+                        ),
+                        onShowPicker: (context, currentValue) {
+                          return showDatePicker(
+                              context: context,
+                              firstDate: DateTime(1900),
+                              initialDate: currentValue ?? DateTime.now(),
+                              lastDate: DateTime(2100));
+                        },
                       ),
-                    ),
+                    )
+                  ],
+                ),
+              ),
 
 
-                    SizedBox(
-                      height: 10.0,
+              SizedBox(
+                height: 10.0,
+              ),
+              Container(
+                height: 30.0,
+                color: Colors.grey[300],
+                child: Center(child: Text('Previous delivery addresses')),
+              ),
+              SizedBox(
+                height: 5.0,
+              ),
+              Consumer<ShippingAddress>(
+                  builder: (context, shippingData, child) => Container(
+                    height: 300.0,
+                    child: ListView(
+                      children: createRadioListUsers(
+                          shippingData.allShippingAddress),
                     ),
-                    Container(
-                      height: 30.0,
-                      color: Colors.grey[300],
-                      child: Center(child: Text('Previous delivery addresses')),
-                    ),
-                    SizedBox(
-                      height: 5.0,
-                    ),
-                    Consumer<ShippingAddress>(
-                        builder: (context, shippingData, child) => Container(
-                              height: 300.0,
-                              child: ListView(
-                                children: createRadioListUsers(
-                                    shippingData.allShippingAddress),
-                              ),
 //                          Consumer<ShippingAddress>(
 //                        builder: (context, shippingData, child) => ListView(
 //                          children: createRadioListUsers(
 //                              shippingData.allShippingAddress),
 //                        ),
 //                      ),
-                            )),
-                    SizedBox(
-                      height: 10.0,
-                    ),
-                    Container(
-                      height: 40.0,
-                      width: 150.0,
-                      child: RaisedButton(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25.0),
-                            side: BorderSide(color: Colors.grey)),
-                        onPressed: () {
-                          if(cart.items.length > 0) {
-                            showDialog(
-                                context: context,
-                                barrierDismissible: false,
-                                child: CreateShippingAddressDialog(cart: cart));
-                          }else{
-                            _scaffoldKey.currentState.showSnackBar(_snackBar('Please add item to cart'));
-                          }
-                        },
-                        color: Theme.of(context).primaryColor,
-                        textColor: Colors.white,
-                        child: Text("Add new address".toUpperCase(),
-                            style: TextStyle(fontSize: 14)),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 10.0,
-                    ),
-                    SizedBox(
-                      height: 20.0,
-                    ),
-                    Container(
-                      height: 40.0,
-                      width: 150.0,
-                      child: RaisedButton(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25.0),
-                            side: BorderSide(color: Colors.grey)),
-                        onPressed: () async {
-                          if (cart.items.length > 0) {
-                            FormData data = new FormData();
-                            List<Cart> ct = [];
-                            ct = cart.items.entries
-                                .map((e) => Cart(id: e.key, cartItem: e.value))
-                                .toList();
+                  )),
+              SizedBox(
+                height: 10.0,
+              ),
+              Container(
+                height: 40.0,
+                width: 150.0,
+                child: RaisedButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25.0),
+                      side: BorderSide(color: Colors.grey)),
+                  onPressed: () {
+                    if(cart.items.length > 0) {
+                      showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          child: CreateShippingAddressDialog(cart: cart));
+                    }else{
+                      _scaffoldKey.currentState.showSnackBar(_snackBar('Please add item to cart'));
+                    }
+                  },
+                  color: Theme.of(context).primaryColor,
+                  textColor: Colors.white,
+                  child: Text("Add new address".toUpperCase(),
+                      style: TextStyle(fontSize: 14)),
+                ),
+              ),
+              SizedBox(
+                height: 10.0,
+              ),
+              SizedBox(
+                height: 20.0,
+              ),
+              Container(
+                height: 40.0,
+                width: 150.0,
+                child: RaisedButton(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25.0),
+                      side: BorderSide(color: Colors.grey)),
+                  onPressed: () async {
+                    if (cart.items.length > 0) {
+                      FormData data = new FormData();
+                      List<Cart> ct = [];
+                      ct = cart.items
+                          .map((e) => Cart(id: e.id, cartItem: e))
+                          .toList();
 
-                            for (int i = 0; i < ct.length; i++) {
-                              data.add('product_id[$i]', ct[i].cartItem.id);
-                              data.add('quantity[$i]', ct[i].cartItem.quantity);
-                              data.add('unit_price[$i]', ct[i].cartItem.price);
-                              data.add('is_non_inventory[$i]',
-                                  ct[i].cartItem.isNonInventory);
-                              data.add('discount[$i]', ct[i].cartItem.discount);
-                            }
-                            data.add('customer_shipping_address_id',
-                                selectedAddressId);
-                            if (selectedAddressId != null) {
-                              setState(() {
-                                _isLoading = true;
-                              });
-                              final response = await Provider.of<Orders>(
-                                      context,
-                                      listen: false)
-                                  .addOrder(data);
-                              if (response != null) {
-                                setState(() {
-                                  _isLoading = false;
-                                });
-                                cart.clear();
+                      for (int i = 0; i < ct.length; i++) {
+                        data.add('product_id[$i]', ct[i].cartItem.productId);
+                        data.add('quantity[$i]', ct[i].cartItem.quantity);
+                        data.add('unit_price[$i]', ct[i].cartItem.price);
+                        data.add('is_non_inventory[$i]',
+                            ct[i].cartItem.isNonInventory);
+                        data.add('discount[$i]', ct[i].cartItem.discount);
+                      }
+                      data.add('customer_shipping_address_id',
+                          selectedAddressId);
+                      if (selectedAddressId != null) {
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        final response = await Provider.of<Orders>(
+                            context,
+                            listen: false)
+                            .addOrder(data);
+                        if (response != null) {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          await cart.clearCartTable();
 //                    _scaffoldKey.currentState.showSnackBar(_snackBar(response['msg']));
 //                    Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
-                                showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (ctx) => AlertDialog(
-                                          title: Text('Order confirmation'),
-                                          content: Text(response['msg']),
-                                          actions: <Widget>[
-                                            FlatButton(
-                                              child: Text('view order'),
-                                              onPressed: () {
-                                                Navigator.of(context).pushNamed(
-                                                    OrdersScreen.routeName);
-                                              },
-                                            ),
-                                            FlatButton(
-                                              child: Text('create another'),
-                                              onPressed: () {
-                                                Navigator.of(context).pushNamed(
-                                                    ProductsOverviewScreen
-                                                        .routeName);
-                                              },
-                                            )
-                                          ],
-                                        ));
-                              } else {
-                                _scaffoldKey.currentState.showSnackBar(
-                                    _snackBar(
-                                        'Something wrong!!! Please try again'));
-                              }
-                            } else {
-                              _scaffoldKey.currentState.showSnackBar(_snackBar(
-                                  'Please select a delivery address or create new one'));
-                            }
-                          }else{
-                            _scaffoldKey.currentState.showSnackBar(_snackBar('Please add item to cart'));
-                          }
-                        },
-                        color: Theme.of(context).primaryColor,
-                        textColor: Colors.white,
-                        child: Text("CONFIRM ORDER".toUpperCase(),
-                            style: TextStyle(fontSize: 14)),
-                      ),
-                    ),
-                  ],
+                          showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (ctx) => AlertDialog(
+                                title: Text('Order confirmation'),
+                                content: Text(response['msg']),
+                                actions: <Widget>[
+                                  FlatButton(
+                                    child: Text('view order'),
+                                    onPressed: () {
+                                      Navigator.of(context).pushNamed(
+                                          OrdersScreen.routeName);
+                                    },
+                                  ),
+                                  FlatButton(
+                                    child: Text('create another'),
+                                    onPressed: () {
+                                      Navigator.of(context).pushNamed(
+                                          ProductsOverviewScreen
+                                              .routeName);
+                                    },
+                                  )
+                                ],
+                              ));
+                        } else {
+                          _scaffoldKey.currentState.showSnackBar(
+                              _snackBar(
+                                  'Something wrong!!! Please try again'));
+                        }
+                      } else {
+                        _scaffoldKey.currentState.showSnackBar(_snackBar(
+                            'Please select a delivery address or create new one'));
+                      }
+                    }else{
+                      _scaffoldKey.currentState.showSnackBar(_snackBar('Please add item to cart'));
+                    }
+                  },
+                  color: Theme.of(context).primaryColor,
+                  textColor: Colors.white,
+                  child: Text("CONFIRM ORDER".toUpperCase(),
+                      style: TextStyle(fontSize: 14)),
                 ),
-              ));
+              ),
+            ],
+          ),
+        ));
   }
 }
+

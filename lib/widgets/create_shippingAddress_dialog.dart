@@ -120,81 +120,81 @@ class _CreateShippingAddressDialogState
     setState(() {
       _isLoading = true;
     });
-      FormData data = new FormData();
-      List<Cart> ct = [];
-      ct = widget.cart.items.entries
-          .map((e) => Cart(id: e.key, cartItem: e.value))
-          .toList();
+    FormData data = new FormData();
+    List<Cart> ct = [];
+    ct = widget.cart.items
+        .map((e) => Cart(id: e.id, cartItem: e))
+        .toList();
 
-      for (int i = 0; i < ct.length; i++) {
-        data.add('product_id[$i]', ct[i].cartItem.id);
-        data.add('quantity[$i]', ct[i].cartItem.quantity);
-        data.add('unit_price[$i]', ct[i].cartItem.price);
-        data.add('is_non_inventory[$i]',
-            ct[i].cartItem.isNonInventory);
-        data.add('discount[$i]', ct[i].cartItem.discount);
-      }
-      data.add('city',shippingAddress.selectedDistrict);
-      data.add('area_id', shippingAddress.selectedArea.toString());
-      data.add('shipping_address_line', homeAddress);
-      data.add('mobile_no', mobileNumber);
+    for (int i = 0; i < ct.length; i++) {
+      data.add('product_id[$i]', ct[i].cartItem.productId);
+      data.add('quantity[$i]', ct[i].cartItem.quantity);
+      data.add('unit_price[$i]', ct[i].cartItem.price);
+      data.add('is_non_inventory[$i]',
+          ct[i].cartItem.isNonInventory);
+      data.add('discount[$i]', ct[i].cartItem.discount);
+    }
+    data.add('city',shippingAddress.selectedDistrict);
+    data.add('area_id', shippingAddress.selectedArea.toString());
+    data.add('shipping_address_line', homeAddress);
+    data.add('mobile_no', mobileNumber);
 
-        setState(() {
-          _isLoading = true;
-        });
-        final response = await Provider.of<Orders>(context, listen: false).addOrder(data);
-        if (response != null) {
-          setState(() {
-            _isLoading = false;
-          });
-          widget.cart.clear();
-          shippingAddress.selectedDistrict = null;
-          shippingAddress.selectedArea = null;
-          showDialog(
+    setState(() {
+      _isLoading = true;
+    });
+    final response = await Provider.of<Orders>(context, listen: false).addOrder(data);
+    if (response != null) {
+      setState(() {
+        _isLoading = false;
+      });
+      widget.cart.clearCartTable();
+      shippingAddress.selectedDistrict = null;
+      shippingAddress.selectedArea = null;
+      showDialog(
 //            useRootNavigator: false,
-            barrierDismissible: false,
-              context: context,
-              builder: (ctx) => AlertDialog(
-                title: Text('Order confirmation'),
-                content: Text(response['msg']),
-                actions: <Widget>[
-                  FlatButton(
-                    child: Text('view order'),
-                    onPressed: () {
-                      Navigator.of(context).pushNamed(
-                          OrdersScreen.routeName);
-                    },
-                  ),
-                  FlatButton(
-                    child: Text('create another'),
-                    onPressed: () {
-                      Navigator.of(context).pushNamed(
-                          ProductsOverviewScreen
-                              .routeName);
-                    },
-                  )
-                ],
-              ));
-        } else {
-          showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (ctx) => AlertDialog(
-                title: Text('Order confirmation'),
-                content: Text(
-                    'something went wrong!!! Please try again'),
-                actions: <Widget>[
-                  FlatButton(
-                    child: Text('ok'),
-                    onPressed: () {
-                      Navigator.of(context).pushNamed(
-                          ProductsOverviewScreen
-                              .routeName);
-                    },
-                  ),
-                ],
-              ));
-        }
+          barrierDismissible: false,
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text('Order confirmation'),
+            content: Text(response['msg']),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('view order'),
+                onPressed: () {
+                  Navigator.of(context).pushNamed(
+                      OrdersScreen.routeName);
+                },
+              ),
+              FlatButton(
+                child: Text('create another'),
+                onPressed: () {
+                  Navigator.of(context).pushNamed(
+                      ProductsOverviewScreen
+                          .routeName);
+                },
+              )
+            ],
+          ));
+    } else {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => AlertDialog(
+            title: Text('Order confirmation'),
+            content: Text(
+                'something went wrong!!! Please try again'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('ok'),
+                onPressed: () {
+                  Navigator.of(context).pushNamed(
+                      ProductsOverviewScreen
+                          .routeName);
+                },
+              ),
+            ],
+          ));
+    }
   }
 
   Future<bool> _onBackPressed() {
@@ -590,10 +590,10 @@ class DistrictDropDown extends StatelessWidget {
     Map<String, dynamic> district = shippingAddress.allDistricts;
     return Consumer<ShippingAddress>(
       builder: (
-        final BuildContext context,
-        final ShippingAddress address,
-        final Widget child,
-      ) {
+          final BuildContext context,
+          final ShippingAddress address,
+          final Widget child,
+          ) {
         return Stack(
           children: <Widget>[
             Container(
@@ -664,10 +664,10 @@ class AreaDropDown extends StatelessWidget {
     Map<String, dynamic> areas = shippingAddress.allAreas;
     return Consumer<ShippingAddress>(
       builder: (
-        final BuildContext context,
-        final ShippingAddress address,
-        final Widget child,
-      ) {
+          final BuildContext context,
+          final ShippingAddress address,
+          final Widget child,
+          ) {
         return Stack(
           children: <Widget>[
             Container(
