@@ -102,7 +102,8 @@ class _AppDrawerState extends State<AppDrawer> {
             children: <Widget>[
               Container(
                 height: 250.0,
-                child: FutureBuilder(
+                child:
+                FutureBuilder(
                     future:
                         Provider.of<ProductCategories>(context, listen: false)
                             .fetchProductsCategory(),

@@ -230,9 +230,8 @@
 //                SizedBox(
 //                  height: 20,
 //                ),
-//                if (_isLoading)
-//                  CircularProgressIndicator()
-//                else
+//                _isLoading?
+//                  CircularProgressIndicator():
 //                  RaisedButton(
 //                    child:
 ////                    Text(_authMode == AuthMode.Login ? 'LOGIN' : 'GET OTP'),

@@ -1,3 +1,6 @@
+
+
+
 import 'dart:math';
 import 'package:shoptempdb/models/http_exception.dart';
 import 'package:flutter/material.dart';
@@ -72,13 +75,11 @@ class AuthCard extends StatefulWidget {
 
 class _AuthCardState extends BaseState<AuthCard> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  AuthMode _authMode = AuthMode.Signup;
   Map<String, String> _authData = {
     'mobile_no': '',
     'otp': '',
   };
   var _isLoading = false;
-  final _otpController = TextEditingController();
   final _phoneController = TextEditingController();
 
 
@@ -102,9 +103,9 @@ class _AuthCardState extends BaseState<AuthCard> {
             ));
   }
 
-  Future<void> _submit(AuthMode mode,Cart cart) async {
+  Future<void> _submit(Auth auth,Cart cart) async {
+
     if (!_formKey.currentState.validate()) {
-      // Invalid!
       return;
     }
     _formKey.currentState.save();
@@ -112,20 +113,12 @@ class _AuthCardState extends BaseState<AuthCard> {
       _isLoading = true;
     });
     try {
-      if (mode == AuthMode.Login) {
-        // Log user in
-        await Provider.of<Auth>(context, listen: false).login(_authData['mobile_no'], _authData['otp']);
-//        _switchAuthMode();
-        setState(() {
-          _authMode = AuthMode.Signup;
-        });
-        cart.items.length <= 0 ?
-        Navigator.of(context).pushReplacementNamed(ProductsOverviewScreen.routeName)
-        :Navigator.of(context).pushReplacementNamed(CartScreen.routeName);
-      } else {
-        // Sign user up
         await Provider.of<Auth>(context, listen: false).signUp(_authData['mobile_no']);
-      }
+        if(auth.otp != null)
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => VerifyPhone(phoneNumber: _phoneController.text,otp: auth.otp,)),
+        );
     } on HttpException catch (error) {
       var errorMessage = 'Authentication failed';
       if (error.toString().contains('EMAIL_EXISTS')) {
@@ -149,17 +142,6 @@ class _AuthCardState extends BaseState<AuthCard> {
     });
   }
 
-  void _switchAuthMode() {
-    if (_authMode == AuthMode.Login) {
-      setState(() {
-        _authMode = AuthMode.Signup;
-      });
-    } else {
-      setState(() {
-        _authMode = AuthMode.Login;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -174,8 +156,7 @@ class _AuthCardState extends BaseState<AuthCard> {
       ),
       elevation: 8.0,
       child: Container(
-        height: _authMode == AuthMode.Signup ? 200 : 250,
-//        constraints: BoxConstraints(minHeight: _authMode == AuthMode.Signup ? 150 : 200),
+        height: 180,
         width: deviceSize.width * 0.75,
         padding: EdgeInsets.all(16.0),
         child: Form(
@@ -183,14 +164,16 @@ class _AuthCardState extends BaseState<AuthCard> {
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
+                SizedBox(
+                  height: 10,
+                ),
                 TextFormField(
                   controller: _phoneController,
                   textAlign: TextAlign.center,
                   decoration: InputDecoration(
                     hintText: 'Phone number',
-//                    labelText: 'Phone number',
                   ),
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType: TextInputType.number,
 //                  validator: (value) {
 //                    if (value.isEmpty || !value.contains('@')) {
 //                      return 'Invalid email!';
@@ -200,59 +183,16 @@ class _AuthCardState extends BaseState<AuthCard> {
                     _authData['mobile_no'] = value;
                   },
                 ),
-                auth.otp != null
-                    ? TextFormField(
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    hintText: 'otp',
-//                    labelText: 'otp',
-                  ),
-                  obscureText: true,
-                  controller: _otpController,
-//                  validator: (value) {
-//                    if (value.isEmpty || value.length < 5) {
-//                      return 'Password is too short!';
-//                    }
-//                  },
-                  onSaved: (value) {
-                    _authData['otp'] = value;
-                  },
-                )
-                    : SizedBox(
-                  width: 0.0,
-                  height: 0.0,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-//                _authMode == AuthMode.Login? Text('otp'):SizedBox(height: 0.0,),
-                auth.otp != null
-                    ? Text(auth.otp)
-                    : SizedBox(
-                  height: 0.0,
-                ),
                 SizedBox(
                   height: 20,
                 ),
-                if (_isLoading)
-                  CircularProgressIndicator()
-                else
+                _isLoading?
+                  CircularProgressIndicator():
                   RaisedButton(
                     child:
-//                    Text(_authMode == AuthMode.Login ? 'LOGIN' : 'GET OTP'),
-                    Text(auth.otp != null ? 'LOGIN' : 'GET OTP'),
+                    Text('GET OTP'),
                     onPressed: () async{
-                      await _submit(AuthMode.Signup,cart);
-                      if(_phoneController.text.isNotEmpty)
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => VerifyPhone(phoneNumber: _phoneController.text)),
-                      );
-//                      _switchAuthMode();
-//                      FocusScope.of(context).requestFocus(new FocusNode());
-//                      auth.otp != null
-//                          ? _submit(AuthMode.Login,cart)
-//                          : _submit(AuthMode.Signup,cart);
+                      await _submit(auth,cart);
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
@@ -268,15 +208,6 @@ class _AuthCardState extends BaseState<AuthCard> {
                         .button
                         .color,
                   ),
-
-//                FlatButton(
-//                  child: Text(
-//                      '${_authMode == AuthMode.Login ? 'SIGNUP' : 'LOGIN'}'),
-//                  onPressed: _switchAuthMode,
-//                  padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 4),
-//                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-//                  textColor: Theme.of(context).primaryColor,
-//                ),
               ],
             ),
           ),

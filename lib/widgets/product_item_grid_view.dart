@@ -5,15 +5,18 @@ import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/product.dart';
 import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/screens/product_detail_screen.dart';
+import 'package:flushbar/flushbar.dart';
 
 class ProductItemGridView extends StatefulWidget {
+
+
   @override
-  _ProductItemGridView  createState() => _ProductItemGridView();
+  _ProductItemGridView createState() => _ProductItemGridView();
 }
 
-class _ProductItemGridView extends State<ProductItemGridView>{
-//  var _isInit = true;
-//  var _isLoading = false;
+class _ProductItemGridView extends State<ProductItemGridView> {
+  var _isInit = true;
+  var _isLoading = false;
 
 //  @override
 //  void didChangeDependencies(){
@@ -33,15 +36,43 @@ class _ProductItemGridView extends State<ProductItemGridView>{
 //    super.didChangeDependencies();
 //  }
 
+
+
+  Widget _showFlushbar(BuildContext context,Cart cart) {
+          Flushbar(
+          duration: Duration(seconds: 3),
+          margin: EdgeInsets.only(bottom: 50),
+          padding: EdgeInsets.all(10),
+          borderRadius: 8,
+          backgroundColor: cart.totalAmount > 500 ? Colors.green.shade400:Colors.red.shade300,
+//              backgroundGradient: LinearGradient(
+//              colors: [Colors.green.shade400, Colors.greenAccent.shade700],
+//              stops: [0.6, 1],
+//              ),
+          boxShadows: [
+            BoxShadow(
+              color: Colors.black45,
+              offset: Offset(3, 3),
+              blurRadius: 3,
+            ),
+          ],
+          dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+          forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+          title: cart.totalAmount > 500 ? 'Delivery charge free' : 'Delivery charge \n50 BDT',
+          message: cart.totalAmount > 500 ? ' ' : 'Shop more for free delivery charge.',
+        )..show(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
-    final cart = Provider.of<Cart>(context);
-    Map<String,dynamic> newCartItem = Map.fromIterable(cart.items, key: (v) => v.productId, value: (v) => v.quantity);
+    var cart = Provider.of<Cart>(context);
+    Map<String, dynamic> newCartItem = Map.fromIterable(cart.items,
+        key: (v) => v.productId, value: (v) => v.quantity);
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).pushNamed(ProductDetailScreen.routeName,
-            arguments: product.id);
+        Navigator.of(context)
+            .pushNamed(ProductDetailScreen.routeName, arguments: product.id);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -56,7 +87,6 @@ class _ProductItemGridView extends State<ProductItemGridView>{
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-
               Text(
                 product.title,
                 textAlign: TextAlign.left,
@@ -67,7 +97,6 @@ class _ProductItemGridView extends State<ProductItemGridView>{
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
@@ -93,26 +122,21 @@ class _ProductItemGridView extends State<ProductItemGridView>{
                   ),
                 ],
               ),
-
               SizedBox(
                 height: 8.0,
               ),
-
               Expanded(
                   child: Hero(
-                    tag: product.id,
-                    child: FadeInImage(
-                      image: NetworkImage(product.imageUrl),
-                      fit: BoxFit.cover,
-                      placeholder: AssetImage('assets/products.png'),
-                    ),
-                  )
-              ),
-
+                tag: product.id,
+                child: FadeInImage(
+                  image: NetworkImage(product.imageUrl),
+                  fit: BoxFit.cover,
+                  placeholder: AssetImage('assets/products.png'),
+                ),
+              )),
               SizedBox(
                 height: 8.0,
               ),
-
               Container(
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.1),
@@ -122,183 +146,214 @@ class _ProductItemGridView extends State<ProductItemGridView>{
                   ),
                   child: Padding(
                       padding: const EdgeInsets.all(4.0),
-                      child:
-                      newCartItem.keys.contains(product.id)?
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          InkWell(
-                            child: Icon(
-                              Icons.add,
-                              size: 16,
-                            ),
-                            onTap: (){
-                              cart.addItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-                              Scaffold.of(context).hideCurrentSnackBar();
-                              if(cart.items.length> 0)
-                                Scaffold.of(context).showSnackBar(SnackBar(
-                                  backgroundColor: cart.totalAmount > 500
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.red[300],
-                                  content: cart.totalAmount > 500
-                                      ? Container(
-                                      padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                                      child:Text('Delievry charge free'))
-                                      : Row(
-                                    children: <Widget>[
-                                      Container(
-                                          decoration: BoxDecoration(
-                                              border: Border(
-                                                  right: BorderSide(
-                                                      color: Colors.white,
-                                                      width: 1.0))),
-                                          width: MediaQuery.of(context).size.width *
-                                              1 /
-                                              7,
-                                          child: Text('Delivery charge \n50 BDT')),
-                                      SizedBox(
-                                        width: 5.0,
-                                      ),
-                                      Container(
-                                        width: MediaQuery.of(context).size.width *
-                                            4 /
-                                            7,
-                                        child: Text(
-                                            'Shop more for free delivery charge.'),
-                                      )
-                                    ],
+                      child: newCartItem.keys.contains(product.id)
+                          ? Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                InkWell(
+                                  child: Icon(
+                                    Icons.add,
+                                    size: 22,
                                   ),
-                                  duration: Duration(seconds: 2),
-                                ));
-                            },
-                          ),
-                          SizedBox(width: 10,),
-                          Container(
-//                          padding: EdgeInsets.only(top: 5),
-                            child: Text(cart.items.firstWhere((d) => d.productId == product.id).quantity.toString(),
-                                style: TextStyle(
-                                    fontSize: 15.0
-                                )),
-                          ),
-                          SizedBox(width: 10,),
-                          InkWell(
-                            child: Icon(
-                              Icons.remove,
-                              size: 16,
-                            ),
-                            onTap: () {
-                              cart.removeSingleItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-                              Scaffold.of(context).hideCurrentSnackBar();
-                              if(cart.items.length> 0)
-                                Scaffold.of(context).showSnackBar(SnackBar(
-                                  backgroundColor: cart.totalAmount > 500
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.red[300],
-                                  content: cart.totalAmount > 500
-                                      ? Container(
-                                      padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                                      child:Text('Delievry charge free'))
-                                      : Row(
-                                    children: <Widget>[
-                                      Container(
-                                          decoration: BoxDecoration(
-                                              border: Border(
-                                                  right: BorderSide(
-                                                      color: Colors.white,
-                                                      width: 1.0))),
-                                          width: MediaQuery.of(context).size.width *
-                                              1 /
-                                              7,
-                                          child: Text('Delivery charge \n50 BDT')),
-                                      SizedBox(
-                                        width: 5.0,
-                                      ),
-                                      Container(
-                                        width: MediaQuery.of(context).size.width *
-                                            4 /
-                                            7,
-                                        child: Text(
-                                            'Shop more for free delivery charge.'),
-                                      )
-                                    ],
-                                  ),
-                                  duration: Duration(seconds: 2),
-                                ));
-                            },
-                          )
-                        ],):
-                      InkWell(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text(
-                              "Add to cart",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                                  onTap: () async{
+                                    await cart.addItem(
+                                        product.id,
+                                        product.title,
+                                        product.price,
+                                        product.isNonInventory,
+                                        product.discount,
+                                        product.discountId,
+                                        product.discountType);
 
-                            SizedBox(
-                              width: 5.0,
-                            ),
+                                    Future.delayed(Duration(milliseconds: 200)).then((_) {
+                                      if(cart.items.length>0)
+                                        _showFlushbar(context,cart);
+                                    } );
 
-                            Icon(
-                              Icons.add_shopping_cart,
-                              color: Theme.of(context).accentColor,
-                              size: 16,
-                            )
 
-                          ],
-                        ),
-                        onTap: () {
-                          cart.addItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-//                            Scaffold.of(context).hideCurrentSnackBar();
-//                            if(cart.items.length> 0)
-//                              Scaffold.of(context).showSnackBar(SnackBar(
-//                                backgroundColor: cart.totalAmount > 500
-//                                    ? Theme.of(context).primaryColor
-//                                    : Colors.red[300],
-//                                content: cart.totalAmount > 500
-//                                    ? Container(
-//                                    padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-//                                    child:Text('Delievry charge free'))
-//                                    : Row(
-//                                  children: <Widget>[
-//                                    Container(
-//                                        decoration: BoxDecoration(
-//                                            border: Border(
-//                                                right: BorderSide(
-//                                                    color: Colors.white,
-//                                                    width: 1.0))),
-//                                        width: MediaQuery.of(context).size.width *
-//                                            1 /
+
+
+
+
+
+//                                      _showFlushbar(
+//                                        context
+//                                        cart.totalAmount > 500
+//                                            ? 'Delivery charge free'
+//                                            : 'Delivery charge \n50 BDT',
+//                                        cart.totalAmount > 500
+//                                            ? ' '
+//                                            : 'Shop more for free delivery charge.',
+//                                        cart.totalAmount > 500
+//                                            ? Colors.green.shade400
+//                                            : Colors.red.shade300,
+//                                      );
+
+
+
+//                              Scaffold.of(context).hideCurrentSnackBar();
+//                                Scaffold.of(context).showSnackBar(SnackBar(
+//                                  backgroundColor: cart.totalAmount > 500
+//                                      ? Theme
+//                                      .of(context)
+//                                      .primaryColor
+//                                      : Colors.red[300],
+//                                  content: cart.totalAmount > 500
+//                                      ? Container(
+//                                      padding: EdgeInsets.only(
+//                                          top: 5.0, bottom: 5.0),
+//                                      child: Text('Delievry charge free'))
+//                                      : Row(
+//                                    children: <Widget>[
+//                                      Container(
+//                                          decoration: BoxDecoration(
+//                                              border: Border(
+//                                                  right: BorderSide(
+//                                                      color: Colors.white,
+//                                                      width: 1.0))),
+//                                          width: MediaQuery
+//                                              .of(context)
+//                                              .size
+//                                              .width *
+//                                              1 /
+//                                              7,
+//                                          child: Text(
+//                                              'Delivery charge \n50 BDT')),
+//                                      SizedBox(
+//                                        width: 5.0,
+//                                      ),
+//                                      Container(
+//                                        width: MediaQuery
+//                                            .of(context)
+//                                            .size
+//                                            .width *
+//                                            4 /
 //                                            7,
-//                                        child: Text('Delivery charge \n50 BDT')),
-//                                    SizedBox(
-//                                      width: 5.0,
-//                                    ),
-//                                    Container(
-//                                      width: MediaQuery.of(context).size.width *
-//                                          4 /
-//                                          7,
-//                                      child: Text(
-//                                          'Shop more for free delivery charge.'),
-//                                    )
-//                                  ],
-//                                ),
-//                                duration: Duration(seconds: 2),
-//                              ));
-                        },
-                      )
+//                                        child: Text(
+//                                            'Shop more for free delivery charge.'),
+//                                      )
+//                                    ],
+//                                  ),
+//                                  duration: Duration(seconds: 2),
+//                                ));
+                                  },
+                                ),
+                                SizedBox(
+                                  width: 15,
+                                ),
+                                Container(
+//                          padding: EdgeInsets.only(top: 5),
+                                  child: Text(
+                                      cart.items
+                                          .firstWhere(
+                                              (d) => d.productId == product.id)
+                                          .quantity
+                                          .toString(),
+                                      style: TextStyle(fontSize: 20.0)),
+                                ),
+                                SizedBox(
+                                  width: 15,
+                                ),
+                                InkWell(
+                                  child: Icon(
+                                    Icons.remove,
+                                    size: 22,
+                                  ),
+                                  onTap: () async{
+                                    await cart.removeSingleItem(
+                                        product.id,
+                                        product.title,
+                                        product.price,
+                                        product.isNonInventory,
+                                        product.discount,
+                                        product.discountId,
+                                        product.discountType);
 
-                  )
-              )
+                                    Future.delayed(Duration(milliseconds: 200)).then((_) {
+                                      if(cart.items.length>0)
+                                        _showFlushbar(context,cart);
+                                    } );
 
+//                                    Scaffold.of(context).hideCurrentSnackBar();
+//                                Scaffold.of(context).showSnackBar(SnackBar(
+//                                  backgroundColor: cart.totalAmount > 500
+//                                      ? Theme.of(context).primaryColor
+//                                      : Colors.red[300],
+//                                  content: cart.totalAmount > 500
+//                                      ? Container(
+//                                      padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+//                                      child:Text('Delievry charge free'))
+//                                      : Row(
+//                                    children: <Widget>[
+//                                      Container(
+//                                          decoration: BoxDecoration(
+//                                              border: Border(
+//                                                  right: BorderSide(
+//                                                      color: Colors.white,
+//                                                      width: 1.0))),
+//                                          width: MediaQuery.of(context).size.width *
+//                                              1 /
+//                                              7,
+//                                          child: Text('Delivery charge \n50 BDT')),
+//                                      SizedBox(
+//                                        width: 5.0,
+//                                      ),
+//                                      Container(
+//                                        width: MediaQuery.of(context).size.width *
+//                                            4 /
+//                                            7,
+//                                        child: Text(
+//                                            'Shop more for free delivery charge.'),
+//                                      )
+//                                    ],
+//                                  ),
+//                                  duration: Duration(seconds: 2),
+//                                ));
+                                  },
+                                )
+                              ],
+                            )
+                          : InkWell(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Text(
+                                    "Add to cart",
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 5.0,
+                                  ),
+                                  Icon(
+                                    Icons.add_shopping_cart,
+                                    color: Theme.of(context).accentColor,
+                                    size: 22,
+                                  )
+                                ],
+                              ),
+                              onTap: () async{
+                                await cart.addItem(
+                                    product.id,
+                                    product.title,
+                                    product.price,
+                                    product.isNonInventory,
+                                    product.discount,
+                                    product.discountId,
+                                    product.discountType);
+
+                                    Future.delayed(Duration(milliseconds: 200)).then((_) {
+                                      if(cart.items.length>0)
+                                        _showFlushbar(context,cart);
+                                } );
+                              },
+                            )))
             ],
           ),
         ),

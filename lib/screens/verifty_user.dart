@@ -6,24 +6,39 @@ import 'package:shoptempdb/screens/cart_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 import 'package:shoptempdb/widgets/numeric_pad.dart';
 import 'package:shoptempdb/models/http_exception.dart';
-
-
+import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:flutter/gestures.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
 
 class VerifyPhone extends StatefulWidget {
 
   final String phoneNumber;
+  final String otp;
 
-  VerifyPhone({@required this.phoneNumber});
+  VerifyPhone({@required this.phoneNumber,@required this.otp});
 
   @override
   _VerifyPhoneState createState() => _VerifyPhoneState();
 }
 
 class _VerifyPhoneState extends State<VerifyPhone> {
-  final GlobalKey<FormState> _formKey = GlobalKey();
-
+  final GlobalKey<FormState> formKey = GlobalKey();
   String code = "";
   var _isLoading = false;
+
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  TextEditingController textEditingController = TextEditingController();
+  StreamController<ErrorAnimationType> errorController;
+  String currentText = "";
+  bool hasError = false;
+
+
+  @override
+  void initState() {
+    super.initState();
+    code = widget.otp;
+  }
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -45,14 +60,14 @@ class _VerifyPhoneState extends State<VerifyPhone> {
   }
 
   Future<void> _submit(Cart cart, var otp) async {
-//    if (!_formKey.currentState.validate()) {
-//      // Invalid!
-//      return;
-//    }
-//    _formKey.currentState.save();
-//    setState(() {
-//      _isLoading = true;
-//    });
+    if (!formKey.currentState.validate()) {
+      // Invalid!
+      return;
+    }
+    formKey.currentState.save();
+    setState(() {
+      _isLoading = true;
+    });
     try {
         await Provider.of<Auth>(context, listen: false).login(widget.phoneNumber, otp);
 
@@ -115,7 +130,7 @@ class _VerifyPhoneState extends State<VerifyPhone> {
       ),
       body: SafeArea(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
 
               Expanded(
@@ -136,22 +151,70 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                         ),
                       ),
 
-                      Expanded(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-
-                            buildCodeNumberBox(code.length > 0 ? code.substring(0, 1) : ""),
-                            buildCodeNumberBox(code.length > 1 ? code.substring(1, 2) : ""),
-                            buildCodeNumberBox(code.length > 2 ? code.substring(2, 3) : ""),
-                            buildCodeNumberBox(code.length > 3 ? code.substring(3, 4) : ""),
-                            buildCodeNumberBox(code.length > 4 ? code.substring(4, 5) : ""),
-                            buildCodeNumberBox(code.length > 5 ? code.substring(5, 6) : ""),
-
-                          ],
+                      Form(
+                        key: formKey,
+                        child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 30),
+                            child: PinCodeTextField(
+                              autoFocus: true,
+                              inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
+                              length: 6,
+                              obsecureText: false,
+                              animationType: AnimationType.fade,
+                              validator: (v) {
+                                if (v.length <5) {
+                                  return '*error';
+                                } else {
+                                  return null;
+                                }
+                              },
+                              pinTheme: PinTheme(
+                                inactiveFillColor: Colors.white,
+                                activeColor: Theme.of(context).primaryColor,
+                                selectedFillColor: Colors.grey[100],
+                                selectedColor: Theme.of(context).primaryColor,
+                                shape: PinCodeFieldShape.box,
+                                borderRadius: BorderRadius.circular(5),
+                                fieldHeight: 50,
+                                fieldWidth: 40,
+                                activeFillColor:
+                                hasError ? Colors.orange : Colors.white,
+                              ),
+                              animationDuration: Duration(milliseconds: 300),
+//                              backgroundColor: Colors.blue.shade50,
+                              enableActiveFill: true,
+                              errorAnimationController: errorController,
+                              controller: textEditingController,
+                              onCompleted: (v) {
+                                print("Completed");
+                              },
+                              onChanged: (value) {
+                                print(value);
+                                setState(() {
+                                  currentText = value;
+                                  print(currentText);
+                                });
+                              },
+                              beforeTextPaste: (text) {
+                                print("Allowing to paste $text");
+                                //if you return true then it will show the paste confirmation dialog. Otherwise if false, then nothing will happen.
+                                //but you can show anything you want here, like your pop up saying wrong paste format or etc
+                                return false;
+                              },
+                            )),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                        child: Text(
+                          hasError ? "*Please fill up all the cells properly" : "",
+                          style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400),
                         ),
                       ),
+
                       auth.otp != null
                           ? Text(auth.otp,style: TextStyle(fontSize: 10),)
                           : SizedBox(
@@ -178,8 +241,27 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                             ),
 
                             GestureDetector(
-                              onTap: () {
-                                print("Resend the code to the user");
+                              onTap: () async{
+                                try {
+                                  await Provider.of<Auth>(context, listen: false).signUp(widget.phoneNumber);
+                                } on HttpException catch (error) {
+                                  var errorMessage = 'Authentication failed';
+                                  if (error.toString().contains('EMAIL_EXISTS')) {
+                                    errorMessage = 'This email address is already in use.';
+                                  } else if (error.toString().contains('INVALID_EMAIL')) {
+                                    errorMessage = 'This is not a valid email address.';
+                                  } else if (error.toString().contains('WEAK_PASSWORD')) {
+                                    errorMessage = 'This password is too weak.';
+                                  } else if (error.toString().contains('EMAIL_NOT_FOUND')) {
+                                    errorMessage = 'Could not find a use with that email.';
+                                  } else if (error.toString().contains('INVALID_PASSWORD')) {
+                                    errorMessage = 'Invalid password.';
+                                  }
+                                  _showErrorDialog(errorMessage);
+                                } catch (error) {
+                                  const errorMessage = 'Could not authenticate you, please try again later';
+                                  _showErrorDialog(errorMessage);
+                                }
                               },
                               child: Text(
                                 "Request again",
@@ -213,7 +295,26 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-                            _submit(cart,auth.otp);
+//                            _submit(cart,auth.otp);
+                            formKey.currentState.validate();
+                            // conditions for validating
+                            if (currentText.length != 6) {
+//                              errorController.add(ErrorAnimationType.shake); // Triggering error shake animation
+                              setState(() {
+                                hasError = true;
+                              });
+                            } else {
+                              _submit(cart,currentText);
+//                              setState(() {
+//                                hasError = false;
+//                                scaffoldKey.currentState.showSnackBar(SnackBar(
+//                                  content: Text("Aye!!"),
+//                                  duration: Duration(seconds: 2),
+//                                ));
+//                              });
+                            }
+                            //                            _submit(cart,auth.otp);
+
                           },
                           child: Container(
                             decoration: BoxDecoration(
@@ -241,22 +342,22 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                 ),
               ),
 
-              NumericPad(
-                onNumberSelected: (value) {
-                  print(value);
-                  setState(() {
-                    if(value != -1){
-                      if(code.length < 6){
-                        code = code + value.toString();
-                      }
-                    }
-                    else{
-                      code = code.substring(0, code.length - 1);
-                    }
-                    print(code);
-                  });
-                },
-              ),
+//              NumericPad(
+//                onNumberSelected: (value) {
+//                  print(value);
+//                  setState(() {
+//                    if(value != -1){
+//                      if(code.length < 6){
+//                        code = code + value.toString();
+//                      }
+//                    }
+//                    else{
+//                      code = code.substring(0, code.length - 1);
+//                    }
+//                    print(code);
+//                  });
+//                },
+//              ),
 
             ],
           )
@@ -268,8 +369,8 @@ class _VerifyPhoneState extends State<VerifyPhone> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 8),
       child: SizedBox(
-        width: 50,
-        height: 50,
+        width: 45,
+        height: 45,
         child: Container(
           decoration: BoxDecoration(
             color: Color(0xFFF6F5FA),

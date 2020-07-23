@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/product.dart';
 import 'package:shoptempdb/screens/product_detail_screen.dart';
+import 'package:flushbar/flushbar.dart';
+
 
 class ProductItemListView extends StatefulWidget {
 
@@ -16,6 +18,30 @@ class ProductItemListView extends StatefulWidget {
 }
 class _ProductItemListViewState extends State<ProductItemListView>{
 
+  Widget _showFlushbar(BuildContext context,Cart cart) {
+    Flushbar(
+      duration: Duration(seconds: 3),
+      margin: EdgeInsets.only(bottom: 50),
+      padding: EdgeInsets.all(10),
+      borderRadius: 8,
+      backgroundColor: cart.totalAmount > 500 ? Colors.green.shade400:Colors.red.shade300,
+//              backgroundGradient: LinearGradient(
+//              colors: [Colors.green.shade400, Colors.greenAccent.shade700],
+//              stops: [0.6, 1],
+//              ),
+      boxShadows: [
+        BoxShadow(
+          color: Colors.black45,
+          offset: Offset(3, 3),
+          blurRadius: 3,
+        ),
+      ],
+      dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+      forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+      title: cart.totalAmount > 500 ? 'Delivery charge free' : 'Delivery charge \n50 BDT',
+      message: cart.totalAmount > 500 ? ' ' : 'Shop more for free delivery charge.',
+    )..show(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,42 +86,10 @@ class _ProductItemListViewState extends State<ProductItemListView>{
                   icon: Icon(Icons.add),
                   onPressed: (){
                     cart.addItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-                    Scaffold.of(context).hideCurrentSnackBar();
-                    if(cart.items.length> 0)
-                      Scaffold.of(context).showSnackBar(SnackBar(
-                        backgroundColor: cart.totalAmount > 500
-                            ? Theme.of(context).primaryColor
-                            : Colors.red[300],
-                        content: cart.totalAmount > 500
-                            ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                            child:Text('Delievry charge free'))
-                            : Row(
-                          children: <Widget>[
-                            Container(
-                                decoration: BoxDecoration(
-                                    border: Border(
-                                        right: BorderSide(
-                                            color: Colors.white,
-                                            width: 1.0))),
-                                width: MediaQuery.of(context).size.width *
-                                    1 /
-                                    7,
-                                child: Text('Delivery charge \n50 BDT')),
-                            SizedBox(
-                              width: 5.0,
-                            ),
-                            Container(
-                              width: MediaQuery.of(context).size.width *
-                                  4 /
-                                  7,
-                              child: Text(
-                                  'Shop more for free delivery charge.'),
-                            )
-                          ],
-                        ),
-                        duration: Duration(seconds: 2),
-                      )
-                      );
+                    Future.delayed(Duration(milliseconds: 200)).then((_) {
+                      if(cart.items.length>0)
+                        _showFlushbar(context,cart);
+                    } );
                   },
                 ),
                 Text(cart.items.firstWhere((d) => d.productId == product.id).quantity.toString(),style: TextStyle(fontSize: 20.0),),
@@ -103,41 +97,10 @@ class _ProductItemListViewState extends State<ProductItemListView>{
                   icon: Icon(Icons.remove),
                   onPressed: (){
                     cart.removeSingleItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-                    Scaffold.of(context).hideCurrentSnackBar();
-                    if(cart.items.length> 0)
-                      Scaffold.of(context).showSnackBar(SnackBar(
-                        backgroundColor: cart.totalAmount > 500
-                            ? Theme.of(context).primaryColor
-                            : Colors.red[300],
-                        content: cart.totalAmount > 500
-                            ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                            child:Text('Delievry charge free'))
-                            : Row(
-                          children: <Widget>[
-                            Container(
-                                decoration: BoxDecoration(
-                                    border: Border(
-                                        right: BorderSide(
-                                            color: Colors.white,
-                                            width: 1.0))),
-                                width: MediaQuery.of(context).size.width *
-                                    1 /
-                                    7,
-                                child: Text('Delivery charge \n50 BDT')),
-                            SizedBox(
-                              width: 5.0,
-                            ),
-                            Container(
-                              width: MediaQuery.of(context).size.width *
-                                  4 /
-                                  7,
-                              child: Text(
-                                  'Shop more for free delivery charge.'),
-                            )
-                          ],
-                        ),
-                        duration: Duration(seconds: 2),
-                      ));
+                    Future.delayed(Duration(milliseconds: 200)).then((_) {
+                      if(cart.items.length>0)
+                        _showFlushbar(context,cart);
+                    } );
                   },
                 ),
               ],
@@ -146,41 +109,10 @@ class _ProductItemListViewState extends State<ProductItemListView>{
               icon: Icon(Icons.shopping_cart),
               onPressed: () {
                 cart.addItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-                Scaffold.of(context).hideCurrentSnackBar();
-                if(cart.items.length> 0)
-                  Scaffold.of(context).showSnackBar(SnackBar(
-                    backgroundColor: cart.totalAmount > 500
-                        ? Theme.of(context).primaryColor
-                        : Colors.red[300],
-                    content: cart.totalAmount > 500
-                        ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                        child:Text('Delievry charge free'))
-                        : Row(
-                      children: <Widget>[
-                        Container(
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    right: BorderSide(
-                                        color: Colors.white,
-                                        width: 1.0))),
-                            width: MediaQuery.of(context).size.width *
-                                1 /
-                                7,
-                            child: Text('Delivery charge \n50 BDT')),
-                        SizedBox(
-                          width: 5.0,
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.width *
-                              4 /
-                              7,
-                          child: Text(
-                              'Shop more for free delivery charge.'),
-                        )
-                      ],
-                    ),
-                    duration: Duration(seconds: 2),
-                  ));
+                Future.delayed(Duration(milliseconds: 200)).then((_) {
+                  if(cart.items.length>0)
+                    _showFlushbar(context,cart);
+                } );
               },
             ),
           ),

@@ -15,6 +15,7 @@ import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:intl/intl.dart';
 import 'package:shoptempdb/widgets/update_shippingAddress_dialog.dart';
 //import 'package:shoptempdb/widgets/update_shippingAddress_dialog_test.dart';
+import 'package:flushbar/flushbar.dart';
 
 import '../base_state.dart';
 
@@ -33,6 +34,13 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
   final format = DateFormat('yyyy-MM-dd');
   var _isInit = true;
   var _isLoading = false;
+//  FormData data;
+
+//  @override
+//  void initState() {
+//    super.initState();
+//    data = FormData();
+//  }
 
   @override
   void didChangeDependencies() {
@@ -348,66 +356,111 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
                       borderRadius: BorderRadius.circular(25.0),
                       side: BorderSide(color: Colors.grey)),
                   onPressed: () async {
+                    FocusScope.of(context).requestFocus(new FocusNode());
                     if (cart.items.length > 0) {
-                      FormData data = new FormData();
                       List<Cart> ct = [];
                       ct = cart.items
                           .map((e) => Cart(id: e.id, cartItem: e))
                           .toList();
-
+                      Map<String,dynamic>  data = Map();
                       for (int i = 0; i < ct.length; i++) {
-                        data.add('product_id[$i]', ct[i].cartItem.productId);
-                        data.add('quantity[$i]', ct[i].cartItem.quantity);
-                        data.add('unit_price[$i]', ct[i].cartItem.price);
-                        data.add('is_non_inventory[$i]',
-                            ct[i].cartItem.isNonInventory);
-                        data.add('discount[$i]', ct[i].cartItem.discount);
+                        data.putIfAbsent('product_id[$i]', () => ct[i].cartItem.productId);
+                        data.putIfAbsent('quantity[$i]', () =>ct[i].cartItem.quantity);
+                        data.putIfAbsent('unit_price[$i]', () =>ct[i].cartItem.price);
+                        data.putIfAbsent('is_non_inventory[$i]', () =>ct[i].cartItem.isNonInventory);
+                        data.putIfAbsent('discount[$i]', () =>ct[i].cartItem.discount);
                       }
-                      data.add('customer_shipping_address_id',
-                          selectedAddressId);
-                      if (selectedAddressId != null) {
+                      data.putIfAbsent('customer_shipping_address_id', () =>selectedAddressId);
+                    FormData formData = FormData.fromMap(data);
+
+                    if (selectedAddressId != null) {
                         setState(() {
                           _isLoading = true;
                         });
                         final response = await Provider.of<Orders>(
                             context,
                             listen: false)
-                            .addOrder(data);
+                            .addOrder(formData);
                         if (response != null) {
                           setState(() {
                             _isLoading = false;
                           });
                           await cart.clearCartTable();
-//                    _scaffoldKey.currentState.showSnackBar(_snackBar(response['msg']));
-//                    Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
-                          showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (ctx) => AlertDialog(
-                                title: Text('Order confirmation'),
-                                content: Text(response['msg']),
-                                actions: <Widget>[
-                                  FlatButton(
-                                    child: Text('view order'),
-                                    onPressed: () {
-                                      Navigator.of(context).pushNamed(
-                                          OrdersScreen.routeName);
-                                    },
-                                  ),
-                                  FlatButton(
-                                    child: Text('create another'),
-                                    onPressed: () {
-                                      Navigator.of(context).pushNamed(
-                                          ProductsOverviewScreen
-                                              .routeName);
-                                    },
-                                  )
-                                ],
-                              ));
+                          Navigator.of(context).pushNamed(
+                              ProductsOverviewScreen
+                                  .routeName);
+                          Flushbar(
+                            duration: Duration(seconds: 10),
+                            margin: EdgeInsets.only(bottom: 2),
+                            padding: EdgeInsets.all(10),
+                            borderRadius: 8,
+                            backgroundColor: Colors.green.shade400,
+                            boxShadows: [
+                              BoxShadow(
+                                color: Colors.black45,
+                                offset: Offset(3, 3),
+                                blurRadius: 3,
+                              ),
+                            ],
+                            // All of the previous Flushbars could be dismissed by swiping down
+                            // now we want to swipe to the sides
+                            dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+                            // The default curve is Curves.easeOut
+                            forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+                            title: 'Order confirmation',
+                            message: response['msg'],
+                            mainButton: FlatButton(
+                              child: Text('view order'),
+                              onPressed: () {
+                                Navigator.of(context).pushNamed(
+                                    OrdersScreen.routeName);
+                              },
+                            ),
+
+                          )..show(context);
+//                          showDialog(
+//                              context: context,
+//                              barrierDismissible: false,
+//                              builder: (ctx) => AlertDialog(
+//                                title: Text('Order confirmation'),
+//                                content: Text(response['msg']),
+//                                actions: <Widget>[
+//                                  FlatButton(
+//                                    child: Text('view order'),
+//                                    onPressed: () {
+//                                      Navigator.of(context).pushNamed(
+//                                          OrdersScreen.routeName);
+//                                    },
+//                                  ),
+//                                  FlatButton(
+//                                    child: Text('create another'),
+//                                    onPressed: () {
+//                                      Navigator.of(context).pushNamed(
+//                                          ProductsOverviewScreen
+//                                              .routeName);
+//                                    },
+//                                  )
+//                                ],
+//                              ));
                         } else {
-                          _scaffoldKey.currentState.showSnackBar(
-                              _snackBar(
-                                  'Something wrong!!! Please try again'));
+                          Flushbar(
+                            duration: Duration(seconds: 5),
+                            margin: EdgeInsets.only(bottom: 2),
+                            padding: EdgeInsets.all(10),
+                            borderRadius: 8,
+                            backgroundColor: Colors.red.shade400,
+                            boxShadows: [
+                              BoxShadow(
+                                color: Colors.black45,
+                                offset: Offset(3, 3),
+                                blurRadius: 3,
+                              ),
+                            ],
+                            dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+                            forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+                            title: 'Order confirmation',
+                            message: 'Something wrong. Please try again',
+                          )..show(context);
                         }
                       } else {
                         _scaffoldKey.currentState.showSnackBar(_snackBar(

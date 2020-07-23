@@ -347,11 +347,21 @@ class _UpdateShippingAddressDialogState
     setState(() {
       _isLoading = true;
     });
-    FormData data = new FormData();
-    data.add('city',shippingAddress.selectedDistrict);
-    data.add('area_id', shippingAddress.selectedArea.toString());
-    data.add('shipping_address_line', homeAddress);
-    data.add('mobile_no', mobileNumber);
+//    FormData data = new FormData();
+//    data.add('city',shippingAddress.selectedDistrict);
+//    data.add('area_id', shippingAddress.selectedArea.toString());
+//    data.add('shipping_address_line', homeAddress);
+//    data.add('mobile_no', mobileNumber);
+
+    //    FormData data = new FormData();
+
+
+    Map<String,dynamic> dt = Map();
+    dt.putIfAbsent('city',() =>shippingAddress.selectedDistrict);
+    dt.putIfAbsent('area_id', () =>shippingAddress.selectedArea.toString());
+    dt.putIfAbsent('shipping_address_line', () =>homeAddress);
+    dt.putIfAbsent('mobile_no', () => mobileNumber);
+    FormData data = FormData.fromMap(dt);
 
     setState(() {
       _isLoading = true;

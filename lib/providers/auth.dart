@@ -92,8 +92,8 @@ class Auth with ChangeNotifier {
       );
       responseData = json.decode(response.body);
 
-      if (responseData['error'] != null) {
-        throw HttpException(responseData['error']['message']);
+      if (response.statusCode != 200) {
+        throw HttpException(responseData['msg']);
       }
       _token = responseData['data']['access_token'];
       _userId = phoneNumber;

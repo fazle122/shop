@@ -84,13 +84,13 @@ class Cart with ChangeNotifier {
   List<CartItem> _items = [];
 
 
+
   List<CartItem> get items {
     return [..._items];
   }
 
   int get itemCount{
     return _items.length;
-    notifyListeners();
   }
 
   double get totalAmount{
@@ -99,6 +99,7 @@ class Cart with ChangeNotifier {
       total += item.price.toDouble() * item.quantity;
     });
     return total;
+//    notifyListeners();
   }
 
   CartItem findById(String id) {
@@ -141,7 +142,7 @@ class Cart with ChangeNotifier {
 //    notifyListeners();
 
     if(!item) {
-      DBHelper.insert('cartTable', {
+      await DBHelper.insert('cartTable', {
 //      'id': newPlace.id,
         'productId': newCartItem.productId,
         'title': newCartItem.title,
@@ -153,7 +154,7 @@ class Cart with ChangeNotifier {
         'discountId': newCartItem.discountId,
       });
     }else{
-      DBHelper.increaseItemQuantity('cartTable', {
+      await DBHelper.increaseItemQuantity('cartTable', {
 //      'id': newPlace.id,
         'productId': newCartItem.productId,
         'title': newCartItem.title,
@@ -171,22 +172,22 @@ class Cart with ChangeNotifier {
 
   }
 
-  void removeSingleItem(String productId, String title, double price,int isNonInventory,double discount,String discountId,String discountType) async{
+  Future<void> removeSingleItem(String productId, String title, double price,int isNonInventory,double discount,String discountId,String discountType) async{
 
     CartItem cartData= await DBHelper.getSingleData(productId);
 
     if(cartData.quantity == 1) {
-      DBHelper.deleteCartItm(productId);
+      await DBHelper.deleteCartItm(productId);
     }else{
-      DBHelper.decreaseItemQuantity(productId);
+      await DBHelper.decreaseItemQuantity(productId);
     }
 //    notifyListeners();
 
     fetchAndSetCartItems();
   }
 
-  void removeCartItemRow(String productId) async{
-    DBHelper.deleteCartItm(productId);
+  Future<void> removeCartItemRow(String productId) async{
+    await DBHelper.deleteCartItm(productId);
 //    notifyListeners();
 
     fetchAndSetCartItems();
