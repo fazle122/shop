@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/cart.dart';
+import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/providers/product.dart';
 import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/screens/product_detail_screen.dart';
@@ -61,6 +62,48 @@ class _ProductItemGridView extends State<ProductItemGridView> {
           title: cart.totalAmount > 500 ? 'Delivery charge free' : 'Delivery charge \n50 BDT',
           message: cart.totalAmount > 500 ? ' ' : 'Shop more for free delivery charge.',
         )..show(context);
+  }
+
+  // getDeliveryCharge(Cart cart,double totalAmount) async{
+  //   List deliveryChargeMatrix = [];
+  //   await Provider.of<Orders>(context,listen: false).fetchDeliveryCharMatrix().then((data){
+  //     deliveryChargeMatrix = data['range'];
+  //     for(int i=0;i<deliveryChargeMatrix.length;i++){
+  //       if(i ==0 && totalAmount<=deliveryChargeMatrix[i]['max']){
+  //         setState(() {
+  //           cart.deliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+  //         });
+  //       }else if( i>0 && totalAmount >= deliveryChargeMatrix[i]['min']){
+  //         setState(() {
+  //           cart.deliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+  //         });
+  //       }
+  //     }
+  //   });
+  // }
+
+  getDeliveryCharge(Cart cart,double totalAmount) async{
+    List deliveryChargeMatrix = [];
+    await Provider.of<Products>(context,listen: false).fetchDeliveryCharMatrix().then((data){
+      deliveryChargeMatrix = data['range'];
+      for(int i=0;i<deliveryChargeMatrix.length;i++){
+        if(i == 0 && totalAmount<=deliveryChargeMatrix[i]['max']){
+          setState(() {
+            cart.deliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+          });
+        }else if( i>0 && totalAmount >= deliveryChargeMatrix[i]['min']){
+          setState(() {
+            cart.deliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+
+          });
+        }else if( i>0){
+          setState(() {
+            cart.maxDeliveryRange = deliveryChargeMatrix[i]['min'].toDouble();
+            // cart.minDeliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+          });
+        }
+      }
+    });
   }
 
   @override
@@ -166,78 +209,45 @@ class _ProductItemGridView extends State<ProductItemGridView> {
                                         product.discount,
                                         product.discountId,
                                         product.discountType);
+                                    Future.delayed(const Duration(milliseconds: 500), () async{
+                                    await getDeliveryCharge(cart,cart.totalAmount);
 
-                                    Future.delayed(Duration(milliseconds: 200)).then((_) {
-                                      if(cart.items.length>0)
-                                        _showFlushbar(context,cart);
-                                    } );
+                                    Scaffold.of(context).showSnackBar(SnackBar(
+                                      backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
+                                      content: cart.totalAmount > cart.maxDeliveryRange
+                                          ? Container(
+                                          padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                                          child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT')
+                                      )
+                                          : Row(
+                                        children: <Widget>[
+                                          // Container(
+                                          //     decoration: BoxDecoration(
+                                          //         border: Border(
+                                          //             right: BorderSide(
+                                          //                 color: Colors.white,
+                                          //                 width: 1.0))),
+                                          //     width: MediaQuery.of(context).size.width * 1 / 7,
+                                          //     child: Text(cart.deliveryCharge.toString())),
+                                          SizedBox(
+                                            width: 5.0,
+                                          ),
+                                          Container(
+                                            width: MediaQuery.of(context).size.width * 4 / 7,
+                                            child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
+                                          )
+                                        ],
+                                      ),
+                                      duration: Duration(seconds: 2),
+                                    ));
+                                    });
 
 
+                                    // Future.delayed(Duration(milliseconds: 200)).then((_) {
+                                      // if(cart.items.length>0)
+                                      //   _showFlushbar(context,cart);
+                                    // });
 
-
-
-
-
-//                                      _showFlushbar(
-//                                        context
-//                                        cart.totalAmount > 500
-//                                            ? 'Delivery charge free'
-//                                            : 'Delivery charge \n50 BDT',
-//                                        cart.totalAmount > 500
-//                                            ? ' '
-//                                            : 'Shop more for free delivery charge.',
-//                                        cart.totalAmount > 500
-//                                            ? Colors.green.shade400
-//                                            : Colors.red.shade300,
-//                                      );
-
-
-
-//                              Scaffold.of(context).hideCurrentSnackBar();
-//                                Scaffold.of(context).showSnackBar(SnackBar(
-//                                  backgroundColor: cart.totalAmount > 500
-//                                      ? Theme
-//                                      .of(context)
-//                                      .primaryColor
-//                                      : Colors.red[300],
-//                                  content: cart.totalAmount > 500
-//                                      ? Container(
-//                                      padding: EdgeInsets.only(
-//                                          top: 5.0, bottom: 5.0),
-//                                      child: Text('Delievry charge free'))
-//                                      : Row(
-//                                    children: <Widget>[
-//                                      Container(
-//                                          decoration: BoxDecoration(
-//                                              border: Border(
-//                                                  right: BorderSide(
-//                                                      color: Colors.white,
-//                                                      width: 1.0))),
-//                                          width: MediaQuery
-//                                              .of(context)
-//                                              .size
-//                                              .width *
-//                                              1 /
-//                                              7,
-//                                          child: Text(
-//                                              'Delivery charge \n50 BDT')),
-//                                      SizedBox(
-//                                        width: 5.0,
-//                                      ),
-//                                      Container(
-//                                        width: MediaQuery
-//                                            .of(context)
-//                                            .size
-//                                            .width *
-//                                            4 /
-//                                            7,
-//                                        child: Text(
-//                                            'Shop more for free delivery charge.'),
-//                                      )
-//                                    ],
-//                                  ),
-//                                  duration: Duration(seconds: 2),
-//                                ));
                                   },
                                 ),
                                 SizedBox(
@@ -262,55 +272,44 @@ class _ProductItemGridView extends State<ProductItemGridView> {
                                     size: 22,
                                   ),
                                   onTap: () async{
-                                    await cart.removeSingleItem(
-                                        product.id,
-                                        product.title,
-                                        product.price,
-                                        product.isNonInventory,
-                                        product.discount,
-                                        product.discountId,
-                                        product.discountType);
+                                    await cart.removeSingleItem(product.id);
+                                    Future.delayed(const Duration(milliseconds: 500), () async{
+                                    await getDeliveryCharge(cart,cart.totalAmount);
 
-                                    Future.delayed(Duration(milliseconds: 200)).then((_) {
-                                      if(cart.items.length>0)
-                                        _showFlushbar(context,cart);
-                                    } );
+                                    Scaffold.of(context).showSnackBar(SnackBar(
+                                      backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
+                                      content: cart.totalAmount > cart.maxDeliveryRange
+                                          ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                                          child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT'))
+                                          : Row(
+                                        children: <Widget>[
+                                          // Container(
+                                          //     decoration: BoxDecoration(
+                                          //         border: Border(
+                                          //             right: BorderSide(
+                                          //                 color: Colors.white,
+                                          //                 width: 1.0))),
+                                          //     width: MediaQuery.of(context).size.width * 1 / 7,
+                                          //     child: Text(cart.minDeliveryCharge.toString())),
+                                          SizedBox(
+                                            width: 5.0,
+                                          ),
+                                          Container(
+                                            width: MediaQuery.of(context).size.width * 4 / 7,
+                                            child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
+                                          )
+                                        ],
+                                      ),
+                                      duration: Duration(seconds: 2),
+                                    ));
+                                    });
 
-//                                    Scaffold.of(context).hideCurrentSnackBar();
-//                                Scaffold.of(context).showSnackBar(SnackBar(
-//                                  backgroundColor: cart.totalAmount > 500
-//                                      ? Theme.of(context).primaryColor
-//                                      : Colors.red[300],
-//                                  content: cart.totalAmount > 500
-//                                      ? Container(
-//                                      padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-//                                      child:Text('Delievry charge free'))
-//                                      : Row(
-//                                    children: <Widget>[
-//                                      Container(
-//                                          decoration: BoxDecoration(
-//                                              border: Border(
-//                                                  right: BorderSide(
-//                                                      color: Colors.white,
-//                                                      width: 1.0))),
-//                                          width: MediaQuery.of(context).size.width *
-//                                              1 /
-//                                              7,
-//                                          child: Text('Delivery charge \n50 BDT')),
-//                                      SizedBox(
-//                                        width: 5.0,
-//                                      ),
-//                                      Container(
-//                                        width: MediaQuery.of(context).size.width *
-//                                            4 /
-//                                            7,
-//                                        child: Text(
-//                                            'Shop more for free delivery charge.'),
-//                                      )
-//                                    ],
-//                                  ),
-//                                  duration: Duration(seconds: 2),
-//                                ));
+
+                                    // Future.delayed(Duration(milliseconds: 200)).then((_) {
+                                      // if(cart.items.length>0)
+                                      //   _showFlushbar(context,cart);
+                                    // });
+
                                   },
                                 )
                               ],
@@ -347,11 +346,39 @@ class _ProductItemGridView extends State<ProductItemGridView> {
                                     product.discount,
                                     product.discountId,
                                     product.discountType);
+                                Future.delayed(const Duration(milliseconds: 500), () async{
+                                  await getDeliveryCharge(cart,cart.totalAmount);
 
-                                    Future.delayed(Duration(milliseconds: 200)).then((_) {
-                                      if(cart.items.length>0)
-                                        _showFlushbar(context,cart);
-                                } );
+                                  Scaffold.of(context).showSnackBar(SnackBar(
+                                    backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
+                                    content: cart.totalAmount > cart.maxDeliveryRange
+                                        ? Container(
+                                        padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                                        child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT')
+                                    )
+                                        : Row(
+                                      children: <Widget>[
+                                        // Container(
+                                        //     decoration: BoxDecoration(
+                                        //         border: Border(
+                                        //             right: BorderSide(
+                                        //                 color: Colors.white,
+                                        //                 width: 1.0))),
+                                        //     width: MediaQuery.of(context).size.width * 1 / 7,
+                                        //     child: Text(cart.deliveryCharge.toString())),
+                                        SizedBox(
+                                          width: 5.0,
+                                        ),
+                                        Container(
+                                          width: MediaQuery.of(context).size.width * 4 / 7,
+                                          child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
+                                        )
+                                      ],
+                                    ),
+                                    duration: Duration(seconds: 2),
+                                  ));
+                                });
+
                               },
                             )))
             ],
@@ -360,520 +387,4 @@ class _ProductItemGridView extends State<ProductItemGridView> {
       ),
     );
   }
-
-//    return ClipRRect(
-//        borderRadius: BorderRadius.circular(10),
-//        child: GridTile(
-//          child: GestureDetector(
-//              onTap: () {
-//                Navigator.of(context).pushNamed(ProductDetailScreen.routeName,
-//                    arguments: product.id);
-//              },
-//              child: Hero(
-//                tag: product.id,
-//                child: FadeInImage(
-//                  image: NetworkImage(product.imageUrl),
-//                  fit: BoxFit.cover,
-//                  placeholder: AssetImage('assets/products.png'),
-//                ),
-//              )),
-//          footer: Container(
-//            height: 80,
-//            color: Colors.black54,
-//            child:
-//            Column(
-//              mainAxisAlignment: MainAxisAlignment.center,
-//              crossAxisAlignment: CrossAxisAlignment.center,
-//              children: <Widget>[
-//
-//               Flexible(child: Container(
-//                 padding: EdgeInsets.all(5.0),
-//                 child: Text(product.title,overflow: TextOverflow.ellipsis,style: TextStyle(fontSize: 15.0,color: Colors.white),),
-//               ),),
-//
-//                Container(
-//                  child:Text(
-//                    'BDT ' + product.price.toString() + '/' + product.unit,
-//                    textAlign: TextAlign.start,
-//                    style: TextStyle(fontSize: 12.0,color: Colors.white),
-//                  ),
-//                ),
-//                    Container(height: 30,
-//                    padding: EdgeInsets.only(bottom: 5),
-//                    child:newCartItem.keys.contains(product.id)?
-//                    Row(
-//                      mainAxisSize: MainAxisSize.min,
-//                      children: <Widget>[
-//                        IconButton(
-//                          icon: Icon(Icons.add,color: Colors.white,),
-//                          onPressed: (){
-//                            cart.addItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-//                            Scaffold.of(context).hideCurrentSnackBar();
-//                            if(cart.items.length> 0)
-//                              Scaffold.of(context).showSnackBar(SnackBar(
-//                                backgroundColor: cart.totalAmount > 500
-//                                    ? Theme.of(context).primaryColor
-//                                    : Colors.red[300],
-//                                content: cart.totalAmount > 500
-//                                    ? Container(
-//                                    padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-//                                    child:Text('Delievry charge free'))
-//                                    : Row(
-//                                  children: <Widget>[
-//                                    Container(
-//                                        decoration: BoxDecoration(
-//                                            border: Border(
-//                                                right: BorderSide(
-//                                                    color: Colors.white,
-//                                                    width: 1.0))),
-//                                        width: MediaQuery.of(context).size.width *
-//                                            1 /
-//                                            7,
-//                                        child: Text('Delivery charge \n50 BDT')),
-//                                    SizedBox(
-//                                      width: 5.0,
-//                                    ),
-//                                    Container(
-//                                      width: MediaQuery.of(context).size.width *
-//                                          4 /
-//                                          7,
-//                                      child: Text(
-//                                          'Shop more for free delivery charge.'),
-//                                    )
-//                                  ],
-//                                ),
-//                                duration: Duration(seconds: 2),
-//                              ));
-//                          },
-//                        ),
-//
-//                        Container(
-//                          padding: EdgeInsets.only(top: 7),
-//                          child: Text(cart.items.firstWhere((d) => d.productId == product.id).quantity.toString(),
-//                              style: TextStyle(
-//                                fontSize: 20.0,color: Colors.white
-//                              )),
-//                        ),
-//
-//                        IconButton(
-//                          icon: Icon(Icons.remove,color: Colors.white,),
-//                          onPressed: () {
-//                            cart.removeSingleItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-//                            Scaffold.of(context).hideCurrentSnackBar();
-//                            if(cart.items.length> 0)
-//                              Scaffold.of(context).showSnackBar(SnackBar(
-//                                backgroundColor: cart.totalAmount > 500
-//                                    ? Theme.of(context).primaryColor
-//                                    : Colors.red[300],
-//                                content: cart.totalAmount > 500
-//                                    ? Container(
-//                                    padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-//                                    child:Text('Delievry charge free'))
-//                                    : Row(
-//                                  children: <Widget>[
-//                                    Container(
-//                                        decoration: BoxDecoration(
-//                                            border: Border(
-//                                                right: BorderSide(
-//                                                    color: Colors.white,
-//                                                    width: 1.0))),
-//                                        width: MediaQuery.of(context).size.width *
-//                                            1 /
-//                                            7,
-//                                        child: Text('Delivery charge \n50 BDT')),
-//                                    SizedBox(
-//                                      width: 5.0,
-//                                    ),
-//                                    Container(
-//                                      width: MediaQuery.of(context).size.width *
-//                                          4 /
-//                                          7,
-//                                      child: Text(
-//                                          'Shop more for free delivery charge.'),
-//                                    )
-//                                  ],
-//                                ),
-//                                duration: Duration(seconds: 2),
-//                              ));
-//                          },
-//                        ),
-//                      ],):
-//                    Container(
-////                  padding: EdgeInsets.only(bottom: 5),
-//                      height: 40,
-//                      child: IconButton(
-//                        color: Theme.of(context).accentColor,
-//                        icon: Icon(Icons.shopping_cart),
-//                        onPressed: () {
-//                          cart.addItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-//                          Scaffold.of(context).hideCurrentSnackBar();
-//                          if(cart.items.length> 0)
-//                            Scaffold.of(context).showSnackBar(SnackBar(
-//                              backgroundColor: cart.totalAmount > 500
-//                                  ? Theme.of(context).primaryColor
-//                                  : Colors.red[300],
-//                              content: cart.totalAmount > 500
-//                                  ? Container(
-//                                  padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-//                                  child:Text('Delievry charge free'))
-//                                  : Row(
-//                                children: <Widget>[
-//                                  Container(
-//                                      decoration: BoxDecoration(
-//                                          border: Border(
-//                                              right: BorderSide(
-//                                                  color: Colors.white,
-//                                                  width: 1.0))),
-//                                      width: MediaQuery.of(context).size.width *
-//                                          1 /
-//                                          7,
-//                                      child: Text('Delivery charge \n50 BDT')),
-//                                  SizedBox(
-//                                    width: 5.0,
-//                                  ),
-//                                  Container(
-//                                    width: MediaQuery.of(context).size.width *
-//                                        4 /
-//                                        7,
-//                                    child: Text(
-//                                        'Shop more for free delivery charge.'),
-//                                  )
-//                                ],
-//                              ),
-//                              duration: Duration(seconds: 2),
-////              action: SnackBarAction(
-////                label: 'undo',
-////                onPressed: (){
-////                  cart.removeSingleItem(product.id);
-////                },
-////              ),
-//                            ));
-//                        },
-//                      ),
-//                    ))
-//                ,
-//
-//              ],
-//            ),
-//          )
-//
-////          GridTileBar(
-////
-////            backgroundColor: Colors.black54,
-////            title:
-////            Column(
-////              mainAxisAlignment: MainAxisAlignment.center,
-////              crossAxisAlignment: CrossAxisAlignment.center,
-////              children: <Widget>[
-//////                Text(
-//////                  product.title,
-//////                  textAlign: TextAlign.start,
-//////                  style: TextStyle(fontSize: 15.0),
-//////                ),
-////
-//////                !newCartItem.keys.contains(product.id)
-//////                    ? Text(
-//////                        'BDT ' + product.price.toString() + '/' + product.unit,
-//////                        style: TextStyle(fontSize: 12.0, color: Colors.grey),
-//////                      )
-//////                    : SizedBox(
-//////                        width: 0.0,
-//////                        height: 0.0,
-//////                      ),
-////////                newCartItem.keys.contains(product.id)
-////////                    ? Text(cart.items.firstWhere((d) => d.productId == product.id).quantity.toString(),
-////////                    style: TextStyle(
-////////                      fontSize: 15.0,
-////////                    ))
-////////                    : SizedBox(
-////////                  width: 0.0,
-////////                  height: 0.0,
-////////                ),
-////                newCartItem.keys.contains(product.id)?
-////                Row(
-////                  mainAxisSize: MainAxisSize.min,
-////                  children: <Widget>[
-////                    IconButton(
-////                      icon: Icon(Icons.add),
-////                      onPressed: (){
-////                        cart.addItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-////                        Scaffold.of(context).hideCurrentSnackBar();
-////                        if(cart.items.length> 0)
-////                          Scaffold.of(context).showSnackBar(SnackBar(
-////                            backgroundColor: cart.totalAmount > 500
-////                                ? Theme.of(context).primaryColor
-////                                : Colors.red[300],
-////                            content: cart.totalAmount > 500
-////                                ? Container(
-//////                                padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-////                                child:Text('Delievry charge free'))
-////                                : Row(
-////                              children: <Widget>[
-////                                Container(
-////                                    decoration: BoxDecoration(
-////                                        border: Border(
-////                                            right: BorderSide(
-////                                                color: Colors.white,
-////                                                width: 1.0))),
-////                                    width: MediaQuery.of(context).size.width *
-////                                        1 /
-////                                        7,
-////                                    child: Text('Delivery charge \n50 BDT')),
-////                                SizedBox(
-////                                  width: 5.0,
-////                                ),
-////                                Container(
-////                                  width: MediaQuery.of(context).size.width *
-////                                      4 /
-////                                      7,
-////                                  child: Text(
-////                                      'Shop more for free delivery charge.'),
-////                                )
-////                              ],
-////                            ),
-////                            duration: Duration(seconds: 2),
-////                          ));
-////                      },
-////                    ),
-////
-////                    Text(cart.items.firstWhere((d) => d.productId == product.id).quantity.toString(),
-////                        style: TextStyle(
-////                          fontSize: 15.0,
-////                        )),
-////
-////                    IconButton(
-////                      icon: Icon(Icons.remove),
-////                      onPressed: () {
-////                        cart.removeSingleItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-////                        Scaffold.of(context).hideCurrentSnackBar();
-////                        if(cart.items.length> 0)
-////                          Scaffold.of(context).showSnackBar(SnackBar(
-////                            backgroundColor: cart.totalAmount > 500
-////                                ? Theme.of(context).primaryColor
-////                                : Colors.red[300],
-////                            content: cart.totalAmount > 500
-////                                ? Container(
-//////                                padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-////                                child:Text('Delievry charge free'))
-////                                : Row(
-////                              children: <Widget>[
-////                                Container(
-////                                    decoration: BoxDecoration(
-////                                        border: Border(
-////                                            right: BorderSide(
-////                                                color: Colors.white,
-////                                                width: 1.0))),
-////                                    width: MediaQuery.of(context).size.width *
-////                                        1 /
-////                                        7,
-////                                    child: Text('Delivery charge \n50 BDT')),
-////                                SizedBox(
-////                                  width: 5.0,
-////                                ),
-////                                Container(
-////                                  width: MediaQuery.of(context).size.width *
-////                                      4 /
-////                                      7,
-////                                  child: Text(
-////                                      'Shop more for free delivery charge.'),
-////                                )
-////                              ],
-////                            ),
-////                            duration: Duration(seconds: 2),
-////                          ));
-////                      },
-////                    ),
-////                  ],):IconButton(
-////                  color: Theme.of(context).accentColor,
-////                  icon: Icon(Icons.shopping_cart),
-////                  onPressed: () {
-////                    cart.addItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-////                    Scaffold.of(context).hideCurrentSnackBar();
-////                    if(cart.items.length> 0)
-////                      Scaffold.of(context).showSnackBar(SnackBar(
-////                        backgroundColor: cart.totalAmount > 500
-////                            ? Theme.of(context).primaryColor
-////                            : Colors.red[300],
-////                        content: cart.totalAmount > 500
-////                            ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-////                            child:Text('Delievry charge free'))
-////                            : Row(
-////                          children: <Widget>[
-////                            Container(
-////                                decoration: BoxDecoration(
-////                                    border: Border(
-////                                        right: BorderSide(
-////                                            color: Colors.white,
-////                                            width: 1.0))),
-////                                width: MediaQuery.of(context).size.width *
-////                                    1 /
-////                                    7,
-////                                child: Text('Delivery charge \n50 BDT')),
-////                            SizedBox(
-////                              width: 5.0,
-////                            ),
-////                            Container(
-////                              width: MediaQuery.of(context).size.width *
-////                                  4 /
-////                                  7,
-////                              child: Text(
-////                                  'Shop more for free delivery charge.'),
-////                            )
-////                          ],
-////                        ),
-////                        duration: Duration(seconds: 2),
-//////              action: SnackBarAction(
-//////                label: 'undo',
-//////                onPressed: (){
-//////                  cart.removeSingleItem(product.id);
-//////                },
-//////              ),
-////                      ));
-////                  },
-////                ),
-////
-////              ],
-////            )
-////
-//////            leading:
-//////            newCartItem.keys.contains(product.id)
-//////                ?
-//////            IconButton(
-//////              icon: Icon(Icons.add),
-//////              onPressed: (){
-//////                cart.addItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-//////                Scaffold.of(context).hideCurrentSnackBar();
-//////                if(cart.items.length> 0)
-//////                  Scaffold.of(context).showSnackBar(SnackBar(
-//////                    backgroundColor: cart.totalAmount > 500
-//////                        ? Theme.of(context).primaryColor
-//////                        : Colors.red[300],
-//////                    content: cart.totalAmount > 500
-//////                        ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-//////                    child:Text('Delievry charge free'))
-//////                        : Row(
-//////                      children: <Widget>[
-//////                        Container(
-//////                            decoration: BoxDecoration(
-//////                                border: Border(
-//////                                    right: BorderSide(
-//////                                        color: Colors.white,
-//////                                        width: 1.0))),
-//////                            width: MediaQuery.of(context).size.width *
-//////                                1 /
-//////                                7,
-//////                            child: Text('Delivery charge \n50 BDT')),
-//////                        SizedBox(
-//////                          width: 5.0,
-//////                        ),
-//////                        Container(
-//////                          width: MediaQuery.of(context).size.width *
-//////                              4 /
-//////                              7,
-//////                          child: Text(
-//////                              'Shop more for free delivery charge.'),
-//////                        )
-//////                      ],
-//////                    ),
-//////                    duration: Duration(seconds: 2),
-//////                  ));
-//////              },
-//////            ) : SizedBox(
-//////                    width: 0.0,
-//////                    height: 0.0,
-//////                  ),
-//////            trailing:
-//////            newCartItem.keys.contains(product.id)
-//////                ? IconButton(
-//////                    icon: Icon(Icons.remove),
-//////                    onPressed: () {
-//////                      cart.removeSingleItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-//////                      Scaffold.of(context).hideCurrentSnackBar();
-//////                      if(cart.items.length> 0)
-//////                        Scaffold.of(context).showSnackBar(SnackBar(
-//////                        backgroundColor: cart.totalAmount > 500
-//////                            ? Theme.of(context).primaryColor
-//////                            : Colors.red[300],
-//////                        content: cart.totalAmount > 500
-//////                            ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-//////                            child:Text('Delievry charge free'))
-//////                            : Row(
-//////                                children: <Widget>[
-//////                                  Container(
-//////                                      decoration: BoxDecoration(
-//////                                          border: Border(
-//////                                              right: BorderSide(
-//////                                                  color: Colors.white,
-//////                                                  width: 1.0))),
-//////                                      width: MediaQuery.of(context).size.width *
-//////                                          1 /
-//////                                          7,
-//////                                      child: Text('Delivery charge \n50 BDT')),
-//////                                  SizedBox(
-//////                                    width: 5.0,
-//////                                  ),
-//////                                  Container(
-//////                                    width: MediaQuery.of(context).size.width *
-//////                                        4 /
-//////                                        7,
-//////                                    child: Text(
-//////                                        'Shop more for free delivery charge.'),
-//////                                  )
-//////                                ],
-//////                              ),
-//////                        duration: Duration(seconds: 2),
-//////                      ));
-//////                    },
-//////                  )
-//////                : IconButton(
-//////                    color: Theme.of(context).accentColor,
-//////                    icon: Icon(Icons.shopping_cart),
-//////                    onPressed: () {
-//////                      cart.addItem(product.id, product.title, product.price,product.isNonInventory,product.discount,product.discountId,product.discountType);
-//////                      Scaffold.of(context).hideCurrentSnackBar();
-//////                      if(cart.items.length> 0)
-//////                        Scaffold.of(context).showSnackBar(SnackBar(
-//////                        backgroundColor: cart.totalAmount > 500
-//////                            ? Theme.of(context).primaryColor
-//////                            : Colors.red[300],
-//////                        content: cart.totalAmount > 500
-//////                            ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-//////                            child:Text('Delievry charge free'))
-//////                            : Row(
-//////                                children: <Widget>[
-//////                                  Container(
-//////                                      decoration: BoxDecoration(
-//////                                          border: Border(
-//////                                              right: BorderSide(
-//////                                                  color: Colors.white,
-//////                                                  width: 1.0))),
-//////                                      width: MediaQuery.of(context).size.width *
-//////                                          1 /
-//////                                          7,
-//////                                      child: Text('Delivery charge \n50 BDT')),
-//////                                  SizedBox(
-//////                                    width: 5.0,
-//////                                  ),
-//////                                  Container(
-//////                                    width: MediaQuery.of(context).size.width *
-//////                                        4 /
-//////                                        7,
-//////                                    child: Text(
-//////                                        'Shop more for free delivery charge.'),
-//////                                  )
-//////                                ],
-//////                              ),
-//////                        duration: Duration(seconds: 2),
-////////              action: SnackBarAction(
-////////                label: 'undo',
-////////                onPressed: (){
-////////                  cart.removeSingleItem(product.id);
-////////                },
-////////              ),
-//////                      ));
-//////                    },
-//////                  ),
-////          ),
-//        ));
-//  }
 }

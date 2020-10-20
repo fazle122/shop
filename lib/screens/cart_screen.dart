@@ -5,6 +5,7 @@ import 'package:shoptempdb/base_state.dart';
 import 'package:shoptempdb/providers/auth.dart';
 import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/orders.dart';
+import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/screens/auth_screen.dart';
 import 'package:shoptempdb/screens/confirm_order_screen.dart';
 import 'package:shoptempdb/widgets/cart_item.dart';
@@ -58,6 +59,41 @@ class _CartScreenState extends BaseState<CartScreen>{
     super.didChangeDependencies();
   }
 
+  getDeliveryCharge(Cart cart,double totalAmount) async{
+    List deliveryChargeMatrix = [];
+    await Provider.of<Products>(context,listen: false).fetchDeliveryCharMatrix().then((data){
+      deliveryChargeMatrix = data['range'];
+      for(int i=0;i<deliveryChargeMatrix.length;i++){
+        if(i == 0 && totalAmount<=deliveryChargeMatrix[i]['max']){
+          setState(() {
+            cart.deliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+          });
+        }else if( i>0 && totalAmount >= deliveryChargeMatrix[i]['min']){
+          setState(() {
+            cart.deliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+
+          });
+        }else if( i>0){
+          setState(() {
+            cart.maxDeliveryRange = deliveryChargeMatrix[i]['min'].toDouble();
+            // cart.minDeliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+          });
+        }
+        // if(i ==0 && totalAmount<=deliveryChargeMatrix[i]['max']){
+        //   setState(() {
+        //     cart.deliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+        //   });
+        // }else if( i>0 && totalAmount >= deliveryChargeMatrix[i]['min']){
+        //   setState(() {
+        //     cart.maxDeliveryRange = deliveryChargeMatrix[i]['min'].toDouble();
+        //     cart.minDeliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+        //     cart.deliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+        //   });
+        // }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final cart = Provider.of<Cart>(context);
@@ -82,7 +118,7 @@ class _CartScreenState extends BaseState<CartScreen>{
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text(
-                        'Total',
+                        'Sub Total',
                         style: TextStyle(fontSize: 20),
                       ),
                       Spacer(),
@@ -189,86 +225,82 @@ class _CartScreenState extends BaseState<CartScreen>{
                                         onPressed: (){
                                           cart.addItem(cartData.items[i].productId, cartData.items[i].title, cartData.items[i].price,cartData.items[i].isNonInventory,cartData.items[i].discount,cartData.items[i].discountId,cartData.items[i].discountType);
                                           Scaffold.of(context).hideCurrentSnackBar();
-                                          if(cart.items.length> 0)
-                                            Scaffold.of(context).showSnackBar(SnackBar(
-                                              backgroundColor: cart.totalAmount > 500
-                                                  ? Theme.of(context).primaryColor
-                                                  : Colors.red[300],
-                                              content: cart.totalAmount > 500
-                                                  ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                                                  child:Text('Delievry charge free'))
-                                                  : Row(
-                                                children: <Widget>[
-                                                  Container(
-                                                      decoration: BoxDecoration(
-                                                          border: Border(
-                                                              right: BorderSide(
-                                                                  color: Colors.white,
-                                                                  width: 1.0))),
-                                                      width:
-                                                      MediaQuery.of(context).size.width *
-                                                          1 /
-                                                          7,
-                                                      child:
-                                                      Text('Delivery charge \n50 BDT')),
-                                                  SizedBox(
-                                                    width: 5.0,
-                                                  ),
-                                                  Container(
-                                                    width: MediaQuery.of(context).size.width *
-                                                        4 /
-                                                        7,
-                                                    child: Text(
-                                                        'Shop more for free delivery charge.'),
-                                                  )
-                                                ],
-                                              ),
-                                              duration: Duration(seconds: 2),
-                                            ));
+                                          Future.delayed(const Duration(milliseconds: 500), () async{
+                                            await getDeliveryCharge(cart,cart.totalAmount);
+
+                                            if(cart.items.length> 0)
+                                              Scaffold.of(context).showSnackBar(SnackBar(
+                                                backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
+                                                content: cart.totalAmount > cart.maxDeliveryRange
+                                                    ? Container(
+                                                    padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                                                    child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT')
+                                                )
+                                                    : Row(
+                                                  children: <Widget>[
+                                                    // Container(
+                                                    //     decoration: BoxDecoration(
+                                                    //         border: Border(
+                                                    //             right: BorderSide(
+                                                    //                 color: Colors.white,
+                                                    //                 width: 1.0))),
+                                                    //     width: MediaQuery.of(context).size.width * 1 / 7,
+                                                    //     child: Text(cart.deliveryCharge.toString())),
+                                                    SizedBox(
+                                                      width: 5.0,
+                                                    ),
+                                                    Container(
+                                                      width: MediaQuery.of(context).size.width * 4 / 7,
+                                                      child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
+                                                    )
+                                                  ],
+                                                ),
+                                                duration: Duration(seconds: 2),
+                                              ));
+                                          });
+
+
                                         },
                                       ),
                                       Text(cartData.items[i].quantity.toString(),style: TextStyle(fontSize: 20.0),),
                                       IconButton(
                                         icon: Icon(Icons.remove),
                                         onPressed: (){
-                                          cart.removeSingleItem(cartData.items[i].productId, cartData.items[i].title, cartData.items[i].price,cartData.items[i].isNonInventory,cartData.items[i].discount,cartData.items[i].discountId,cartData.items[i].discountType);
+                                          cart.removeSingleItem(cartData.items[i].productId);
                                           Scaffold.of(context).hideCurrentSnackBar();
-                                          if(cart.items.length> 0)
-                                            Scaffold.of(context).showSnackBar(SnackBar(
-                                              backgroundColor: cart.totalAmount > 500
-                                                  ? Theme.of(context).primaryColor
-                                                  : Colors.red[300],
-                                              content: cart.totalAmount > 500
-                                                  ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                                                  child:Text('Delievry charge free'))
-                                                  : Row(
-                                                children: <Widget>[
-                                                  Container(
-                                                      decoration: BoxDecoration(
-                                                          border: Border(
-                                                              right: BorderSide(
-                                                                  color: Colors.white,
-                                                                  width: 1.0))),
-                                                      width:
-                                                      MediaQuery.of(context).size.width *
-                                                          1 /
-                                                          7,
-                                                      child:
-                                                      Text('Delivery charge \n50 BDT')),
-                                                  SizedBox(
-                                                    width: 5.0,
-                                                  ),
-                                                  Container(
-                                                    width: MediaQuery.of(context).size.width *
-                                                        4 /
-                                                        7,
-                                                    child: Text(
-                                                        'Shop more for free delivery charge.'),
-                                                  )
-                                                ],
-                                              ),
-                                              duration: Duration(seconds: 2),
-                                            ));
+                                          Future.delayed(const Duration(milliseconds: 500), () async{
+                                            await getDeliveryCharge(cart,cart.totalAmount);
+
+                                            if(cart.items.length> 0)
+                                              Scaffold.of(context).showSnackBar(SnackBar(
+                                                backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
+                                                content: cart.totalAmount > cart.maxDeliveryRange
+                                                    ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                                                    child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT'))
+                                                    : Row(
+                                                  children: <Widget>[
+                                                    // Container(
+                                                    //     decoration: BoxDecoration(
+                                                    //         border: Border(
+                                                    //             right: BorderSide(
+                                                    //                 color: Colors.white,
+                                                    //                 width: 1.0))),
+                                                    //     width: MediaQuery.of(context).size.width * 1 / 7,
+                                                    //     child: Text(cart.minDeliveryCharge.toString())),
+                                                    SizedBox(
+                                                      width: 5.0,
+                                                    ),
+                                                    Container(
+                                                      width: MediaQuery.of(context).size.width * 4 / 7,
+                                                      child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
+                                                    )
+                                                  ],
+                                                ),
+                                                duration: Duration(seconds: 2),
+                                              ));
+                                          });
+
+
                                         },
                                       ),
                                     ],
@@ -293,62 +325,116 @@ class _CartScreenState extends BaseState<CartScreen>{
                 ),
               ),
               cart.items.length > 0
-                  ? Container(
-                  height: 50.0,
-                  color: Theme.of(context).primaryColor,
-                  child: Row(
-                    children: <Widget>[
-                      Container(
-                          width: MediaQuery.of(context).size.width * 5 / 7,
-                          padding: EdgeInsets.only(left: 20.0),
-                          color: Theme.of(context).primaryColor,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              Text('SubTotal: ' +
-                                  cart.totalAmount.toStringAsFixed(2)),
-                              cart.totalAmount>500 ? Text('Delivery charge: 00.00 BDT'):Text('Delivery charge: 50.00 BDT'),
-                              cart.totalAmount>500 ?
-                              Text(
-                                'Total amount : ' +
-                                    cart.totalAmount.toStringAsFixed(2),
-                                style: TextStyle(color: Colors.white),
-                              )
-                                  :Text(
-                                'Total amount : ' +
-                                    (cart.totalAmount + 50.00).toStringAsFixed(2),
-                                style: TextStyle(color: Colors.white),
+                  ?Consumer<Cart>(
+                builder: (context, cartData, child) =>
+                cart.items.length > 0
+                    ?
+                Container(
+                    height: 50.0,
+                    color: Theme.of(context).primaryColor,
+                    child: Row(
+                      children: <Widget>[
+                        Container(
+                            width: MediaQuery.of(context).size.width *
+                                5 /
+                                7,
+                            padding:
+                            EdgeInsets.only(left: 20.0, top: 2.0),
+                            color: Theme.of(context).primaryColor,
+                            child: Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              mainAxisAlignment:
+                              MainAxisAlignment.start,
+                              children: <Widget>[
+                                Text('SubTotal: ' + cartData.totalAmount.toStringAsFixed(2)),
+                                Text('Delivery charge: ' + cartData.deliveryCharge.toString()),
+                                Text('Total amount : ' + (cartData.totalAmount + cartData.deliveryCharge).toStringAsFixed(2)),
+                              ],
+                            )),
+                        Container(
+                          height: MediaQuery.of(context).size.height,
+                          width:
+                          MediaQuery.of(context).size.width * 2 / 7,
+                          color: Theme.of(context).primaryColorDark,
+                          child: InkWell(
+                            child: Center(
+                              child: Text(
+                                'Check out',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
                               ),
-                            ],
-                          )),
-                      Container(
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.width * 2 / 7,
-                        color: Theme.of(context).primaryColorDark,
-                        child: InkWell(
-                          child: Center(
-                            child: Text(
-                              'Check out',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
                             ),
+                            onTap: () {
+                              auth.isAuth?
+                              Navigator.of(context).pushNamed(ShippingAddressScreen.routeName,arguments: cart)
+                                  :Navigator.of(context).pushNamed(AuthScreen.routeName);
+                            },
                           ),
-                          onTap: () {
-                            auth.isAuth?
-                            Navigator.of(context).pushNamed(ShippingAddressScreen.routeName,arguments: cart)
-                                :Navigator.of(context).pushNamed(AuthScreen.routeName);
-//                            showDialog(
-//                                context: context,
-//                                child: _confirmOrderDialog(context, cart)
-////                                child: ConfirmOrderDialog()
-//                            );
-                          },
                         ),
-                      ),
-                    ],
-                  ))
+                      ],
+                    )): SizedBox(
+                  width: 0.0,
+                  height: 0.0,
+                ),
+              )
+//               Container(
+//                   height: 50.0,
+//                   color: Theme.of(context).primaryColor,
+//                   child: Row(
+//                     children: <Widget>[
+//                       Container(
+//                           width: MediaQuery.of(context).size.width * 5 / 7,
+//                           padding: EdgeInsets.only(left: 20.0),
+//                           color: Theme.of(context).primaryColor,
+//                           child: Column(
+//                             crossAxisAlignment: CrossAxisAlignment.start,
+//                             mainAxisAlignment: MainAxisAlignment.start,
+//                             children: <Widget>[
+//                               Text('SubTotal: ' +
+//                                   cart.totalAmount.toStringAsFixed(2)),
+//                               cart.totalAmount>500 ? Text('Delivery charge: 00.00 BDT'):Text('Delivery charge: 50.00 BDT'),
+//                               cart.totalAmount>500 ?
+//                               Text(
+//                                 'Total amount : ' +
+//                                     cart.totalAmount.toStringAsFixed(2),
+//                                 style: TextStyle(color: Colors.white),
+//                               )
+//                                   :Text(
+//                                 'Total amount : ' +
+//                                     (cart.totalAmount + 50.00).toStringAsFixed(2),
+//                                 style: TextStyle(color: Colors.white),
+//                               ),
+//                             ],
+//                           )),
+//                       Container(
+//                         height: MediaQuery.of(context).size.height,
+//                         width: MediaQuery.of(context).size.width * 2 / 7,
+//                         color: Theme.of(context).primaryColorDark,
+//                         child: InkWell(
+//                           child: Center(
+//                             child: Text(
+//                               'Check out',
+//                               style: TextStyle(
+//                                   color: Colors.white,
+//                                   fontWeight: FontWeight.bold),
+//                             ),
+//                           ),
+//                           onTap: () {
+//                             auth.isAuth?
+//                             Navigator.of(context).pushNamed(ShippingAddressScreen.routeName,arguments: cart)
+//                                 :Navigator.of(context).pushNamed(AuthScreen.routeName);
+// //                            showDialog(
+// //                                context: context,
+// //                                child: _confirmOrderDialog(context, cart)
+// ////                                child: ConfirmOrderDialog()
+// //                            );
+//                           },
+//                         ),
+//                       ),
+//                     ],
+//                   ))
                   : SizedBox(
                 width: 0.0,
                 height: 0.0,

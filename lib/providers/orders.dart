@@ -12,14 +12,18 @@ class OrderItem{
   final double invoiceAmount;
   final double totalDue;
   final List<InvoiceItem> invoiceItem;
-  final DateTime dateTime;
+  final DateTime invoiceDate;
+  final DateTime createdAt;
+  final int status;
 
   OrderItem({
    @required this.id,
    @required this.invoiceAmount,
     @required this.totalDue,
     @required this.invoiceItem,
-   @required this.dateTime,
+    @required this.invoiceDate,
+    @required this.createdAt,
+    @required this.status,
 });
 
 }
@@ -27,7 +31,7 @@ class OrderItem{
 class InvoiceItem{
   final int id;
   final int productID;
-  final int quantity;
+  final double quantity;
   final double unitPrice;
   final String productName;
 
@@ -113,6 +117,8 @@ class Orders with ChangeNotifier{
   List<OrderItem> _orders = [];
   final String authToken;
   final String userid;
+  int lastPageCount;
+
 
   Orders(this.authToken,this.userid,this._orders);
 
@@ -126,7 +132,16 @@ class Orders with ChangeNotifier{
     return [..._orders];
   }
 
+  List _deliveryChargeData =[];
 
+  List get delChargeData {
+    return [..._deliveryChargeData];
+  }
+
+
+  int get lastPageNo {
+    return lastPageCount;
+  }
 
 
   Future<Map<String,dynamic>> addOrder(FormData formData) async{
@@ -139,25 +154,30 @@ class Orders with ChangeNotifier{
       'Content-Type': 'application/json',
     };
 
-    final Response response = await dioService.post(
-      url,
-      data: formData,
-    );
+    try {
+      final Response response = await dioService.post(
+        url,
+        data: formData,
+      );
 
-    final responseData = response.data;
-    print(responseData);
-    notifyListeners();
-    if(response.statusCode == 200) {
-      return response.data;
-    }else{
+      final responseData = response.data;
+      print(responseData);
+      notifyListeners();
+      if (response.statusCode == 200) {
+        return response.data;
+      } else {
+        return null;
+      }
+    }catch(error){
+      // throw error;
       return null;
     }
   }
 
-  void cancelOrder(String orderId,String reason) async{
+  Future<Map<String, dynamic>> cancelOrder(String orderId,String reason) async{
 
     var responseData;
-    final url = ApiService.BASE_URL +  'api/V1.0/accounts/invoice/cancelled/$orderId';
+    final url = ApiService.BASE_URL +  'api/V1.0/accounts/invoice/cancel-my-invoice/$orderId';
 
     Map<String, String> headers = {
       'Authorization': 'Bearer ' + authToken,
@@ -173,28 +193,29 @@ class Orders with ChangeNotifier{
         headers: headers,
       );
       responseData = json.decode(response.body);
-      if (responseData['error'] != null) {
-        throw HttpException(responseData['error']['message']);
+      if (response.statusCode == 200) {
+        return responseData;
       }
+      return null;
 
-      notifyListeners();
     }catch(error){
-      throw error;
+      return null;
+      // throw error;
     }
   }
 
-  Future<void> fetchAndSetOrders(Map<String,dynamic> filters) async {
-    print('fetch orders');
-    String url = 'http://new.bepari.net/demo/api/V1.0/accounts/invoice/list-invoice?';
+  Future<List<OrderItem>> fetchAndSetOrders(Map<String,dynamic> filters,int pageCount) async {
+
+    // String url = 'http://new.bepari.net/demo/api/V1.0/accounts/invoice/list-my-invoice?page_size=10&page=$pageCount';
+    // String url = 'http://new.bepari.net/demo/api/V1.0/accounts/invoice/list-my-invoice?page_size=100';
+    String url = 'http://new.bepari.net/demo/api/V1.1/accounts/invoice/list?page_size=10&page=$pageCount';
 
     if (filters != null) {
-//      if (filters.containsKey('status') && filters['status'] == 'Pending') {
-//        qString += '&status[]=' + 'Requested for Cancellation';
-//      }
-      if (filters.containsKey('invoice_from_date') && filters['invoice_from_date'] != 'null') {
-        url += 'invoice_from_date=' + filters['invoice_from_date'].toString();
+
+      if (filters.containsKey('invoice_from_date') && filters['invoice_from_date'] != null) {
+        url += '&invoice_from_date=' + filters['invoice_from_date'].toString();
       }
-      if (filters.containsKey('invoice_to_date') && filters['invoice_to_date'] != 'null') {
+      if (filters.containsKey('invoice_to_date') && filters['invoice_to_date'] != null) {
         url += '&invoice_to_date=' + filters['invoice_to_date'].toString();
       }
 //      if (currentPage != null) {
@@ -212,63 +233,40 @@ class Orders with ChangeNotifier{
 //      final extractedData = json.decode(response.data) as Map<String, dynamic>;
       final extractedData = response.data;
       if (extractedData == null) {
-        return;
+        return null;
       }
 
-      if(extractedData['data']['invoices'].length > 0){
-      var allOrders = extractedData['data']['invoices']['data'];
+      if(extractedData['data'].length > 0){
+      var allOrders = extractedData['data']['data'];
       for (int i = 0; i < allOrders.length; i++) {
         final OrderItem orders = OrderItem(
           id: allOrders[i]['id'],
-          invoiceAmount: allOrders[i]['invoice_amount'].toDouble(),
-          totalDue: allOrders[i]['total_due'].toDouble(),
-          dateTime: DateTime.parse(allOrders[i]['invoice_date']),
+          invoiceAmount: double.parse(allOrders[i]['invoice_amount']),
+          totalDue: double.parse(allOrders[i]['total_due']),
+          invoiceDate: DateTime.parse(allOrders[i]['invoice_date']),
+          createdAt: DateTime.parse(allOrders[i]['created_at']),
+          status: allOrders[i]['status'],
+
         );
         loadedOrders.add(orders);
       }
-//      _orders = loadedOrders.reversed.toList();
+      lastPageCount = extractedData['data']['last_page'];
       _orders = loadedOrders;
       }else{
         _orders = [];
       }
       notifyListeners();
-    }
+      return _orders;
 
-//    Map<String, String> headers = {
-//      'Authorization': 'Bearer ' + authToken,
-//      'Content-Type': 'application/json',
-//    };
-//    try {
-//      final http.Response response = await http.get(
-//        url,
-//        headers: headers,
-//      );
-//      final List<OrderItem> loadedOrders = [];
-//      final extarctedData = json.decode(response.body) as Map<String, dynamic>;
-//      if (extarctedData == null) {
-//        return;
-//      }
-//
-//      var allOrders = extarctedData['data']['invoices']['data'];
-//      for (int i = 0; i < allOrders.length; i++) {
-//        final OrderItem orders = OrderItem(
-//          id: allOrders[i]['id'],
-//          invoiceAmount: allOrders[i]['invoice_amount'].toDouble(),
-//          totalDue: allOrders[i]['total_due'].toDouble(),
-//          dateTime: DateTime.parse(allOrders[i]['invoice_date']),
-//        );
-//        loadedOrders.add(orders);
-//      }
-//      _orders = loadedOrders.reversed.toList();
-//      notifyListeners();
-//    }
+    }
     catch (error) {
-      throw (error);
+      return null;
+      // throw (error);
     }
   }
 
   Future<void> fetchSingleOrder(int orderId) async {
-    final url = 'http://new.bepari.net/demo/api/V1.0/accounts/invoice/view-invoice/$orderId';
+    final url = 'http://new.bepari.net/demo/api/V1.0/accounts/invoice/view-my-invoice/$orderId';
     Map<String, String> headers = {
       'Authorization': 'Bearer ' + authToken,
       'Content-Type': 'application/json',
@@ -285,14 +283,16 @@ class Orders with ChangeNotifier{
     var allOrders = extarctedData['data'];
       final OrderItem orderItem = OrderItem(
         id: allOrders['id'],
-        totalDue: allOrders['total_due'].toDouble(),
-         dateTime: DateTime.parse(allOrders['delivery_date']),
-        invoiceAmount: allOrders['invoice_amount'].toDouble(),
+        totalDue: double.parse(allOrders['total_due']),
+         invoiceDate: DateTime.parse(allOrders['delivery_date']),
+//        invoiceAmount: allOrders['invoice_amount'].toDouble(),
+        invoiceAmount: double.parse(allOrders['invoice_amount']),
         invoiceItem: (allOrders['invoice_details'] as List<dynamic>).map((item) => InvoiceItem(
           id: item['id'],
           productID: item['product_id'],
-          unitPrice: item['unit_price'].toDouble(),
-          quantity: item['quantity'],
+//            unitPrice: item['unit_price'].toDouble(),
+            unitPrice: double.parse(item['unit_price']),
+          quantity: double.parse(item['quantity']),
           productName: item['product_name']
         )).toList(),
 
@@ -328,7 +328,7 @@ class Orders with ChangeNotifier{
             id: allOrders[i]['id'],
             invoiceAmount: allOrders[i]['invoice_amount'].toDouble(),
             totalDue: allOrders[i]['total_due'].toDouble(),
-            dateTime: DateTime.parse(allOrders[i]['invoice_date']),
+            invoiceDate: DateTime.parse(allOrders[i]['invoice_date']),
           );
           loadedOrders.add(orders);
         }

@@ -1,12 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/cart.dart';
+import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/providers/products.dart';
 
 
-class ProductDetailScreen extends StatelessWidget {
+class ProductDetailScreen extends StatefulWidget {
 
   static const routeName = '/product-detail';
+  @override
+  _ProductDetailScreenState createState() => _ProductDetailScreenState();
+
+}
+
+class _ProductDetailScreenState extends State<ProductDetailScreen>{
+
+  getDeliveryCharge(Cart cart,double totalAmount) async{
+    List deliveryChargeMatrix = [];
+    await Provider.of<Products>(context,listen: false).fetchDeliveryCharMatrix().then((data){
+      deliveryChargeMatrix = data['range'];
+      for(int i=0;i<deliveryChargeMatrix.length;i++){
+        if(i ==0 && totalAmount<=deliveryChargeMatrix[i]['max']){
+          setState(() {
+            cart.deliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+          });
+        }else if( i>0 && totalAmount >= deliveryChargeMatrix[i]['min']){
+          setState(() {
+            cart.maxDeliveryRange = deliveryChargeMatrix[i]['min'].toDouble();
+            cart.minDeliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+            cart.deliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+          });
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +155,38 @@ class ProductDetailScreen extends StatelessWidget {
                                         ),
                                         onTap: (){
                                           cart.addItem(loadedProduct.id, loadedProduct.title, loadedProduct.price,loadedProduct.isNonInventory,loadedProduct.discount,loadedProduct.discountId,loadedProduct.discountType,);
+                                          Future.delayed(const Duration(milliseconds: 500), () async{
+                                            await getDeliveryCharge(cart,cart.totalAmount);
 
+                                            Scaffold.of(context).showSnackBar(SnackBar(
+                                              backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
+                                              content: cart.totalAmount > cart.maxDeliveryRange
+                                                  ? Container(
+                                                  padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                                                  child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT')
+                                              )
+                                                  : Row(
+                                                children: <Widget>[
+                                                  // Container(
+                                                  //     decoration: BoxDecoration(
+                                                  //         border: Border(
+                                                  //             right: BorderSide(
+                                                  //                 color: Colors.white,
+                                                  //                 width: 1.0))),
+                                                  //     width: MediaQuery.of(context).size.width * 1 / 7,
+                                                  //     child: Text(cart.deliveryCharge.toString())),
+                                                  SizedBox(
+                                                    width: 5.0,
+                                                  ),
+                                                  Container(
+                                                    width: MediaQuery.of(context).size.width * 4 / 7,
+                                                    child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
+                                                  )
+                                                ],
+                                              ),
+                                              duration: Duration(seconds: 2),
+                                            ));
+                                          });
                                         },
                                       )
                                   ),
@@ -158,7 +216,37 @@ class ProductDetailScreen extends StatelessWidget {
                                           color: Colors.black,
                                         ),
                                         onTap: (){
-                                          cart.removeSingleItem(loadedProduct.id, loadedProduct.title, loadedProduct.price,loadedProduct.isNonInventory,loadedProduct.discount,loadedProduct.discountId,loadedProduct.discountType,);
+                                          cart.removeSingleItem(loadedProduct.id);
+                                          Future.delayed(const Duration(milliseconds: 500), () async{
+                                            await getDeliveryCharge(cart,cart.totalAmount);
+
+                                            Scaffold.of(context).showSnackBar(SnackBar(
+                                              backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
+                                              content: cart.totalAmount > cart.maxDeliveryRange
+                                                  ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                                                  child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT'))
+                                                  : Row(
+                                                children: <Widget>[
+                                                  // Container(
+                                                  //     decoration: BoxDecoration(
+                                                  //         border: Border(
+                                                  //             right: BorderSide(
+                                                  //                 color: Colors.white,
+                                                  //                 width: 1.0))),
+                                                  //     width: MediaQuery.of(context).size.width * 1 / 7,
+                                                  //     child: Text(cart.minDeliveryCharge.toString())),
+                                                  SizedBox(
+                                                    width: 5.0,
+                                                  ),
+                                                  Container(
+                                                    width: MediaQuery.of(context).size.width * 4 / 7,
+                                                    child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
+                                                  )
+                                                ],
+                                              ),
+                                              duration: Duration(seconds: 2),
+                                            ));
+                                          });
                                         },
                                       )
                                   ),

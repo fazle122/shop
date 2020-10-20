@@ -29,7 +29,7 @@ class _CompletedOrdersScreenState extends BaseState<CompletedOrdersScreen> {
       setState(() {
         _isLoading = true;
       });
-      Provider.of<Orders>(context).fetchAndSetOrders(filters).then((_) {
+      Provider.of<Orders>(context).fetchAndSetOrders(filters,null).then((_) {
         if (!mounted) return;
         setState(() {
           _isLoading = false;
@@ -66,7 +66,7 @@ class _CompletedOrdersScreenState extends BaseState<CompletedOrdersScreen> {
                                           '\$${orderData.orders[i].invoiceAmount}'),
                                       subtitle: Text(
                                         DateFormat('dd/MM/yyyy hh:mm').format(
-                                            orderData.orders[i].dateTime),
+                                            orderData.orders[i].invoiceDate),
                                       ),
                                       onTap: () {
                                         Navigator.of(context).pushNamed(

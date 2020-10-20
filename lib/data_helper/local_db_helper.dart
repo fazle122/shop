@@ -24,7 +24,15 @@ class DBHelper {
         onCreate: (db, version) {
           return db.execute(
               'CREATE TABLE cartTable('
-                  'id INTEGER PRIMARY KEY AUTOINCREMENT, productId TEXT, title TEXT,quantity INTEGER,price NUMERIC,isNonInventory INTEGER,discount NUMERIC,discountType TEXT,discountId TEXT)');
+                  'id INTEGER PRIMARY KEY AUTOINCREMENT, '
+                  'productId TEXT, '
+                  'title TEXT,'
+                  'quantity INTEGER,'
+                  'price NUMERIC,'
+                  'isNonInventory INTEGER,'
+                  'discount NUMERIC,'
+                  'discountType TEXT,'
+                  'discountId TEXT)');
         }, version: 1);
   }
 
@@ -50,11 +58,10 @@ class DBHelper {
     );
   }
 
-  static Future<void> increaseItemQuantity(String table,
-      Map<String, Object> data) async {
+  static Future<void> increaseItemQuantity(String table, String productId) async {
     final db = await DBHelper.database();
     db.rawUpdate(
-        'UPDATE cartTable SET quantity = quantity+1 WHERE productId = ${data['productId']}');
+        'UPDATE cartTable SET quantity = quantity+1 WHERE productId = $productId');
   }
 
   static Future<void> decreaseItemQuantity(String productId) async {

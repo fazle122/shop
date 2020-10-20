@@ -82,6 +82,9 @@ class Cart with ChangeNotifier {
   Cart({this.id,this.cartItem});
 
   List<CartItem> _items = [];
+  double _deliveryCharge =0.0;
+  double _maxDeliveryRange =0.0;
+  double _minDeliveryCharge =0.0;
 
 
 
@@ -95,11 +98,39 @@ class Cart with ChangeNotifier {
 
   double get totalAmount{
     var total = 0.0;
-    _items.forEach((item){
-      total += item.price.toDouble() * item.quantity;
+      _items.forEach((item){
+        total += item.price.toDouble() * item.quantity;
     });
+
     return total;
 //    notifyListeners();
+  }
+
+  double get deliveryCharge{
+    return _deliveryCharge;
+  }
+
+  set deliveryCharge(value){
+    _deliveryCharge = value;
+    notifyListeners();
+  }
+
+  double get maxDeliveryRange{
+    return _maxDeliveryRange;
+  }
+
+  set maxDeliveryRange(value){
+    _maxDeliveryRange = value;
+    notifyListeners();
+  }
+
+  double get minDeliveryCharge{
+    return _minDeliveryCharge;
+  }
+
+  set minDeliveryCharge(value){
+    _minDeliveryCharge = value;
+    notifyListeners();
   }
 
   CartItem findById(String id) {
@@ -117,7 +148,7 @@ class Cart with ChangeNotifier {
         quantity: item['quantity'],
         price: item['price'].toDouble(),
         isNonInventory: item['isNonInventory'],
-        discount: item['discount'].toDouble(),
+        discount: item['discount'] != null ?item['discount'].toDouble():0.0,
         discountType: item['discountType'],
         discountId: item['discountId'],
 
@@ -126,45 +157,31 @@ class Cart with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addItem(String productId, String title, double price,int isNonInventory,double discount,String discountId,String discountType)  async {
+  Future<void> addItem(String productId,
+      String title,
+      double price,
+      int isNonInventory,
+      double discount,
+      String discountId,
+      String discountType)  async {
 
     bool item = await DBHelper.isProductExist(productId);
-    final newCartItem = CartItem(
-        productId: productId,
-        title: title,
-        price: price,
-        isNonInventory: isNonInventory,
-        discount: discount,
-        discountId: discountId,
-        discountType: discountType
-    );
-//    _items.add(newCartItem);
-//    notifyListeners();
+
 
     if(!item) {
       await DBHelper.insert('cartTable', {
 //      'id': newPlace.id,
-        'productId': newCartItem.productId,
-        'title': newCartItem.title,
+        'productId': productId,
+        'title': title,
         'quantity': 1,
-        'price': newCartItem.price,
-        'isNonInventory': newCartItem.isNonInventory,
-        'discount': newCartItem.discount,
-        'discountType': newCartItem.discountType,
-        'discountId': newCartItem.discountId,
+        'price': price,
+        'isNonInventory': isNonInventory,
+        'discount': discount,
+        'discountType': discountType,
+        'discountId':  discountId,
       });
     }else{
-      await DBHelper.increaseItemQuantity('cartTable', {
-//      'id': newPlace.id,
-        'productId': newCartItem.productId,
-        'title': newCartItem.title,
-        'quantity': 1,
-        'price': newCartItem.price,
-        'isNonInventory': newCartItem.isNonInventory,
-        'discount': newCartItem.discount,
-        'discountType': newCartItem.discountType,
-        'discountId': newCartItem.discountId,
-      });
+      await DBHelper.increaseItemQuantity('cartTable',productId);
     }
 //    notifyListeners();
 
@@ -172,7 +189,7 @@ class Cart with ChangeNotifier {
 
   }
 
-  Future<void> removeSingleItem(String productId, String title, double price,int isNonInventory,double discount,String discountId,String discountType) async{
+  Future<void> removeSingleItem(String productId) async{
 
     CartItem cartData= await DBHelper.getSingleData(productId);
 

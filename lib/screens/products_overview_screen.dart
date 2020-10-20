@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shoptempdb/providers/auth.dart';
 import 'package:shoptempdb/providers/cart.dart';
+import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/providers/product.dart';
 import 'package:shoptempdb/providers/productCategories.dart';
 import 'package:shoptempdb/providers/products.dart';
@@ -39,6 +41,14 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
   int lastItemId = 0;
   List<Product> finalProduct = [];
   bool isPerformingRequest = false;
+
+  @override
+  void initState() {
+    if (_isInit) {
+      getDeliveryCharge();
+    }
+    super.initState();
+  }
 
 
   @override
@@ -85,23 +95,31 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
           setState(() {
             pageCount += 1;
           });
-          getData('increment');
+          getData();
         }
-//        if (pageCount > 0) if (_scrollController.position.pixels ==
-//            _scrollController.position.minScrollExtent) {
-//          setState(() {
-//            pageCount -= 1;
-//          });
-//          getData('decrement');
-//        }
       }
     });
 
     super.didChangeDependencies();
   }
 
+  getDeliveryCharge() async{
+    List deliveryChargeMatrix = [];
+    final cart = await Provider.of<Cart>(context,listen: false);
+    await Provider.of<Products>(context,listen: false).fetchDeliveryCharMatrix().then((data){
+      deliveryChargeMatrix = data['range'];
+      for(int i=0;i<deliveryChargeMatrix.length;i++){
+        if(i == 0 && cart.totalAmount<=deliveryChargeMatrix[i]['max']){
+          cart.deliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+        }else if( i>0 && cart.totalAmount >= deliveryChargeMatrix[i]['min']){
+          cart.deliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+        }
+      }
+    });
+  }
 
-  List<Product> getData(String type) {
+
+  List<Product> getData() {
     final cat = ModalRoute.of(context).settings.arguments as String;
     if (_isInit) {
       if (!isPerformingRequest) {
@@ -130,7 +148,7 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
         Provider.of<Products>(context, listen: false)
             .fetchAndSetProducts(pageCount, 0)
             .then((data) {
-
+          isPerformingRequest = false;
           if (data == null || data.isEmpty) {
             if (finalProduct.isNotEmpty) animateScrollBump();
             if (finalProduct.isEmpty) {
@@ -258,28 +276,27 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
                               mainAxisAlignment:
                               MainAxisAlignment.start,
                               children: <Widget>[
-                                Text('SubTotal: ' +
-                                    cartData.totalAmount
-                                        .toStringAsFixed(2)),
-                                cartData.totalAmount > 500
-                                    ? Text('Delivery charge: 00.00 BDT')
-                                    : Text(
-                                    'Delivery charge: 50.00 BDT'),
-                                cartData.totalAmount > 500
-                                    ? Text(
-                                  'Total amount : ' +
-                                      cartData.totalAmount
-                                          .toStringAsFixed(2),
-                                  style: TextStyle(
-                                      color: Colors.white),
-                                )
-                                    : Text(
-                                  'Total amount : ' +
-                                      (cartData.totalAmount + 50.00)
-                                          .toStringAsFixed(2),
-                                  style: TextStyle(
-                                      color: Colors.white),
-                                ),
+                                Text('SubTotal: ' + cartData.totalAmount.toStringAsFixed(2)),
+                                Text('Delivery charge: ' + cartData.deliveryCharge.toString()),
+                                Text('Total amount : ' + (cartData.totalAmount + cartData.deliveryCharge).toStringAsFixed(2)),
+                                // cartData.totalAmount > 500
+                                //     ? Text('Delivery charge: 00.00 BDT')
+                                //     : Text('Delivery charge: 50.00 BDT'),
+                                // cartData.totalAmount > 500
+                                //     ? Text(
+                                //   'Total amount : ' +
+                                //       cartData.totalAmount
+                                //           .toStringAsFixed(2),
+                                //   style: TextStyle(
+                                //       color: Colors.white),
+                                // )
+                                //     : Text(
+                                //   'Total amount : ' +
+                                //       (cartData.totalAmount + 50.00)
+                                //           .toStringAsFixed(2),
+                                //   style: TextStyle(
+                                //       color: Colors.white),
+                                // ),
                               ],
                             )),
                         Container(
@@ -356,7 +373,7 @@ class ProductItemList extends StatelessWidget{
           ? ListView.builder(
           padding: const EdgeInsets.all(10.0),
           controller: scrollController,
-          itemCount: productListItems.length,
+          itemCount: productListItems.length+1,
           itemBuilder: (context, i) {
             if (i == productListItems.length) {
               return _buildProgressIndicator();
@@ -371,10 +388,12 @@ class ProductItemList extends StatelessWidget{
         child: Text('No item found'),
       )
           : productListItems != null && productListItems.length > 0
-          ? GridView.builder(
+          ?
+
+          GridView.builder(
           controller: scrollController,
           padding: const EdgeInsets.all(10.0),
-          itemCount: productListItems.length,
+          itemCount: productListItems.length+1,
           gridDelegate:
           SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
@@ -384,7 +403,7 @@ class ProductItemList extends StatelessWidget{
           ),
           itemBuilder: (context, i) {
             if (i == productListItems.length) {
-              return _buildProgressIndicator();
+              return _buildProgressIndicator1();
             } else {
               return ChangeNotifierProvider.value(
               value: productListItems[i],
@@ -402,6 +421,18 @@ class ProductItemList extends StatelessWidget{
   Widget _buildProgressIndicator() {
     return Padding(
       padding: const EdgeInsets.all(8.0),
+      child: Center(
+        child: Opacity(
+          opacity: isPerformingRequest ? 1.0 : 0.0,
+          child: CircularProgressIndicator(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProgressIndicator1() {
+    return Padding(
+      padding: const EdgeInsets.only(top:50,left:160),
       child: Center(
         child: Opacity(
           opacity: isPerformingRequest ? 1.0 : 0.0,

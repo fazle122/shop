@@ -125,7 +125,7 @@ class _CartItemWidgetState extends State<CartItemWidget>{
                   IconButton(
                     icon: Icon(Icons.remove),
                     onPressed: (){
-                      cart.removeSingleItem(widget.productId, widget.title, widget.price,widget.isNonInventory,widget.discount,widget.discountId,widget.discountType);
+                      cart.removeSingleItem(widget.productId);
                       Scaffold.of(context).hideCurrentSnackBar();
                       if(cart.items.length> 0)
                         Scaffold.of(context).showSnackBar(SnackBar(

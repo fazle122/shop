@@ -58,8 +58,8 @@ class OrderDetailScreen extends StatelessWidget {
 //                          title: Text('Total amount:  ' + 'BDT\$${(orderDetailData.singOrderItem.totalDue.toString())}'),
                           title: Text('Total amount:  ' + orderDetailData.singOrderItem.totalDue.toString() + ' BDT'),
                           subtitle: Text(
-                            DateFormat('EEEE, MMM d, ').format(orderDetailData.singOrderItem.dateTime) +
-                                convert12(DateFormat('hh:mm').format(orderDetailData.singOrderItem.dateTime)),
+                            DateFormat('EEEE, MMM d, ').format(orderDetailData.singOrderItem.invoiceDate) +
+                                convert12(DateFormat('hh:mm').format(orderDetailData.singOrderItem.invoiceDate)),
                           ),
                         )
 //                        Row(
@@ -89,19 +89,47 @@ class OrderDetailScreen extends StatelessWidget {
                     Expanded(
                         child: ListView.builder(
                           itemCount: orderDetailData.singOrderItem.invoiceItem.length,
-                          itemBuilder: (context, i) => ListTile(
-                            title: Text('Item name:' + orderDetailData.singOrderItem.invoiceItem[i].productName),
-                            subtitle: ListTile(
-                              title: Text('Quantity:'  + orderDetailData.singOrderItem.invoiceItem[i].quantity.toString()),
-                              subtitle: Text(
-                                  'price:' + orderDetailData.singOrderItem.invoiceItem[i].quantity.toString() + 'x'
-                                      + orderDetailData.singOrderItem.invoiceItem[i].unitPrice.toString()  + ' = '
-                                      + (orderDetailData.singOrderItem.invoiceItem[i].quantity * orderDetailData.singOrderItem.invoiceItem[i].unitPrice).toString()
-                                      + ' BDT'
-
-                              ),
-                            ),
-                          ),
+                          itemBuilder: (context, i) =>
+                              Card(
+                                // shape: RoundedRectangleBorder(
+                                //   borderRadius: BorderRadius.circular(15.0),
+                                // ),
+                                shape: StadiumBorder(
+                                  side: BorderSide(
+                                    color: Colors.grey[200],
+                                    width: 2.0,
+                                  ),
+                                ),
+                                margin: EdgeInsets.all(10),
+                                child: Column(
+                                  children: <Widget>[
+                                    ListTile(
+                                        title: Center(child:Text(orderDetailData.singOrderItem.invoiceItem[i].productName)),
+                                        subtitle: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            Text('Quantity : ' + orderDetailData.singOrderItem.invoiceItem[i].quantity.toString()),
+                                            SizedBox(width: 30.0,),
+                                            Text('Total : \$${(double.parse(orderDetailData.singOrderItem.invoiceItem[i].unitPrice.toString()) * double.parse(orderDetailData.singOrderItem.invoiceItem[i].quantity.toString()))}'),
+                                          ],
+                                        )
+                                    ),
+                                  ],
+                                ),
+                              )
+                          //     ListTile(
+                          //   title: Text('Item name:' + orderDetailData.singOrderItem.invoiceItem[i].productName),
+                          //   subtitle: ListTile(
+                          //     title: Text('Quantity:'  + orderDetailData.singOrderItem.invoiceItem[i].quantity.toString()),
+                          //     subtitle: Text(
+                          //         'price:' + orderDetailData.singOrderItem.invoiceItem[i].quantity.toString() + 'x'
+                          //             + orderDetailData.singOrderItem.invoiceItem[i].unitPrice.toString()  + ' = '
+                          //             + (orderDetailData.singOrderItem.invoiceItem[i].quantity * orderDetailData.singOrderItem.invoiceItem[i].unitPrice).toString()
+                          //             + ' BDT'
+                          //
+                          //     ),
+                          //   ),
+                          // ),
                         )
                     ),
                   ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/orders.dart';
+import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
 import 'package:dio/dio.dart';
 import 'package:shoptempdb/screens/orders_screen.dart';
@@ -24,6 +25,7 @@ class CreateShippingAddressDialog extends StatefulWidget {
 class _CreateShippingAddressDialogState
     extends State<CreateShippingAddressDialog> {
   final _form = GlobalKey<FormState>();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   TextEditingController _phoneEditController;
   TextEditingController _addressEditController;
@@ -34,6 +36,8 @@ class _CreateShippingAddressDialogState
   var _isLoading = false;
   String mobileNumber;
   String homeAddress;
+  Map<String, dynamic> product;
+
 
   @override
   void initState() {
@@ -49,6 +53,7 @@ class _CreateShippingAddressDialogState
       setState(() {
         _isLoading = true;
       });
+      getDeliveryCharge();
       Provider.of<ShippingAddress>(context).fetchDistrictList().then((_) {
         if (!mounted) return;
         setState(() {
@@ -58,6 +63,20 @@ class _CreateShippingAddressDialogState
     }
     _isInit = false;
     super.didChangeDependencies();
+  }
+
+  getDeliveryCharge() async {
+    final cart = await Provider.of<Cart>(context, listen: false);
+    Map<String, dynamic> data = Map();
+    data.putIfAbsent('amount', () => cart.totalAmount.toDouble());
+    FormData formData = FormData.fromMap(data);
+    var response = await Provider.of<Products>(context, listen: false)
+        .fetchDeliveryCharge(formData);
+    if (response != null) {
+      setState(() {
+        product = response['data']['product'];
+      });
+    }
   }
 
 
@@ -88,7 +107,6 @@ class _CreateShippingAddressDialogState
     );
   }
 
-
   Widget addressField() {
     return TextFormField(
       autofocus: false,
@@ -115,7 +133,7 @@ class _CreateShippingAddressDialogState
     );
   }
 
-  Future<void> _saveForm(var shippingAddress) async {
+  Future<void> _saveForm(var shippingAddress,Cart cart) async {
     final isValid = _form.currentState.validate();
     if (!isValid) {
       return;
@@ -124,83 +142,79 @@ class _CreateShippingAddressDialogState
     setState(() {
       _isLoading = true;
     });
-    List<Cart> ct = [];
-    ct = widget.cart.items
-        .map((e) => Cart(id: e.id, cartItem: e))
-        .toList();
-
-//    FormData data = new FormData();
-//    for (int i = 0; i < ct.length; i++) {
-//      data.add('product_id[$i]', ct[i].cartItem.productId);
-//      data.add('quantity[$i]', ct[i].cartItem.quantity);
-//      data.add('unit_price[$i]', ct[i].cartItem.price);
-//      data.add('is_non_inventory[$i]',
-//          ct[i].cartItem.isNonInventory);
-//      data.add('discount[$i]', ct[i].cartItem.discount);
-//    }
-//    data.add('city',shippingAddress.selectedDistrict);
-//    data.add('area_id', shippingAddress.selectedArea.toString());
-//    data.add('shipping_address_line', homeAddress);
-//    data.add('mobile_no', mobileNumber);
-
-    Map<String,dynamic> dt = Map();
-    for (int i = 0; i < ct.length; i++) {
-      dt.putIfAbsent('product_id[$i]', ()=>ct[i].cartItem.productId);
-      dt.putIfAbsent('quantity[$i]', ()=>ct[i].cartItem.quantity);
-      dt.putIfAbsent('unit_price[$i]', ()=>ct[i].cartItem.price);
-      dt.putIfAbsent('is_non_inventory[$i]', ()=>ct[i].cartItem.isNonInventory);
-      dt.putIfAbsent('discount[$i]', ()=>ct[i].cartItem.discount);
+    if (product != null) {
+      await cart.addItem(
+          product['id'].toString(),
+          product['name'],
+          product['unit_price'].toDouble(),
+          product['is_non_inventory'],
+          product['discount'] != null ? product['discount'] : 0.0,
+          product['discount_id'],
+          product['discount_type']);
     }
-    dt.putIfAbsent('city',()=>shippingAddress.selectedDistrict);
-    dt.putIfAbsent('area_id', ()=>shippingAddress.selectedArea.toString());
-    dt.putIfAbsent('shipping_address_line', ()=>homeAddress);
-    dt.putIfAbsent('mobile_no', ()=>mobileNumber);
+    Future.delayed(Duration(milliseconds: 500), () async {
+      if (cart.items.length > 0) {
+        List<Cart> ct = [];
+        ct = cart.items.map((e) => Cart(id: e.id, cartItem: e)).toList();
 
-    FormData data = FormData.fromMap(dt);
+        Map<String,dynamic> dt = Map();
+        for (int i = 0; i < ct.length; i++) {
+          dt.putIfAbsent('product_id[$i]', ()=>ct[i].cartItem.productId);
+          dt.putIfAbsent('quantity[$i]', ()=>ct[i].cartItem.quantity);
+          dt.putIfAbsent('unit_price[$i]', ()=>ct[i].cartItem.price);
+          dt.putIfAbsent('is_non_inventory[$i]', ()=>ct[i].cartItem.isNonInventory);
+          dt.putIfAbsent('discount[$i]', ()=>ct[i].cartItem.discount);
+        }
+        dt.putIfAbsent('city',()=>shippingAddress.selectedDistrict);
+        dt.putIfAbsent('area_id', ()=>shippingAddress.selectedArea.toString());
+        dt.putIfAbsent('shipping_address_line', ()=>homeAddress);
+        dt.putIfAbsent('mobile_no', ()=>mobileNumber);
 
-    setState(() {
-      _isLoading = true;
-    });
-    final response = await Provider.of<Orders>(context, listen: false).addOrder(data);
-    if (response != null) {
-      setState(() {
-        _isLoading = false;
-      });
-      widget.cart.clearCartTable();
-      shippingAddress.selectedDistrict = null;
-      shippingAddress.selectedArea = null;
-      Navigator.of(context).pushNamed(
-          ProductsOverviewScreen
-              .routeName);
-      Flushbar(
-        duration: Duration(seconds: 10),
-        margin: EdgeInsets.only(bottom: 2),
-        padding: EdgeInsets.all(10),
-        borderRadius: 8,
-        backgroundColor: Colors.green.shade400,
-        boxShadows: [
-          BoxShadow(
-            color: Colors.black45,
-            offset: Offset(3, 3),
-            blurRadius: 3,
-          ),
-        ],
-        // All of the previous Flushbars could be dismissed by swiping down
-        // now we want to swipe to the sides
-        dismissDirection: FlushbarDismissDirection.HORIZONTAL,
-        // The default curve is Curves.easeOut
-        forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
-        title: 'Order confirmation',
-        message: response['msg'],
-        mainButton: FlatButton(
-          child: Text('view order'),
-          onPressed: () {
-            Navigator.of(context).pushNamed(
-                OrdersScreen.routeName);
-          },
-        ),
+        FormData data = FormData.fromMap(dt);
 
-      )..show(context);
+        setState(() {
+          _isLoading = true;
+        });
+        final response = await Provider.of<Orders>(context, listen: false).addOrder(data);
+        if (response != null) {
+          setState(() {
+            _isLoading = false;
+          });
+          widget.cart.clearCartTable();
+          shippingAddress.selectedDistrict = null;
+          shippingAddress.selectedArea = null;
+          Navigator.of(context).pushNamed(
+              ProductsOverviewScreen
+                  .routeName);
+          Flushbar(
+            duration: Duration(seconds: 10),
+            margin: EdgeInsets.only(bottom: 2),
+            padding: EdgeInsets.all(10),
+            borderRadius: 8,
+            backgroundColor: Colors.green.shade400,
+            boxShadows: [
+              BoxShadow(
+                color: Colors.black45,
+                offset: Offset(3, 3),
+                blurRadius: 3,
+              ),
+            ],
+            // All of the previous Flushbars could be dismissed by swiping down
+            // now we want to swipe to the sides
+            dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+            // The default curve is Curves.easeOut
+            forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+            title: 'Order confirmation',
+            message: response['msg'],
+            mainButton: FlatButton(
+              child: Text('view order'),
+              onPressed: () {
+                Navigator.of(context).pushNamed(
+                    OrdersScreen.routeName);
+              },
+            ),
+
+          )..show(context);
 //      showDialog(
 ////            useRootNavigator: false,
 //          barrierDismissible: false,
@@ -226,25 +240,30 @@ class _CreateShippingAddressDialogState
 //              )
 //            ],
 //          ));
-    } else {
-      Flushbar(
-        duration: Duration(seconds: 5),
-        margin: EdgeInsets.only(bottom: 2),
-        padding: EdgeInsets.all(10),
-        borderRadius: 8,
-        backgroundColor: Colors.red.shade400,
-        boxShadows: [
-          BoxShadow(
-            color: Colors.black45,
-            offset: Offset(3, 3),
-            blurRadius: 3,
-          ),
-        ],
-        dismissDirection: FlushbarDismissDirection.HORIZONTAL,
-        forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
-        title: 'Order confirmation',
-        message: 'Something wrong. Please try again',
-      )..show(context);
+        }
+        else {
+          await cart.removeCartItemRow('1');
+          setState(() {
+            _isLoading = false;
+          });
+          Flushbar(
+            duration: Duration(seconds: 5),
+            margin: EdgeInsets.only(bottom: 2),
+            padding: EdgeInsets.all(10),
+            borderRadius: 8,
+            backgroundColor: Colors.red.shade400,
+            boxShadows: [
+              BoxShadow(
+                color: Colors.black45,
+                offset: Offset(3, 3),
+                blurRadius: 3,
+              ),
+            ],
+            dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+            forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+            title: 'Order confirmation',
+            message: 'Something wrong. Please try again',
+          )..show(context);
 //      showDialog(
 //          context: context,
 //          barrierDismissible: false,
@@ -263,7 +282,22 @@ class _CreateShippingAddressDialogState
 //              ),
 //            ],
 //          ));
-    }
+        }
+      }else{
+        _scaffoldKey.currentState.showSnackBar(
+            _snackBar('Please add item to cart'));
+      }
+    });
+
+  }
+
+  Widget _snackBar(String text) {
+    return SnackBar(
+      backgroundColor: Theme.of(context).primaryColor,
+      content: Container(
+          padding: EdgeInsets.only(top: 5.0, bottom: 5.0), child: Text(text)),
+      duration: Duration(seconds: 2),
+    );
   }
 
   Future<bool> _onBackPressed() {
@@ -278,7 +312,7 @@ class _CreateShippingAddressDialogState
   @override
   Widget build(BuildContext context) {
     final shippingAddress = Provider.of<ShippingAddress>(context);
-
+    final cart = Provider.of<Cart>(context,listen: false);
     Map<String, dynamic> district = shippingAddress.allDistricts;
     Map<String, dynamic> areas = Map();
     return WillPopScope(
@@ -442,7 +476,7 @@ class _CreateShippingAddressDialogState
                           style: TextStyle(fontSize: 14)),
                       onPressed: () async{
                         FocusScope.of(context).requestFocus(new FocusNode());
-                        await _saveForm(shippingAddress);
+                        await _saveForm(shippingAddress,cart);
                       },
                     ),
                   )
@@ -639,148 +673,3 @@ class _CreateShippingAddressDialogState
   }
 }
 
-class DistrictDropDown extends StatelessWidget {
-  String selectedDistrict;
-
-  List<DropdownMenuItem> _districtMenuItems(Map<String, dynamic> items) {
-    List<DropdownMenuItem> itemWidgets = List();
-    items.forEach((key, value) {
-      itemWidgets.add(DropdownMenuItem(
-        value: value,
-        child: Text(value),
-      ));
-    });
-    return itemWidgets;
-  }
-
-  @override
-  Widget build(final BuildContext context) {
-    final shippingAddress = Provider.of<ShippingAddress>(context);
-
-    Map<String, dynamic> district = shippingAddress.allDistricts;
-    return Consumer<ShippingAddress>(
-      builder: (
-          final BuildContext context,
-          final ShippingAddress address,
-          final Widget child,
-          ) {
-        return Stack(
-          children: <Widget>[
-            Container(
-                decoration: ShapeDecoration(
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(width: 1.0, style: BorderStyle.solid),
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  ),
-                ),
-                padding: EdgeInsets.only(left: 44.0, right: 10.0),
-//              margin: EdgeInsets.only(left: 16.0, right: 16.0),
-                child: DropdownButtonFormField(
-                  isExpanded: true,
-//                icon: Icon(Icons.location_city),
-                  hint: Text('Select district'),
-                  value: shippingAddress.selectedDistrict,
-                  onChanged: (newValue) {
-                    shippingAddress.selectedDistrict = newValue;
-                    shippingAddress.selectedArea = null;
-                  },
-                  items: _districtMenuItems(district),
-                )),
-            Container(
-              margin: EdgeInsets.only(top: 10.0, left: 12.0),
-              child: Icon(
-                Icons.location_city,
-                color: Theme.of(context).primaryColor,
-//              size: 20.0,
-              ),
-            ),
-          ],
-        );
-
-
-//        DropdownButton(
-//              isExpanded: true,
-//              icon: Icon(Icons.location_city),
-//              hint: Text('Select district'),
-//              value: shippingAddress.selectedDistrict,
-//              onChanged: (newValue) {
-//                shippingAddress.selectedDistrict = newValue;
-//                shippingAddress.selectedArea = null;
-//              },
-//              items: _districtMenuItems(district),
-//            );
-      },
-    );
-  }
-}
-
-class AreaDropDown extends StatelessWidget {
-  String selectedArea;
-
-  List<DropdownMenuItem> _areaMenuItems(Map<String, dynamic> items) {
-    List<DropdownMenuItem> itemWidgets = List();
-    items.forEach((key, value) {
-      itemWidgets.add(DropdownMenuItem(
-        value: key,
-        child: Text(value),
-      ));
-    });
-    return itemWidgets;
-  }
-
-  @override
-  Widget build(final BuildContext context) {
-    final shippingAddress = Provider.of<ShippingAddress>(context);
-    Map<String, dynamic> areas = shippingAddress.allAreas;
-    return Consumer<ShippingAddress>(
-      builder: (
-          final BuildContext context,
-          final ShippingAddress address,
-          final Widget child,
-          ) {
-        return Stack(
-          children: <Widget>[
-            Container(
-                decoration: ShapeDecoration(
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(width: 1.0, style: BorderStyle.solid),
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                  ),
-                ),
-                padding: EdgeInsets.only(left: 44.0, right: 10.0),
-//              margin: EdgeInsets.only(left: 16.0, right: 16.0),
-                child: DropdownButtonFormField(
-                  isExpanded: true,
-//                icon: Icon(Icons.local_gas_station),
-                  hint: Text('Select area'),
-                  value: shippingAddress.selectedArea,
-                  onChanged: (newValue) {
-                    shippingAddress.selectedArea = newValue;
-                  },
-                  items: _areaMenuItems(areas),
-                )),
-            Container(
-              margin: EdgeInsets.only(top: 10.0, left: 12.0),
-              child: Icon(
-                Icons.local_gas_station,
-                color: Theme.of(context).primaryColor,
-//              size: 20.0,
-              ),
-            ),
-          ],
-        );
-
-//          DropdownButton(
-//          isExpanded: true,
-//          icon: Icon(Icons.local_gas_station),
-//          hint: Text('Select area'),
-//          value: shippingAddress.selectedArea,
-//          onChanged: (newValue) {
-//            shippingAddress.selectedArea = newValue;
-//          },
-//          items: _districtMenuItems(district),
-//        );
-      },
-    );
-  }
-}
