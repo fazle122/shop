@@ -141,8 +141,8 @@ class DataSearch extends SearchDelegate<String> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return query.isEmpty ? SizedBox(width: 0.0,height: 0.0,): FutureBuilder(
-      future: Provider.of<Products>(context).searchAndSetProducts(keyword: query),
+    return query.trim().isEmpty ? SizedBox(width: 0.0,height: 0.0,): FutureBuilder(
+      future: Provider.of<Products>(context).searchAndSetProducts(keyword: query.trim()),
       builder: (context, snapshot) {
 //        if (snapshot.connectionState == ConnectionState.waiting) {
 //          return Center(child:CircularProgressIndicator());

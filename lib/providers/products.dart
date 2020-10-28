@@ -5,11 +5,51 @@ import 'package:shoptempdb/providers/product.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+class Product with ChangeNotifier {
+  final String id;
+  final String title;
+  final String category;
+  final String description;
+  final double price;
+  final String unit;
+  final String imageUrl;
+  final int isNonInventory;
+  final double discount;
+  final String discountId;
+  final String discountType;
+  final double perUnitDiscount;
+  bool isFavorite;
+
+  Product({
+    @required this.id,
+    @required this.title,
+    @required this.category,
+    @required this.description,
+    @required this.price,
+    @required this.unit,
+    @required this.imageUrl,
+    @required this.isNonInventory,
+    @required this.discount,
+    @required this.discountId,
+    @required this.discountType,
+    @required this.perUnitDiscount,
+    this.isFavorite = false,
+
+  });
+
+}
+
 class Products with ChangeNotifier {
   List<Product> _items = [];
   int lastPageCount;
+  bool _isList = false;
   var _showFavoritesOnly = false;
 
+  Product _productItem;
+
+  Product get singProductItem{
+    return _productItem;
+  }
   List<Product> get items {
 //    return [..._items];
     return [..._items];
@@ -17,6 +57,15 @@ class Products with ChangeNotifier {
 
   int get lastPageNo {
     return lastPageCount;
+  }
+
+  bool get isList{
+    return _isList;
+  }
+
+  set isList(value){
+    _isList = value;
+    notifyListeners();
   }
 
   Future<Map<String, dynamic>> fetchDeliveryCharMatrix() async {
@@ -161,6 +210,46 @@ class Products with ChangeNotifier {
     } catch (error) {
       throw (error);
     }
+  }
+
+  Future<Product> fetchSingleProduct(int productId) async {
+    final url = 'http://new.bepari.net/demo/api/V1.0/product-catalog/product/view-product/$productId';
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+    final http.Response response = await http.get(
+      url,
+      headers: headers,
+    );
+    final extarctedData = json.decode(response.body) as Map<String, dynamic>;
+    if(extarctedData == null){
+      return null;
+    }
+
+    var product = extarctedData['data'];
+    final Product selectedProduct = Product(
+      id: product['id'].toString(),
+
+      title: product['name'],
+      category: product['product_category_id'].toString(),
+      description: product['description'],
+      unit: product['unit_name'],
+      price: product['unit_price'].toDouble(),
+      isNonInventory: product['is_non_inventory'],
+      discount: product['discount_amount'] != null
+          ? product['discount_amount'].toDouble()
+          : 0.0,
+      discountType: product['discount_type'],
+      discountId: product['discount_id'],
+      // imageUrl: product['thumb_image'] != null
+      //     ? ApiService.CDN_URl + 'product-catalog-images/product/' + product['thumb_image']
+      //     : 'https://www.jessicagavin.com/wp-content/uploads/2019/02/honey-1-600x900.jpg',
+      imageUrl: 'https://www.jessicagavin.com/wp-content/uploads/2019/02/honey-1-600x900.jpg',
+    );
+    _productItem = selectedProduct;
+    notifyListeners();
+    return _productItem;
+
   }
 
 //  List<Product> get favoriteItems {

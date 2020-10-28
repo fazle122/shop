@@ -206,17 +206,15 @@ class Orders with ChangeNotifier{
 
   Future<List<OrderItem>> fetchAndSetOrders(Map<String,dynamic> filters,int pageCount) async {
 
-    // String url = 'http://new.bepari.net/demo/api/V1.0/accounts/invoice/list-my-invoice?page_size=10&page=$pageCount';
-    // String url = 'http://new.bepari.net/demo/api/V1.0/accounts/invoice/list-my-invoice?page_size=100';
-    String url = 'http://new.bepari.net/demo/api/V1.1/accounts/invoice/list?page_size=10&page=$pageCount';
+    String url = 'http://new.bepari.net/demo/api/V1.0/accounts/invoice/list-my-invoice?page_size=10&page=$pageCount';
 
     if (filters != null) {
 
       if (filters.containsKey('invoice_from_date') && filters['invoice_from_date'] != null) {
-        url += '&invoice_from_date=' + filters['invoice_from_date'].toString();
+        url += '&inv_from_date=' + filters['invoice_from_date'].toString();
       }
       if (filters.containsKey('invoice_to_date') && filters['invoice_to_date'] != null) {
-        url += '&invoice_to_date=' + filters['invoice_to_date'].toString();
+        url += '&inv_to_date=' + filters['invoice_to_date'].toString();
       }
 //      if (currentPage != null) {
 //        qString += '&page=$currentPage';

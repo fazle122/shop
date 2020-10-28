@@ -347,9 +347,9 @@ class _CartScreenState extends BaseState<CartScreen>{
                               mainAxisAlignment:
                               MainAxisAlignment.start,
                               children: <Widget>[
-                                Text('SubTotal: ' + cartData.totalAmount.toStringAsFixed(2)),
-                                Text('Delivery charge: ' + cartData.deliveryCharge.toString()),
-                                Text('Total amount : ' + (cartData.totalAmount + cartData.deliveryCharge).toStringAsFixed(2)),
+                                Text('SubTotal: ' + cartData.totalAmount.toStringAsFixed(2) + ' BDT'),
+                                Text('Delivery charge: ' + cartData.deliveryCharge.toString() + ' BDT'),
+                                Text('Total amount : ' + (cartData.totalAmount + cartData.deliveryCharge).toStringAsFixed(2) + ' BDT'),
                               ],
                             )),
                         Container(

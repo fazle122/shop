@@ -122,7 +122,7 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
                         builder: (context) => AlertDialog(
                               title: Text('Are you sure?'),
                               content:
-                                  Text('Do you want to cancel this order?'),
+                                  Text('Do you want to remove this address?'),
                               actions: <Widget>[
                                 FlatButton(
                                   child: Text('No'),

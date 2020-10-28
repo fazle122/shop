@@ -8,7 +8,6 @@ import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
 import 'package:shoptempdb/screens/auth_screen.dart';
 import 'package:shoptempdb/screens/cart_screen.dart';
-import 'package:shoptempdb/screens/completed_orders_screen.dart';
 import 'package:shoptempdb/screens/order_detail_screen.dart';
 import 'package:shoptempdb/screens/orders_screen.dart';
 import 'package:shoptempdb/screens/product_detail_screen.dart';
@@ -76,7 +75,6 @@ class MyApp extends StatelessWidget {
           CartScreen.routeName: (context) => CartScreen(),
           OrdersScreen.routeName: (context) => OrdersScreen(),
           ProfilePage.routeName: (context) => ProfilePage(),
-          CompletedOrdersScreen.routeName : (context) => CompletedOrdersScreen(),
           ShippingAddressScreen.routeName: (context) => ShippingAddressScreen(),
           OrderDetailScreen.routeName: (context) => OrderDetailScreen(),
           ProfileUpdateScreen.routeName: (context) => ProfileUpdateScreen(),

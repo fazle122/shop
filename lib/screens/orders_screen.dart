@@ -86,24 +86,23 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
       }
       _isInit = false;
     }
-
     _scrollController.addListener(() {
-//      if (pageCount - oldPageCount == 1 || oldPageCount - pageCount == 1) {
-      _isInit = true;
-      if (pageCount < lastPage) if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
-        setState(() {
-          pageCount += 1;
-        });
-        getOrderData(filters,pageCount);
-      }
-//      }
+        _isInit = true;
+        if (pageCount < lastPage) if (_scrollController.position.pixels ==
+            _scrollController.position.maxScrollExtent) {
+          setState(() {
+            pageCount += 1;
+          });
+          getOrderData(orders,filters, pageCount);
+        }
     });
 
     super.didChangeDependencies();
   }
 
-  List<OrderItem> getOrderData(Map<String,dynamic> filters,int pageCount) {
+  List<OrderItem> getOrderData(Orders orders,Map<String,dynamic> filters,int pageCount) {
+    if(pageCount <= orders.lastPageCount) {
+
     if (_isInit) {
       if (!isPerformingRequest) {
         setState(() {
@@ -127,8 +126,9 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
         }
 
       });
-//      }
     }
+    }
+
     _isInit = false;
     return finalOrders;
   }
@@ -156,26 +156,6 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
     );
   }
 
-  String convert12(String str) {
-    String finalTime;
-    int h1 = int.parse(str.substring(0, 1)) - 0;
-    int h2 = int.parse(str.substring(1, 2));
-    int hh = h1 * 10 + h2;
-
-    String Meridien;
-    if (hh < 12) {
-      Meridien = " AM";
-    } else
-      Meridien = " PM";
-    hh %= 12;
-    if (hh == 0 && Meridien == ' PM') {
-      finalTime = '12' + str.substring(2);
-    } else {
-      finalTime = hh.toString() + str.substring(2);
-    }
-    finalTime = finalTime + Meridien;
-    return finalTime;
-  }
 
   Widget _buildProgressIndicator() {
     return Padding(
@@ -195,6 +175,8 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final orders = Provider.of<Orders>(context, listen: false);
+
     return Scaffold(
         appBar: AppBar(
           title: Text('All orders'),
@@ -235,7 +217,7 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
                         _isInit = true;
                       });
                     }
-                    getOrderData(filters,1);
+                    getOrderData(orders,filters,1);
                     break;
 
                 }
@@ -292,15 +274,14 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
                   child: Column(
                     children: <Widget>[
                       ListTile(
-                        title: Text('Invoice amount: ' + '\$${finalOrders[i].invoiceAmount}',style: TextStyle(fontSize: 16.0,fontWeight: FontWeight.bold),),
+                        title: Text('Invoice amount: ' + '\$ ${finalOrders[i].invoiceAmount}',style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold),),
                         subtitle:Column(
                           mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            // Flexible(child:Text('Customer name: ' + finalOrders[i].customerName,style: TextStyle(fontSize: 12.0,fontWeight: FontWeight.bold),),),
-                            Flexible(child:Text('Invoice date: ' + DateFormat('EEEE, MMM d, ').format(finalOrders[i].invoiceDate),style: TextStyle(fontSize: 12.0),),),
-                            Flexible(child: Text('Invoice created: ' + DateFormat('EEEE, MMM d, hh:mm aaa').format(finalOrders[i].createdAt.toLocal()),style: TextStyle(fontSize: 10.0),),),
+                            Flexible(child:Text('Invoice date: ' + DateFormat('EEEE, MMM d, ').format(finalOrders[i].invoiceDate),style: TextStyle(fontSize: 15.0),),),
+                            Flexible(child: Text('Invoice created: ' + DateFormat('EEEE, MMM d, hh:mm aaa').format(finalOrders[i].createdAt.toLocal()),style: TextStyle(fontSize: 12.0),),),
                           ],
                         ),
                         trailing: Container(
@@ -308,8 +289,7 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
-                              finalOrders[i].status == 5?SizedBox(width: 0.0,height: 0.0,):
-                              IconButton(
+                              finalOrders[i].status == 0 || finalOrders[i].status == 1?IconButton(
                                 icon: Icon(Icons.cancel),
                                 onPressed: () async {
                                   showDialog(
@@ -383,7 +363,8 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
                                             ],
                                           ));
                                 },
-                              ),
+                              ):
+                              SizedBox(width: 0.0,height: 0.0,),
                               // SizedBox(width: 20.0,),
                             ],
                           ),

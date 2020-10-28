@@ -134,7 +134,7 @@ class Cart with ChangeNotifier {
   }
 
   CartItem findById(String id) {
-    return _items.firstWhere((item) => item.id == id);
+    return _items.firstWhere((item) => item.id == id , orElse: () => null);
   }
 
   Future<void> fetchAndSetCartItems() async {

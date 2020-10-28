@@ -198,13 +198,14 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
   Widget build(BuildContext context) {
     final products = finalProduct;
     final cart = Provider.of<Cart>(context, listen: false);
-
+    final product = Provider.of<Products>(context,listen:false);
     return Scaffold(
       appBar: AppBar(
         title: Text('Bepari'),
         actions: <Widget>[
           IconButton(
-            icon: !_showList
+            // icon: !_showList
+        icon: !product.isList
                 ? Icon(
                     Icons.list,
                     size: 25.0,
@@ -215,9 +216,18 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
                   ),
             onPressed: () {
               if (!mounted) return;
-              setState(() {
-                _showList = !_showList;
-              });
+              // setState(() {
+                // _showList = !_showList;
+              // });
+             if(product.isList == true){
+               setState(() {
+                 product.isList = false;
+               });
+             }else{
+               setState(() {
+                 product.isList = true;
+               });
+             }
             },
           ),
           Consumer<Cart>(
@@ -235,7 +245,8 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
-              showSearch(context: context, delegate: DataSearch(_showList));
+              // showSearch(context: context, delegate: DataSearch(_showList));
+              showSearch(context: context, delegate: DataSearch(product.isList));
             },
           ),
         ],
@@ -252,7 +263,7 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
           child: Column(
             children: <Widget>[
               Expanded(
-                  child: queryItemListDataWidget(context)),
+                  child: queryItemListDataWidget(context,product)),
 
               Consumer<Cart>(
                 builder: (context, cartData, child) =>
@@ -276,9 +287,9 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
                               mainAxisAlignment:
                               MainAxisAlignment.start,
                               children: <Widget>[
-                                Text('SubTotal: ' + cartData.totalAmount.toStringAsFixed(2)),
-                                Text('Delivery charge: ' + cartData.deliveryCharge.toString()),
-                                Text('Total amount : ' + (cartData.totalAmount + cartData.deliveryCharge).toStringAsFixed(2)),
+                                Text('SubTotal: ' + cartData.totalAmount.toStringAsFixed(2) + ' BDT'),
+                                Text('Delivery charge: ' + cartData.deliveryCharge.toString() + ' BDT'),
+                                Text('Total amount : ' + (cartData.totalAmount + cartData.deliveryCharge).toStringAsFixed(2) + ' BDT'),
                                 // cartData.totalAmount > 500
                                 //     ? Text('Delivery charge: 00.00 BDT')
                                 //     : Text('Delivery charge: 50.00 BDT'),
@@ -333,13 +344,14 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
     );
   }
 
-  Widget queryItemListDataWidget(BuildContext context) {
+  Widget queryItemListDataWidget(BuildContext context,Products products) {
     if (finalProduct.isNotEmpty) //has data & performing/not performing
       return ProductItemList(
         productListItems: finalProduct,
         scrollController: _scrollController,
         isPerformingRequest: isPerformingRequest,
-        showList: _showList,
+        // showList: _showList,
+        showList: products.isList,
       );
     if (isPerformingRequest)
       return Center(
