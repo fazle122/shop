@@ -257,34 +257,6 @@ class _ProfilePageState extends BaseState<ProfilePage> {
                           style: TextStyle(fontSize: 14)),
                     ),
                   ),
-//            SizedBox(height: 10.0,),
-//            Container(
-//              height: 30.0,
-//              color: Colors.grey[300],
-//              child: Center(child:Text('password')),
-//            ),
-//            ListTile(
-//              leading: Icon(Icons.vpn_key),
-//              title: Text('*******'),
-//              onTap: (){
-//                Navigator.of(context).pushNamed(Profilepage.routeName);
-//              },
-//            ),
-//            Divider(),
-//            Container(
-//              height: 40.0,
-//              width: 150.0,
-//              child: RaisedButton(
-//                shape: RoundedRectangleBorder(
-//                    borderRadius: BorderRadius.circular(25.0),
-//                    side: BorderSide(color: Colors.grey)),
-//                onPressed: () {},
-//                color: Theme.of(context).primaryColor,
-//                textColor: Colors.white,
-//                child: Text("Change password".toUpperCase(),
-//                    style: TextStyle(fontSize: 14)),
-//              ),
-//            ),
                 ],
               ),)
         ));

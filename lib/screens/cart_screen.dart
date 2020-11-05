@@ -8,6 +8,7 @@ import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/screens/auth_screen.dart';
 import 'package:shoptempdb/screens/confirm_order_screen.dart';
+import 'package:shoptempdb/screens/login_screen.dart';
 import 'package:shoptempdb/widgets/cart_item.dart';
 import 'package:shoptempdb/widgets/confirm_order_dialog.dart';
 import 'package:dio/dio.dart';
@@ -143,7 +144,8 @@ class _CartScreenState extends BaseState<CartScreen>{
                         onPressed: () {
                           auth.isAuth?
                           Navigator.of(context).pushNamed(ShippingAddressScreen.routeName,arguments: cart)
-                              :Navigator.of(context).pushNamed(AuthScreen.routeName);
+                              // :Navigator.of(context).pushNamed(AuthScreen.routeName);
+                              :Navigator.of(context).pushNamed(LoginScreen.routeName);
 //                      showDialog(
 //                          context: context,
 //                          child: _confirmOrderDialog(context, cart)
@@ -340,7 +342,7 @@ class _CartScreenState extends BaseState<CartScreen>{
                                 7,
                             padding:
                             EdgeInsets.only(left: 20.0, top: 2.0),
-                            color: Theme.of(context).primaryColor,
+                            color: Color(0xffFB0084),
                             child: Column(
                               crossAxisAlignment:
                               CrossAxisAlignment.start,
@@ -356,7 +358,7 @@ class _CartScreenState extends BaseState<CartScreen>{
                           height: MediaQuery.of(context).size.height,
                           width:
                           MediaQuery.of(context).size.width * 2 / 7,
-                          color: Theme.of(context).primaryColorDark,
+                          color: Color(0xffB40060),
                           child: InkWell(
                             child: Center(
                               child: Text(
@@ -369,7 +371,8 @@ class _CartScreenState extends BaseState<CartScreen>{
                             onTap: () {
                               auth.isAuth?
                               Navigator.of(context).pushNamed(ShippingAddressScreen.routeName,arguments: cart)
-                                  :Navigator.of(context).pushNamed(AuthScreen.routeName);
+                                  // :Navigator.of(context).pushNamed(AuthScreen.routeName);
+                              :Navigator.of(context).pushNamed(LoginScreen.routeName);
                             },
                           ),
                         ),
