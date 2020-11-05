@@ -162,10 +162,11 @@ class Products with ChangeNotifier {
     }
   }
 
-  Future<List<Product>> searchAndSetProducts({String keyword}) async {
-    print('test');
+  Future<List<Product>> searchAndSetProducts({String keyword,int pageCount}) async {
+
     var url =
-        'http://new.bepari.net/demo/api/V1.0/product-catalog/product/list-product?page_size=100&keyword=$keyword';
+        // 'http://new.bepari.net/demo/api/V1.0/product-catalog/product/list-product?page_size=100&keyword=$keyword';
+    'http://new.bepari.net/demo/api/V1.0/product-catalog/product/list-product?page_size=10&page=$pageCount&keyword=$keyword';
     try {
       final response = await http.get(url);
       if (response.statusCode != 200) {

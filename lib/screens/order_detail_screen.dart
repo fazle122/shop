@@ -63,8 +63,8 @@ class OrderDetailScreen extends StatelessWidget {
                               children: <Widget>[
                                 Text('Total invoice amount: ' + orderDetailData.singOrderItem.invoiceAmount.toString() + ' BDT',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18.0),),
                                 Text('Due: ' + orderDetailData.singOrderItem.totalDue.toString() + ' BDT'),
-                                Text('Subtotal: ' + _fetchItemTotal(orderDetailData.singOrderItem.invoiceItem).toString() + ' BDT'),
-                                Text('Delivery charge: ' + _fetchDeliveryCharge(orderDetailData.singOrderItem.invoiceAmount,orderDetailData.singOrderItem.invoiceItem).toString() + ' BDT'),
+                                // Text('Subtotal: ' + _fetchItemTotal(orderDetailData.singOrderItem.invoiceItem).toString() + ' BDT'),
+                                // Text('Delivery charge: ' + _fetchDeliveryCharge(orderDetailData.singOrderItem.invoiceAmount,orderDetailData.singOrderItem.invoiceItem).toString() + ' BDT'),
 
                               ],
                             ) ,
@@ -97,6 +97,17 @@ class OrderDetailScreen extends StatelessWidget {
                                 margin: EdgeInsets.all(10),
                                 child: Column(
                                   children: <Widget>[
+                                    orderDetailData.singOrderItem.invoiceItem[i].productID == 1 ?
+                                    ListTile(
+                                        title: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            Text(orderDetailData.singOrderItem.invoiceItem[i].productName),
+                                            SizedBox(width: 20.0,),
+                                            Text('\$${(double.parse(orderDetailData.singOrderItem.invoiceItem[i].unitPrice.toString()))}'),
+                                          ],
+                                        )
+                                    ):
                                     ListTile(
                                         title: Center(child:Text(orderDetailData.singOrderItem.invoiceItem[i].productName)),
                                         subtitle: Row(

@@ -142,17 +142,17 @@ class _CreateShippingAddressDialogState
     setState(() {
       _isLoading = true;
     });
-    if (product != null) {
-      await cart.addItem(
-          product['id'].toString(),
-          product['name'],
-          product['unit_price'].toDouble(),
-          product['is_non_inventory'],
-          product['discount'] != null ? product['discount'] : 0.0,
-          product['discount_id'],
-          product['discount_type']);
-    }
-    Future.delayed(Duration(milliseconds: 500), () async {
+    // if (product != null) {
+    //   await cart.addItem(
+    //       product['id'].toString(),
+    //       product['name'],
+    //       product['unit_price'].toDouble(),
+    //       product['is_non_inventory'],
+    //       product['discount'] != null ? product['discount'] : 0.0,
+    //       product['discount_id'],
+    //       product['discount_type']);
+    // }
+    // Future.delayed(Duration(milliseconds: 500), () async {
       if (cart.items.length > 0) {
         List<Cart> ct = [];
         ct = cart.items.map((e) => Cart(id: e.id, cartItem: e)).toList();
@@ -287,7 +287,7 @@ class _CreateShippingAddressDialogState
         _scaffoldKey.currentState.showSnackBar(
             _snackBar('Please add item to cart'));
       }
-    });
+    // });
 
   }
 
@@ -476,7 +476,19 @@ class _CreateShippingAddressDialogState
                           style: TextStyle(fontSize: 14)),
                       onPressed: () async{
                         FocusScope.of(context).requestFocus(new FocusNode());
-                        await _saveForm(shippingAddress,cart);
+                        if (product != null) {
+                          await cart.addItem(
+                              product['id'].toString(),
+                              product['name'],
+                              product['unit_price'].toDouble(),
+                              product['is_non_inventory'],
+                              product['discount'] != null ? product['discount'] : 0.0,
+                              product['discount_id'],
+                              product['discount_type']);
+                        }
+                        Future.delayed(Duration(milliseconds: 500), () async {
+                          await _saveForm(shippingAddress, cart);
+                        });
                       },
                     ),
                   )

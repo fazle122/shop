@@ -401,24 +401,16 @@ class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
                           Future.delayed(Duration(milliseconds: 500), () async {
                             if (cart.items.length > 0) {
                               List<Cart> ct = [];
-                              ct = cart.items
-                                  .map((e) => Cart(id: e.id, cartItem: e))
-                                  .toList();
+                              ct = cart.items.map((e) => Cart(id: e.id, cartItem: e)).toList();
                               Map<String, dynamic> data = Map();
                               for (int i = 0; i < ct.length; i++) {
-                                data.putIfAbsent('product_id[$i]',
-                                    () => ct[i].cartItem.productId);
-                                data.putIfAbsent('quantity[$i]',
-                                    () => ct[i].cartItem.quantity);
-                                data.putIfAbsent('unit_price[$i]',
-                                    () => ct[i].cartItem.price);
-                                data.putIfAbsent('is_non_inventory[$i]',
-                                    () => ct[i].cartItem.isNonInventory);
-                                data.putIfAbsent('discount[$i]',
-                                    () => ct[i].cartItem.discount);
+                                data.putIfAbsent('product_id[$i]', () => ct[i].cartItem.productId);
+                                data.putIfAbsent('quantity[$i]', () => ct[i].cartItem.quantity);
+                                data.putIfAbsent('unit_price[$i]', () => ct[i].cartItem.price);
+                                data.putIfAbsent('is_non_inventory[$i]', () => ct[i].cartItem.isNonInventory);
+                                data.putIfAbsent('discount[$i]', () => ct[i].cartItem.discount);
                               }
-                              data.putIfAbsent('customer_shipping_address_id',
-                                  () => selectedAddressId);
+                              data.putIfAbsent('customer_shipping_address_id', () => selectedAddressId);
                               FormData formData = FormData.fromMap(data);
 
                               if (selectedAddressId != null) {
