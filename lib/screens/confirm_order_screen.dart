@@ -1,482 +1,265 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/cart.dart';
-import 'package:shoptempdb/providers/orders.dart';
-import 'package:shoptempdb/providers/product.dart';
-import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
-import 'package:shoptempdb/screens/orders_screen.dart';
-import 'package:shoptempdb/screens/products_overview_screen.dart';
-import 'package:shoptempdb/screens/test.dart';
-import 'package:shoptempdb/widgets/app_drawer.dart';
-import 'package:shoptempdb/widgets/create_shippingAddress_dialog.dart';
-import 'package:shoptempdb/widgets/order_item.dart';
-import 'package:shoptempdb/widgets/shipping_address_item.dart';
-import 'package:dio/dio.dart';
+import 'package:shoptempdb/screens/delivery_address_screen.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
-import 'package:intl/intl.dart';
-import 'package:shoptempdb/widgets/update_shippingAddress_dialog.dart';
+import 'package:shoptempdb/screens/order_confirmation_screen.dart';
 
-//import 'package:shoptempdb/widgets/update_shippingAddress_dialog_test.dart';
-import 'package:flushbar/flushbar.dart';
 
-import '../base_state.dart';
-
-class ShippingAddressScreen extends StatefulWidget {
-  static const routeName = '/shipping_address';
+class ConfirmOrderScreen extends StatefulWidget{
+  static const routeName = '/confirm_order';
 
   @override
-  _ShippingAddressScreenState createState() => _ShippingAddressScreenState();
-}
-
-class _ShippingAddressScreenState extends BaseState<ShippingAddressScreen> {
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
-  AddressItem selectedAddress;
-  String selectedAddressId;
-  DateTime date = DateTime.now();
-  final format = DateFormat('yyyy-MM-dd');
-  var _isInit = true;
-  var _isLoading = false;
-  Map<String, dynamic> product;
-
-//  FormData data;
-
-//  @override
-//  void initState() {
-//    super.initState();
-//    data = FormData();
-//  }
-
-  @override
-  void didChangeDependencies() {
-    if (_isInit) {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = true;
-      });
-      getDeliveryCharge();
-      Provider.of<ShippingAddress>(context).fetchShippingAddress().then((_) {
-        if (!mounted) return;
-        setState(() {
-          _isLoading = false;
-        });
-      });
-    }
-    _isInit = false;
-    super.didChangeDependencies();
+  State<StatefulWidget> createState() {
+    return _ConfirmOrderScreenState();
   }
 
-  setSelectedAddress(AddressItem address) {
+}
+
+
+class _ConfirmOrderScreenState extends State<ConfirmOrderScreen>{
+
+  DateTime _deliveryDate;
+  TimeOfDay currentTime = TimeOfDay.now();
+  final format = DateFormat('yyyy-MM-dd');
+  final timeFormat = DateFormat("HH:mm");
+
+  int selectedRadioTile;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedRadioTile = 3;
+  }
+
+  setSelectedRadioTile(int val) {
     setState(() {
-      selectedAddress = address;
-      selectedAddressId = address.id;
+      selectedRadioTile = val;
     });
   }
 
-  getDeliveryCharge() async {
-    final cart = await Provider.of<Cart>(context, listen: false);
-    Map<String, dynamic> data = Map();
-    data.putIfAbsent('amount', () => cart.totalAmount.toDouble());
-    FormData formData = FormData.fromMap(data);
-    var response = await Provider.of<Products>(context, listen: false)
-        .fetchDeliveryCharge(formData);
-    if (response != null) {
-      setState(() {
-        product = response['data']['product'];
-      });
-    }
-  }
-
-  List<Widget> createRadioListUsers(List<AddressItem> address) {
+  Widget _paymentOptions(BuildContext context) {
     var innerBorder = Border.all(width: 2.0, color: Colors.black.withOpacity(0.3));
-    var outerBorder = Border.all(width: 2.0, color: Colors.black.withOpacity(0));
-    List<Widget> widgets = [];
-    for (AddressItem data in address) {
-      widgets.add(Padding(
-        padding: const EdgeInsets.all(0.0),
-        child: Container(
-            decoration: BoxDecoration(
-                border: outerBorder, borderRadius: BorderRadius.circular(0.0)),
+    var outerBorder = Border.all(width: 2.0, color: Colors.black.withOpacity(0.0));
+    return ListView(
+      shrinkWrap: true,
+      children: ListTile.divideTiles(
+        context: context,
+        tiles: [
+          Padding(
+            padding: const EdgeInsets.all(0.0),
             child: Container(
-              decoration: BoxDecoration(
-                  border: innerBorder, borderRadius: BorderRadius.circular(0.0)),
-              child: Dismissible(
-                  key: UniqueKey(),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    color: Theme.of(context).errorColor,
-                    child: Icon(
-                      Icons.delete,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                    alignment: Alignment.centerRight,
-                    padding: EdgeInsets.only(right: 20),
-                    margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
-                  ),
-                  confirmDismiss: (direction) {
-                    return showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) => AlertDialog(
-                              title: Text('Are you sure?'),
-                              content:
-                                  Text('Do you want to remove this address?'),
-                              actions: <Widget>[
-                                FlatButton(
-                                  child: Text('No'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop(false);
-                                  },
-                                ),
-                                FlatButton(
-                                  child: Text('Yes'),
-                                  onPressed: () {
-                                    Navigator.of(context).pop(true);
-                                  },
-                                ),
-                              ],
-                            ));
-                  },
-                  onDismissed: (direction) async {
-                    if (!mounted) return;
-                    setState(() {
-                      _isLoading = true;
-                    });
-                    await Provider.of<ShippingAddress>(context, listen: false)
-                        .deleteShippingAddress(data.id);
-                    if (!mounted) return;
-                    setState(() {
-                      _isInit = true;
-                      _isLoading = false;
-                    });
-                  },
+                decoration: BoxDecoration(border: outerBorder, borderRadius: BorderRadius.circular(0.0)),
+                child: Container(decoration: BoxDecoration(border: innerBorder, borderRadius: BorderRadius.circular(0.0)),
                   child: ListTile(
                     title: RadioListTile(
-                      value: data,
-                      groupValue: selectedAddress,
-                      title: Text(data.shippingAddress),
-                      // subtitle: Text(data.phoneNumber),
+                      value: 1,
+                      groupValue: selectedRadioTile,
+                      title: Row(
+                        children: <Widget>[
+                          Image.asset('assets/Bkash-Logo.png'),
+                          Text('bkash Checkout')
+                        ],
+                      ),
                       onChanged: (currentAddress) {
-                        print("New address ${currentAddress.id}");
-                        setSelectedAddress(currentAddress);
+                        setSelectedRadioTile(currentAddress);
                       },
-                      selected: selectedAddress == data,
-                      activeColor: Colors.green,
+                      selected: selectedRadioTile == 1,
+                      activeColor: Colors.red,
                     ),
-                    trailing: InkWell(
-                      child: Text('Edit',style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold),),
-                      // icon: Icon(Icons.edit),
-                      onTap: () async {
-//                        await showDialog(
-//                            context: context,
-//                            child: TestWidget(
-//                              addressItem: data,
-//                            ));
-                        await showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            child: UpdateShippingAddressDialog(
-                              addressItem: data,
-                            ));
-                        if (!mounted) return;
-                        setState(() {
-                          _isInit = true;
-                        });
-                      },
-                    ),
-                  )),
-            )
+                  ),
+                )
             ),
-      ));
-    }
-    return widgets;
-  }
-
-  Widget _snackBar(String text) {
-    return SnackBar(
-      backgroundColor: Theme.of(context).primaryColor,
-      content: Container(
-          padding: EdgeInsets.only(top: 5.0, bottom: 5.0), child: Text(text)),
-      duration: Duration(seconds: 2),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(0.0),
+            child: Container(decoration: BoxDecoration(
+                border: outerBorder, borderRadius: BorderRadius.circular(0.0)),
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: innerBorder, borderRadius: BorderRadius.circular(0.0)),
+                  child: ListTile(
+                    title: RadioListTile(
+                      value: 2,
+                      groupValue: selectedRadioTile,
+                      title: Row(
+                        children: <Widget>[
+                          Image.asset('assets/credit-card-Logo.png'),
+                          Text('Credit or debit card')
+                        ],
+                      ),
+                      onChanged: (currentAddress) {
+                        setSelectedRadioTile(currentAddress);
+                      },
+                      selected: selectedRadioTile == 1,
+                      activeColor: Colors.red,
+                    ),
+                  ),
+                )
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(0.0),
+            child: Container(
+                decoration: BoxDecoration(
+                    border: outerBorder, borderRadius: BorderRadius.circular(0.0)),
+                child: Container(
+                  decoration: BoxDecoration(
+                      border: innerBorder, borderRadius: BorderRadius.circular(0.0)),
+                  child: ListTile(
+                    title: RadioListTile(
+                      value: 3,
+                      groupValue: selectedRadioTile,
+                      title: Text('cash on delivery'),
+                      onChanged: (currentAddress) {
+                        setSelectedRadioTile(currentAddress);
+                      },
+                      selected: selectedRadioTile == 1,
+                      activeColor: Colors.red,
+                    ),
+                  ),
+                )
+            ),
+          ),
+        ],
+      ).toList(),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-//    final shippingData = Provider.of<ShippingAddress>(context);
-    final cart = ModalRoute.of(context).settings.arguments as Cart;
-    return Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          title: Text('Confirm order'),
-        ),
-        drawer: AppDrawer(),
-        body: _isLoading
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
-            : SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    // SizedBox(
-                    //   height: 20.0,
-                    // ),
-                    Container(
-                      height: MediaQuery.of(context).size.height * .5 / 6,
-                      padding: EdgeInsets.only(left:10.0),
-                      child: Row(
-                        children: <Widget>[
-                          Icon(Icons.add_location),
-                          Text('Select Delivery Address',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold),),
-                        ],
-                      ),
-                      // child:  Text('Select Delivery Address'),
-                    ),
-                    // SizedBox(
-                    //   height: 10.0,
-                    // ),
-                    Consumer<ShippingAddress>(
-                        builder: (context, shippingData, child) =>
-                            Container(
-                              padding: EdgeInsets.only(left: 10.0,right: 10.0),
-                              height: MediaQuery.of(context).size.height * 3.5 / 6,
-                              child: ListView(
-                                children: createRadioListUsers(
-                                    shippingData.allShippingAddress),
-                              ),
-                            )),
-                    // SizedBox(
-                    //   height: 10.0,
-                    // ),
-                    Container(
-                        margin: EdgeInsets.only(right: 12.0,top: 20.0,bottom: 20.0),
-                        height: MediaQuery.of(context).size.height * .4/ 6,
-                        width: 160.0,
-                        child: Column(
-                          children: <Widget>[
-                            MaterialButton(
-                              height: 40.0,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(0.0),
-                                  side: BorderSide(color: Colors.black)),
-                              onPressed: () {
-                                if (cart.items.length > 0) {
-                                  showDialog(
-                                      context: context,
-                                      barrierDismissible: false,
-                                      child: CreateShippingAddressDialog(cart: cart));
-                                } else {
-                                  _scaffoldKey.currentState.showSnackBar(
-                                      _snackBar('Please add item to cart'));
-                                }
-                              },
-                              textColor: Colors.black,
-                              child: Row(
-                                children: <Widget>[
-                                  Icon(Icons.add_circle_outline),
-                                  SizedBox(width: 10.0,),
-                                  Text('New Address',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 15.0),)
-                                ],
-                              ),
-                              // color: Theme.of(context).primaryColor,
-                              // child: Text("Add new address".toUpperCase(),
-                              //     style: TextStyle(fontSize: 14)),
-                            ),
-                          ],
-                        )
-                      ),
-                    // SizedBox(
-                    //   height: 20.0,
-                    // ),
-                    Container(
-                        height: 50.0,
-                        color: Theme.of(context).primaryColor,
-                        child: Row(
-                          children: <Widget>[
-                            Container(
-                                width: MediaQuery.of(context).size.width * 5/7,
-                                padding:
-                                EdgeInsets.only(left: 20.0, top: 2.0),
-                                color: Color(0xffFB0084),
-                                child: Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Text(' Confirm order',style: TextStyle(fontSize:18.0,fontWeight: FontWeight.bold,color: Colors.white),)
-                                  ],
-                                )),
-                            Container(
-                              height: MediaQuery.of(context).size.height,
-                              width:
-                              MediaQuery.of(context).size.width * 2 / 7,
-                              color: Color(0xffB40060),
-                              child: InkWell(
-                                child: Center(
-                                  // child: Text('Check out', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
-                                  child: Text((cart.totalAmount + cart.deliveryCharge).toStringAsFixed(2) + ' BDT',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
-                                ),
-                                onTap: () {
+    final cart = Provider.of<Cart>(context);
 
-                                },
-                              ),
-                            ),
+    return Scaffold(
+      appBar: AppBar(title: Text('Confirm order'),),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Container(
+            height: MediaQuery.of(context).size.height * 1/12,
+            child: Padding(
+              padding: EdgeInsets.only(top: 20.0,left: 20.0),
+              child:Text('Select Payment Option',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold,color: Colors.grey),),
+            ),
+          ),
+          Container(
+            height: MediaQuery.of(context).size.height * 7.1/12,
+            padding: EdgeInsets.only(left:10.0,right:10.0),
+            child:_paymentOptions(context),
+          ),
+          Container(
+            height: MediaQuery.of(context).size.height * 1/12,
+            child: Padding(
+              padding: EdgeInsets.only(left: 20.0),
+              child:Text('By clicking the "Confirm order" button, you \n agree with our "Terms & Conditions".'),
+            ),
+          ),
+          InkWell(
+            child: Container(
+                height: MediaQuery.of(context).size.height * 1/12,
+
+                color: Theme.of(context).primaryColor,
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                        width: MediaQuery.of(context).size.width * 5/7,
+                        padding:
+                        EdgeInsets.only(left: 20.0, top: 2.0),
+                        color: Color(0xffFB0084),
+                        child: Column(
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                          mainAxisAlignment:
+                          MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(' Confirm order',style: TextStyle(fontSize:18.0,fontWeight: FontWeight.bold,color: Colors.white),)
                           ],
-                        ))
-//                     Container(
-//                       height: 40.0,
-//                       width: 150.0,
-//                       child: RaisedButton(
-//                         color: Theme.of(context).primaryColor,
-//                         textColor: Colors.white,
-//                         child: Text("CONFIRM ORDER".toUpperCase(),
-//                             style: TextStyle(fontSize: 14)),
-//                         shape: RoundedRectangleBorder(
-//                             borderRadius: BorderRadius.circular(25.0),
-//                             side: BorderSide(color: Colors.grey)),
-//                         onPressed: () async {
-//                           FocusScope.of(context).requestFocus(new FocusNode());
-//                           // cart.addItem(
-//                           // cartData.items[i].productId, cartData.items[i].title,
-//                           // cartData.items[i].price,cartData.items[i].isNonInventory,
-//                           // cartData.items[i].discount,cartData.items[i].discountId,
-//                           // cartData.items[i].discountType);
-//
-//                           if (product != null) {
-//                             await cart.addItem(
-//                                 product['id'].toString(),
-//                                 product['name'],
-//                                 product['unit_price'].toDouble(),
-//                                 product['is_non_inventory'],
-//                                 product['discount'] != null ? product['discount'] : 0.0,
-//                                 product['discount_id'],
-//                                 product['discount_type']);
-//                           }
-//                           Future.delayed(Duration(milliseconds: 500), () async {
-//                             if (cart.items.length > 0) {
-//                               List<Cart> ct = [];
-//                               ct = cart.items.map((e) => Cart(id: e.id, cartItem: e)).toList();
-//                               Map<String, dynamic> data = Map();
-//                               for (int i = 0; i < ct.length; i++) {
-//                                 data.putIfAbsent('product_id[$i]', () => ct[i].cartItem.productId);
-//                                 data.putIfAbsent('quantity[$i]', () => ct[i].cartItem.quantity);
-//                                 data.putIfAbsent('unit_price[$i]', () => ct[i].cartItem.price);
-//                                 data.putIfAbsent('is_non_inventory[$i]', () => ct[i].cartItem.isNonInventory);
-//                                 data.putIfAbsent('discount[$i]', () => ct[i].cartItem.discount);
-//                               }
-//                               data.putIfAbsent('customer_shipping_address_id', () => selectedAddressId);
-//                               FormData formData = FormData.fromMap(data);
-//
-//                               if (selectedAddressId != null) {
-//                                 setState(() {
-//                                   _isLoading = true;
-//                                 });
-//                                 final response = await Provider.of<Orders>(context, listen: false).addOrder(formData);
-//                                 if (response != null) {
-//                                   setState(() {
-//                                     _isLoading = false;
-//                                   });
-//                                   await cart.clearCartTable();
-//                                   Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
-//                                   Flushbar(
-//                                     duration: Duration(seconds: 10),
-//                                     margin: EdgeInsets.only(bottom: 2),
-//                                     padding: EdgeInsets.all(10),
-//                                     borderRadius: 8,
-//                                     backgroundColor: Colors.green.shade400,
-//                                     boxShadows: [
-//                                       BoxShadow(
-//                                         color: Colors.black45,
-//                                         offset: Offset(3, 3),
-//                                         blurRadius: 3,
-//                                       ),
-//                                     ],
-//                                     // All of the previous Flushbars could be dismissed by swiping down
-//                                     // now we want to swipe to the sides
-//                                     dismissDirection:
-//                                         FlushbarDismissDirection.HORIZONTAL,
-//                                     // The default curve is Curves.easeOut
-//                                     forwardAnimationCurve:
-//                                         Curves.fastLinearToSlowEaseIn,
-//                                     title: 'Order confirmation',
-//                                     message: response['msg'],
-//                                     mainButton: FlatButton(
-//                                       child: Text('view order'),
-//                                       onPressed: () {
-//                                         Navigator.of(context)
-//                                             .pushNamed(OrdersScreen.routeName);
-//                                       },
-//                                     ),
-//                                   )..show(context);
-// //                          showDialog(
-// //                              context: context,
-// //                              barrierDismissible: false,
-// //                              builder: (ctx) => AlertDialog(
-// //                                title: Text('Order confirmation'),
-// //                                content: Text(response['msg']),
-// //                                actions: <Widget>[
-// //                                  FlatButton(
-// //                                    child: Text('view order'),
-// //                                    onPressed: () {
-// //                                      Navigator.of(context).pushNamed(
-// //                                          OrdersScreen.routeName);
-// //                                    },
-// //                                  ),
-// //                                  FlatButton(
-// //                                    child: Text('create another'),
-// //                                    onPressed: () {
-// //                                      Navigator.of(context).pushNamed(
-// //                                          ProductsOverviewScreen
-// //                                              .routeName);
-// //                                    },
-// //                                  )
-// //                                ],
-// //                              ));
-//                                 } else {
-//                                   await cart.removeCartItemRow('1');
-//                                   setState(() {
-//                                     _isLoading = false;
-//                                   });
-//                                   Flushbar(
-//                                     duration: Duration(seconds: 5),
-//                                     margin: EdgeInsets.only(bottom: 2),
-//                                     padding: EdgeInsets.all(10),
-//                                     borderRadius: 8,
-//                                     backgroundColor: Colors.red.shade400,
-//                                     boxShadows: [
-//                                       BoxShadow(
-//                                         color: Colors.black45,
-//                                         offset: Offset(3, 3),
-//                                         blurRadius: 3,
-//                                       ),
-//                                     ],
-//                                     dismissDirection:
-//                                         FlushbarDismissDirection.HORIZONTAL,
-//                                     forwardAnimationCurve:
-//                                         Curves.fastLinearToSlowEaseIn,
-//                                     title: 'Order confirmation',
-//                                     message:
-//                                         'Something wrong. Please try again',
-//                                   )..show(context);
-//                                 }
-//                               } else {
-//                                 _scaffoldKey.currentState.showSnackBar(_snackBar(
-//                                     'Please select a delivery address or create new one'));
-//                               }
-//                             } else {
-//                               _scaffoldKey.currentState.showSnackBar(
-//                                   _snackBar('Please add item to cart'));
-//                             }
-//                           });
-//                         },
-//                       ),
-//                     ),
+                        )),
+                    Container(
+                      height: MediaQuery.of(context).size.height,
+                      width:
+                      MediaQuery.of(context).size.width * 2 / 7,
+                      color: Color(0xffB40060),
+                      child: InkWell(
+                        child: Center(
+                          // child: Text('Check out', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                          child: Text((cart.totalAmount + cart.deliveryCharge).toStringAsFixed(2) + ' BDT',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
+                        ),
+                        onTap: () {
+
+                        },
+                      ),
+                    ),
                   ],
-                ),
-              ));
+                )),
+            onTap: (){
+              Navigator.pushNamed(context, OrderConfirmationScreen.routeName);
+            },
+          )
+
+          // RadioListTile(
+          //
+          //   value: 1,
+          //   groupValue: selectedRadioTile,
+          //   title: Text("Radio 1"),
+          //   subtitle: Text("Radio 1 Subtitle"),
+          //   onChanged: (val) {
+          //     print("Radio Tile pressed $val");
+          //     setSelectedRadioTile(val);
+          //   },
+          //   activeColor: Colors.red,
+          //   secondary: OutlineButton(
+          //     child: Text("Say Hi"),
+          //     onPressed: () {
+          //       print("Say Hello");
+          //     },
+          //   ),
+          //   selected: false,
+          // ),
+          // RadioListTile(
+          //   value: 2,
+          //   groupValue: selectedRadioTile,
+          //   title: Text("Radio 2"),
+          //   subtitle: Text("Radio 2 Subtitle"),
+          //   onChanged: (val) {
+          //     print("Radio Tile pressed $val");
+          //     setSelectedRadioTile(val);
+          //   },
+          //   activeColor: Colors.red,
+          //   secondary: OutlineButton(
+          //     child: Text("Say Hi"),
+          //     onPressed: () {
+          //       print("Say Hello");
+          //     },
+          //   ),
+          //   selected: false,
+          // ),
+          // RadioListTile(
+          //   value: 3,
+          //   groupValue: selectedRadioTile,
+          //   title: Text("Radio 3"),
+          //   subtitle: Text("Radio 1 Subtitle"),
+          //   onChanged: (val) {
+          //     print("Radio Tile pressed $val");
+          //     setSelectedRadioTile(val);
+          //   },
+          //   activeColor: Colors.red,
+          //   secondary: OutlineButton(
+          //     child: Text("Say Hi"),
+          //     onPressed: () {
+          //       print("Say Hello");
+          //     },
+          //   ),
+          //   selected: true,
+          // ),
+
+        ],
+      ),
+    );
   }
+
 }

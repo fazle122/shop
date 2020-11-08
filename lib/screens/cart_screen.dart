@@ -7,7 +7,7 @@ import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/screens/auth_screen.dart';
-import 'package:shoptempdb/screens/confirm_order_screen.dart';
+import 'package:shoptempdb/screens/delivery_address_screen.dart';
 import 'package:shoptempdb/screens/login_screen.dart';
 import 'package:shoptempdb/widgets/cart_item.dart';
 import 'package:shoptempdb/widgets/confirm_order_dialog.dart';
@@ -143,7 +143,7 @@ class _CartScreenState extends BaseState<CartScreen>{
                         child: Text('Order now'),
                         onPressed: () {
                           auth.isAuth?
-                          Navigator.of(context).pushNamed(ShippingAddressScreen.routeName,arguments: cart)
+                          Navigator.of(context).pushNamed(DeliveryAddressScreen.routeName,arguments: cart)
                               // :Navigator.of(context).pushNamed(AuthScreen.routeName);
                               :Navigator.of(context).pushNamed(LoginScreen.routeName);
 //                      showDialog(
@@ -370,7 +370,7 @@ class _CartScreenState extends BaseState<CartScreen>{
                             ),
                             onTap: () {
                               auth.isAuth?
-                              Navigator.of(context).pushNamed(ShippingAddressScreen.routeName,arguments: cart)
+                              Navigator.of(context).pushNamed(DeliveryAddressScreen.routeName,arguments: cart)
                                   // :Navigator.of(context).pushNamed(AuthScreen.routeName);
                               :Navigator.of(context).pushNamed(LoginScreen.routeName);
                             },

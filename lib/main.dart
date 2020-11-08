@@ -8,14 +8,16 @@ import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
 import 'package:shoptempdb/screens/auth_screen.dart';
 import 'package:shoptempdb/screens/cart_screen.dart';
+import 'package:shoptempdb/screens/confirm_order_screen.dart';
 import 'package:shoptempdb/screens/login_screen.dart';
+import 'package:shoptempdb/screens/order_confirmation_screen.dart';
 import 'package:shoptempdb/screens/order_detail_screen.dart';
 import 'package:shoptempdb/screens/orders_screen.dart';
 import 'package:shoptempdb/screens/product_detail_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 import 'package:shoptempdb/screens/profile_screen.dart';
 import 'package:shoptempdb/screens/profile_update_screen.dart';
-import 'package:shoptempdb/screens/confirm_order_screen.dart';
+import 'package:shoptempdb/screens/delivery_address_screen.dart';
 import 'package:shoptempdb/screens/splash_screen.dart';
 
 void main() => runApp(MyApp());
@@ -76,7 +78,9 @@ class MyApp extends StatelessWidget {
           CartScreen.routeName: (context) => CartScreen(),
           OrdersScreen.routeName: (context) => OrdersScreen(),
           ProfilePage.routeName: (context) => ProfilePage(),
-          ShippingAddressScreen.routeName: (context) => ShippingAddressScreen(),
+          DeliveryAddressScreen.routeName: (context) => DeliveryAddressScreen(),
+          ConfirmOrderScreen.routeName:(context) => ConfirmOrderScreen(),
+          OrderConfirmationScreen.routeName:(context) => OrderConfirmationScreen(),
           OrderDetailScreen.routeName: (context) => OrderDetailScreen(),
           ProfileUpdateScreen.routeName: (context) => ProfileUpdateScreen(),
           LoginScreen.routeName: (context) => LoginScreen(),

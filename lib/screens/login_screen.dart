@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shoptempdb/models/http_exception.dart';
 import 'package:shoptempdb/providers/auth.dart';
 import 'package:shoptempdb/providers/cart.dart';
-import 'package:shoptempdb/screens/confirm_order_screen.dart';
+import 'package:shoptempdb/screens/delivery_address_screen.dart';
 import 'package:toast/toast.dart';
 
 
@@ -102,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen>{
         Toast.show('Please provide OTP code', context, duration: Toast.LENGTH_LONG, gravity: Toast.CENTER);
       }else{
         await Provider.of<Auth>(context, listen: false).login(_phoneController.text, _otpController.text);
-        Navigator.of(context).pushReplacementNamed(ShippingAddressScreen.routeName);
+        Navigator.of(context).pushReplacementNamed(DeliveryAddressScreen.routeName);
       }
 
 
@@ -164,7 +164,6 @@ class _LoginScreenState extends State<LoginScreen>{
     });
   }
 
-  TextEditingController _phoneNumberController;
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<Auth>(context);
