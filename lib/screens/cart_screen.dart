@@ -101,65 +101,61 @@ class _CartScreenState extends BaseState<CartScreen>{
     final auth = Provider.of<Auth>(context);
     return Scaffold(
         appBar: AppBar(
-          title: Text('Your cart'),
+          title: Text('My Basket'),
         ),
-        body:
-//        _isLoading?
-//        Center(child: CircularProgressIndicator(),)
-//            :
-        Consumer<Cart>(builder: (context,cartData,child) =>
+        body: Consumer<Cart>(builder: (context,cartData,child) =>
         cartData.items.length >0 ?
         Column(
             children: <Widget>[
-              Card(
-                margin: EdgeInsets.all(15.0),
-                child: Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(
-                        'Sub Total',
-                        style: TextStyle(fontSize: 20),
-                      ),
-                      Spacer(),
-                      Chip(
-                        label: cart.totalAmount<500 && cart.items.length >0 ?
-//                    Text('\$${(cart.totalAmount + 50).toStringAsFixed(2)}',
-                        Text('\$${(cart.totalAmount).toStringAsFixed(2)}',
-                          style: TextStyle(
-                              color:
-                              Theme.of(context).primaryTextTheme.title.color),
-                        ) :
-                        Text('\$${cart.totalAmount.toStringAsFixed(2)}',
-                          style: TextStyle(
-                              color:
-                              Theme.of(context).primaryTextTheme.title.color),
-                        ),
-                        backgroundColor: Theme.of(context).primaryColor,
-                      ),
-                      FlatButton(
-                        textColor: Theme.of(context).primaryColor,
-                        child: Text('Order now'),
-                        onPressed: () {
-                          auth.isAuth?
-                          Navigator.of(context).pushNamed(DeliveryAddressScreen.routeName,arguments: cart)
-                              // :Navigator.of(context).pushNamed(AuthScreen.routeName);
-                              :Navigator.of(context).pushNamed(LoginScreen.routeName);
-//                      showDialog(
-//                          context: context,
-//                          child: _confirmOrderDialog(context, cart)
-////                          child: ConfirmOrderDialog()
-//                      );
-//                      Provider.of<Orders>(context, listen: false).addOrder(
-//                          cart.items.values.toList(), cart.totalAmount);
-//                      cart.clear();
-                        },
-                      )
-                    ],
-                  ),
-                ),
-              ),
+//               Card(
+//                 margin: EdgeInsets.all(15.0),
+//                 child: Padding(
+//                   padding: EdgeInsets.all(8),
+//                   child: Row(
+//                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                     children: <Widget>[
+//                       Text(
+//                         'Sub Total',
+//                         style: TextStyle(fontSize: 20),
+//                       ),
+//                       Spacer(),
+//                       Chip(
+//                         label: cart.totalAmount<500 && cart.items.length >0 ?
+// //                    Text('\$${(cart.totalAmount + 50).toStringAsFixed(2)}',
+//                         Text('\$${(cart.totalAmount).toStringAsFixed(2)}',
+//                           style: TextStyle(
+//                               color:
+//                               Theme.of(context).primaryTextTheme.title.color),
+//                         ) :
+//                         Text('\$${cart.totalAmount.toStringAsFixed(2)}',
+//                           style: TextStyle(
+//                               color:
+//                               Theme.of(context).primaryTextTheme.title.color),
+//                         ),
+//                         backgroundColor: Theme.of(context).primaryColor,
+//                       ),
+//                       FlatButton(
+//                         textColor: Theme.of(context).primaryColor,
+//                         child: Text('Order now'),
+//                         onPressed: () {
+//                           auth.isAuth?
+//                           Navigator.of(context).pushNamed(DeliveryAddressScreen.routeName,arguments: cart)
+//                               // :Navigator.of(context).pushNamed(AuthScreen.routeName);
+//                               :Navigator.of(context).pushNamed(LoginScreen.routeName);
+// //                      showDialog(
+// //                          context: context,
+// //                          child: _confirmOrderDialog(context, cart)
+// ////                          child: ConfirmOrderDialog()
+// //                      );
+// //                      Provider.of<Orders>(context, listen: false).addOrder(
+// //                          cart.items.values.toList(), cart.totalAmount);
+// //                      cart.clear();
+//                         },
+//                       )
+//                     ],
+//                   ),
+//                 ),
+//               ),
               SizedBox(
                 height: 10,
               ),
@@ -329,29 +325,53 @@ class _CartScreenState extends BaseState<CartScreen>{
               cart.items.length > 0
                   ?Consumer<Cart>(
                 builder: (context, cartData, child) =>
-                cart.items.length > 0
-                    ?
-                Container(
+                    Container(
+                      padding: EdgeInsets.only(left: 10.0,right: 10.0),
+                        height: 30.0,
+                        color: Color(0xffC6C6C6),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text('SubTotal'),
+                            Text(cartData.totalAmount.toStringAsFixed(2)),
+
+                          ],
+                        )),
+              ):SizedBox(width: 0.0,height: 0.0,),
+              cart.items.length > 0
+                  ?Consumer<Cart>(
+                builder: (context, cartData, child) =>
+                    Container(
+                        padding: EdgeInsets.only(left: 10.0,right: 10.0),
+                        height: 30.0,
+                        color: Color(0xffDEDEDE),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text('Delivery fee'),
+                            Text(cartData.deliveryCharge.toString()),
+                          ],
+                        )),
+              ):SizedBox(width: 0.0,height: 0.0,),
+              cart.items.length > 0
+                  ?Consumer<Cart>(
+                builder: (context, cartData, child) =>
+                InkWell(
+                  child:Container(
                     height: 50.0,
                     color: Theme.of(context).primaryColor,
                     child: Row(
                       children: <Widget>[
                         Container(
-                            width: MediaQuery.of(context).size.width *
-                                5 /
-                                7,
-                            padding:
-                            EdgeInsets.only(left: 20.0, top: 2.0),
+                            width: MediaQuery.of(context).size.width * 5 / 7,
+                            padding: EdgeInsets.only(left: 20.0, top: 2.0),
                             color: Color(0xffFB0084),
                             child: Column(
-                              crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                              mainAxisAlignment:
-                              MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
-                                Text('SubTotal: ' + cartData.totalAmount.toStringAsFixed(2) + ' BDT'),
-                                Text('Delivery charge: ' + cartData.deliveryCharge.toString() + ' BDT'),
-                                Text('Total amount : ' + (cartData.totalAmount + cartData.deliveryCharge).toStringAsFixed(2) + ' BDT'),
+                                Text('Place order',style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold,color: Colors.white),),
+
                               ],
                             )),
                         Container(
@@ -359,89 +379,19 @@ class _CartScreenState extends BaseState<CartScreen>{
                           width:
                           MediaQuery.of(context).size.width * 2 / 7,
                           color: Color(0xffB40060),
-                          child: InkWell(
-                            child: Center(
-                              child: Text(
-                                'Check out',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
+                          child: Center(
+                              child: Text((cartData.totalAmount + cartData.deliveryCharge).toStringAsFixed(2),style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold,color: Colors.white),),
                             ),
-                            onTap: () {
-                              auth.isAuth?
-                              Navigator.of(context).pushNamed(DeliveryAddressScreen.routeName,arguments: cart)
-                                  // :Navigator.of(context).pushNamed(AuthScreen.routeName);
-                              :Navigator.of(context).pushNamed(LoginScreen.routeName);
-                            },
-                          ),
                         ),
                       ],
-                    )): SizedBox(
-                  width: 0.0,
-                  height: 0.0,
-                ),
-              )
-//               Container(
-//                   height: 50.0,
-//                   color: Theme.of(context).primaryColor,
-//                   child: Row(
-//                     children: <Widget>[
-//                       Container(
-//                           width: MediaQuery.of(context).size.width * 5 / 7,
-//                           padding: EdgeInsets.only(left: 20.0),
-//                           color: Theme.of(context).primaryColor,
-//                           child: Column(
-//                             crossAxisAlignment: CrossAxisAlignment.start,
-//                             mainAxisAlignment: MainAxisAlignment.start,
-//                             children: <Widget>[
-//                               Text('SubTotal: ' +
-//                                   cart.totalAmount.toStringAsFixed(2)),
-//                               cart.totalAmount>500 ? Text('Delivery charge: 00.00 BDT'):Text('Delivery charge: 50.00 BDT'),
-//                               cart.totalAmount>500 ?
-//                               Text(
-//                                 'Total amount : ' +
-//                                     cart.totalAmount.toStringAsFixed(2),
-//                                 style: TextStyle(color: Colors.white),
-//                               )
-//                                   :Text(
-//                                 'Total amount : ' +
-//                                     (cart.totalAmount + 50.00).toStringAsFixed(2),
-//                                 style: TextStyle(color: Colors.white),
-//                               ),
-//                             ],
-//                           )),
-//                       Container(
-//                         height: MediaQuery.of(context).size.height,
-//                         width: MediaQuery.of(context).size.width * 2 / 7,
-//                         color: Theme.of(context).primaryColorDark,
-//                         child: InkWell(
-//                           child: Center(
-//                             child: Text(
-//                               'Check out',
-//                               style: TextStyle(
-//                                   color: Colors.white,
-//                                   fontWeight: FontWeight.bold),
-//                             ),
-//                           ),
-//                           onTap: () {
-//                             auth.isAuth?
-//                             Navigator.of(context).pushNamed(ShippingAddressScreen.routeName,arguments: cart)
-//                                 :Navigator.of(context).pushNamed(AuthScreen.routeName);
-// //                            showDialog(
-// //                                context: context,
-// //                                child: _confirmOrderDialog(context, cart)
-// ////                                child: ConfirmOrderDialog()
-// //                            );
-//                           },
-//                         ),
-//                       ),
-//                     ],
-//                   ))
-                  : SizedBox(
-                width: 0.0,
-                height: 0.0,
-              )
+                    )),
+                  onTap: () {
+                    auth.isAuth?
+                    Navigator.of(context).pushNamed(DeliveryAddressScreen.routeName,arguments: cart)
+                    // :Navigator.of(context).pushNamed(AuthScreen.routeName);
+                        :Navigator.of(context).pushNamed(LoginScreen.routeName);
+                  },),
+              ) : SizedBox(width: 0.0, height: 0.0,)
             ]
         )
 

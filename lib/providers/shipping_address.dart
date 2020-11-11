@@ -57,6 +57,7 @@ class ProfileItem{
 
 class ShippingAddress with ChangeNotifier{
   List<AddressItem> _allShippingAddress = [];
+  AddressItem _addressItem;
   final String authToken;
   final String userId;
 
@@ -72,6 +73,10 @@ class ShippingAddress with ChangeNotifier{
 
   List<AddressItem> get allShippingAddress{
     return [..._allShippingAddress];
+  }
+
+  AddressItem get getDeliveryAddress{
+    return _addressItem;
   }
 
   Map<String,dynamic> get allDistricts{
@@ -376,7 +381,7 @@ class ShippingAddress with ChangeNotifier{
     }
   }
 
-  Future<void> fetchShippingAddress() async {
+  Future<void> fetchShippingAddressList() async {
     var url = 'http://new.bepari.net/demo/api/V1.0/crm/customer/list-shipping-address';
     Map<String, String> headers = {
       'Authorization': 'Bearer ' + authToken,
@@ -405,6 +410,38 @@ class ShippingAddress with ChangeNotifier{
         loadedAddress.add(address);
       }
       _allShippingAddress = loadedAddress.reversed.toList();
+      notifyListeners();
+    } catch (error) {
+      throw (error);
+    }
+  }
+
+  Future<void> fetchShippingAddress(String id) async {
+    var url = 'http://new.bepari.net/demo/api/V1.0/crm/customer/view-shipping-address/$id';
+    Map<String, String> headers = {
+      'Authorization': 'Bearer ' + authToken,
+      'Content-Type': 'application/json',
+    };
+    try {
+      final http.Response response = await http.get(
+        url,
+        headers: headers,
+      );
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      if (data == null) {
+        return;
+      }
+      var alldata = data['data'];
+        final AddressItem address = AddressItem(
+          id: alldata['id'].toString(),
+          city:alldata['city'],
+          shippingAddress: alldata['shipping_address_line'],
+          areaId: alldata['area_id'].toString(),
+          customerId: alldata['customer_id'].toString(),
+          phoneNumber: alldata['mobile_no'].toString(),
+        );
+
+      _addressItem = address;
       notifyListeners();
     } catch (error) {
       throw (error);

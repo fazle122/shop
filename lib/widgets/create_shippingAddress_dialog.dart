@@ -5,6 +5,7 @@ import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
 import 'package:dio/dio.dart';
+import 'package:shoptempdb/screens/confirm_order_screen.dart';
 import 'package:shoptempdb/screens/orders_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 import 'package:flushbar/flushbar.dart';
@@ -139,150 +140,22 @@ class _CreateShippingAddressDialogState
       return;
     }
     _form.currentState.save();
-    setState(() {
-      _isLoading = true;
-    });
-    // if (product != null) {
-    //   await cart.addItem(
-    //       product['id'].toString(),
-    //       product['name'],
-    //       product['unit_price'].toDouble(),
-    //       product['is_non_inventory'],
-    //       product['discount'] != null ? product['discount'] : 0.0,
-    //       product['discount_id'],
-    //       product['discount_type']);
-    // }
     // Future.delayed(Duration(milliseconds: 500), () async {
       if (cart.items.length > 0) {
         List<Cart> ct = [];
         ct = cart.items.map((e) => Cart(id: e.id, cartItem: e)).toList();
 
         Map<String,dynamic> dt = Map();
-        for (int i = 0; i < ct.length; i++) {
-          dt.putIfAbsent('product_id[$i]', ()=>ct[i].cartItem.productId);
-          dt.putIfAbsent('quantity[$i]', ()=>ct[i].cartItem.quantity);
-          dt.putIfAbsent('unit_price[$i]', ()=>ct[i].cartItem.price);
-          dt.putIfAbsent('is_non_inventory[$i]', ()=>ct[i].cartItem.isNonInventory);
-          dt.putIfAbsent('discount[$i]', ()=>ct[i].cartItem.discount);
-        }
         dt.putIfAbsent('city',()=>shippingAddress.selectedDistrict);
         dt.putIfAbsent('area_id', ()=>shippingAddress.selectedArea.toString());
         dt.putIfAbsent('shipping_address_line', ()=>homeAddress);
         dt.putIfAbsent('mobile_no', ()=>mobileNumber);
 
-        FormData data = FormData.fromMap(dt);
+        shippingAddress.selectedDistrict = null;
+        shippingAddress.selectedArea = null;
+        // Navigator.pushNamed(context, ConfirmOrderScreen.routeName,arguments: dt);
+        Navigator.of(context).pop(dt,);
 
-        setState(() {
-          _isLoading = true;
-        });
-        final response = await Provider.of<Orders>(context, listen: false).addOrder(data);
-        if (response != null) {
-          setState(() {
-            _isLoading = false;
-          });
-          widget.cart.clearCartTable();
-          shippingAddress.selectedDistrict = null;
-          shippingAddress.selectedArea = null;
-          Navigator.of(context).pushNamed(
-              ProductsOverviewScreen
-                  .routeName);
-          Flushbar(
-            duration: Duration(seconds: 10),
-            margin: EdgeInsets.only(bottom: 2),
-            padding: EdgeInsets.all(10),
-            borderRadius: 8,
-            backgroundColor: Colors.green.shade400,
-            boxShadows: [
-              BoxShadow(
-                color: Colors.black45,
-                offset: Offset(3, 3),
-                blurRadius: 3,
-              ),
-            ],
-            // All of the previous Flushbars could be dismissed by swiping down
-            // now we want to swipe to the sides
-            dismissDirection: FlushbarDismissDirection.HORIZONTAL,
-            // The default curve is Curves.easeOut
-            forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
-            title: 'Order confirmation',
-            message: response['msg'],
-            mainButton: FlatButton(
-              child: Text('view order'),
-              onPressed: () {
-                Navigator.of(context).pushNamed(
-                    OrdersScreen.routeName);
-              },
-            ),
-
-          )..show(context);
-//      showDialog(
-////            useRootNavigator: false,
-//          barrierDismissible: false,
-//          context: context,
-//          builder: (ctx) => AlertDialog(
-//            title: Text('Order confirmation'),
-//            content: Text(response['msg']),
-//            actions: <Widget>[
-//              FlatButton(
-//                child: Text('view order'),
-//                onPressed: () {
-//                  Navigator.of(context).pushNamed(
-//                      OrdersScreen.routeName);
-//                },
-//              ),
-//              FlatButton(
-//                child: Text('create another'),
-//                onPressed: () {
-//                  Navigator.of(context).pushNamed(
-//                      ProductsOverviewScreen
-//                          .routeName);
-//                },
-//              )
-//            ],
-//          ));
-        }
-        else {
-          await cart.removeCartItemRow('1');
-          setState(() {
-            _isLoading = false;
-          });
-          Flushbar(
-            duration: Duration(seconds: 5),
-            margin: EdgeInsets.only(bottom: 2),
-            padding: EdgeInsets.all(10),
-            borderRadius: 8,
-            backgroundColor: Colors.red.shade400,
-            boxShadows: [
-              BoxShadow(
-                color: Colors.black45,
-                offset: Offset(3, 3),
-                blurRadius: 3,
-              ),
-            ],
-            dismissDirection: FlushbarDismissDirection.HORIZONTAL,
-            forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
-            title: 'Order confirmation',
-            message: 'Something wrong. Please try again',
-          )..show(context);
-//      showDialog(
-//          context: context,
-//          barrierDismissible: false,
-//          builder: (ctx) => AlertDialog(
-//            title: Text('Order confirmation'),
-//            content: Text(
-//                'something went wrong!!! Please try again'),
-//            actions: <Widget>[
-//              FlatButton(
-//                child: Text('ok'),
-//                onPressed: () {
-//                  Navigator.of(context).pushNamed(
-//                      ProductsOverviewScreen
-//                          .routeName);
-//                },
-//              ),
-//            ],
-//          ));
-        }
       }else{
         _scaffoldKey.currentState.showSnackBar(
             _snackBar('Please add item to cart'));
@@ -476,16 +349,16 @@ class _CreateShippingAddressDialogState
                           style: TextStyle(fontSize: 14)),
                       onPressed: () async{
                         FocusScope.of(context).requestFocus(new FocusNode());
-                        if (product != null) {
-                          await cart.addItem(
-                              product['id'].toString(),
-                              product['name'],
-                              product['unit_price'].toDouble(),
-                              product['is_non_inventory'],
-                              product['discount'] != null ? product['discount'] : 0.0,
-                              product['discount_id'],
-                              product['discount_type']);
-                        }
+                        // if (product != null) {
+                        //   await cart.addItem(
+                        //       product['id'].toString(),
+                        //       product['name'],
+                        //       product['unit_price'].toDouble(),
+                        //       product['is_non_inventory'],
+                        //       product['discount'] != null ? product['discount'] : 0.0,
+                        //       product['discount_id'],
+                        //       product['discount_type']);
+                        // }
                         Future.delayed(Duration(milliseconds: 500), () async {
                           await _saveForm(shippingAddress, cart);
                         });

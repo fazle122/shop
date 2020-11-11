@@ -252,7 +252,8 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
                 builder: (context, cartData, child) =>
                 cart.items.length > 0
                     ?
-                Container(
+                InkWell(
+                  child:Container(
                     height: 50.0,
                     color: Theme.of(context).primaryColor,
                     child: Row(
@@ -281,19 +282,16 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
                           width:
                           MediaQuery.of(context).size.width * 2 / 7,
                           color: Color(0xffB40060),
-                          child: InkWell(
-                            child: Center(
+                          child: Center(
                               // child: Text('Check out', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
                               child: Text((cartData.totalAmount + cartData.deliveryCharge).toStringAsFixed(2) + ' BDT',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
-                            ),
-                            onTap: () {
-                              Navigator.of(context)
-                                  .pushNamed(CartScreen.routeName);
-                            },
                           ),
                         ),
                       ],
-                    )): SizedBox(
+                    )),
+                  onTap: () {
+                    Navigator.of(context).pushNamed(CartScreen.routeName);
+                  },): SizedBox(
                   width: 0.0,
                   height: 0.0,
                 ),

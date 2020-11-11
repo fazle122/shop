@@ -55,6 +55,12 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
+  fonts:
+    - family: Josephin Sans
+      fonts:
+        - asset: fonts/JosefinSans-Regular.ttf
+        - asset: fonts/JosefinSans-Bold.ttf
+          weight: 100
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -68,6 +74,9 @@ flutter:
      - assets/profile.png
      - assets/Bkash-Logo.png
      - assets/credit-card-Logo.png
+     - assets/bkash-icon.png
+     - assets/package.png
+     - assets/visa-mastercard.png
 
 
 

@@ -19,6 +19,7 @@ import 'package:shoptempdb/screens/profile_screen.dart';
 import 'package:shoptempdb/screens/profile_update_screen.dart';
 import 'package:shoptempdb/screens/delivery_address_screen.dart';
 import 'package:shoptempdb/screens/splash_screen.dart';
+import 'package:shoptempdb/style/app_theme.dart';
 
 void main() => runApp(MyApp());
 
@@ -59,7 +60,8 @@ class MyApp extends StatelessWidget {
     builder: (ctx, auth, child) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Bepari',
-        theme: ThemeData(primarySwatch: Colors.teal, accentColor: Colors.blueGrey),
+        // theme: ThemeData(primarySwatch: Colors.teal, accentColor: Colors.blueGrey),
+        theme:AppTheme.themeBepari(),
 //        home: auth.isAuth
 //            ? ProductsOverviewScreen()
 //            : FutureBuilder(
@@ -80,7 +82,7 @@ class MyApp extends StatelessWidget {
           ProfilePage.routeName: (context) => ProfilePage(),
           DeliveryAddressScreen.routeName: (context) => DeliveryAddressScreen(),
           ConfirmOrderScreen.routeName:(context) => ConfirmOrderScreen(),
-          OrderConfirmationScreen.routeName:(context) => OrderConfirmationScreen(),
+          // OrderConfirmationScreen.routeName:(context) => OrderConfirmationScreen(),
           OrderDetailScreen.routeName: (context) => OrderDetailScreen(),
           ProfileUpdateScreen.routeName: (context) => ProfileUpdateScreen(),
           LoginScreen.routeName: (context) => LoginScreen(),

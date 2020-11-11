@@ -68,18 +68,18 @@ class _ProductItemListViewState extends State<ProductItemListView>{
               Text(
                 product.title,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12.0),
+                style: TextStyle(fontSize: 15.0),
               ),
             ],
           ),
-          subtitle: Text('BDT ' + product.price.toString(),style: TextStyle(fontSize: 10.0,color: Colors.red,fontWeight: FontWeight.bold),),
+          subtitle: Text('BDT ' + product.price.toString(),style: TextStyle(fontSize: 12.0,color: Colors.red,fontWeight: FontWeight.bold),),
 
           trailing: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  Text(product.unit,style: TextStyle(fontSize: 12.0,color: Colors.grey,)),
+                  Text(product.unit,style: TextStyle(fontSize: 14.0,color: Colors.grey,)),
                   newCartItem.keys.contains(product.id) ?
                   Expanded(
                       child:Row(
@@ -158,8 +158,8 @@ class _ProductItemListViewState extends State<ProductItemListView>{
                       )):
                       Container(
                         margin: EdgeInsets.only(top:5.0),
-                        padding: EdgeInsets.all(2.0),
-                        width: 70.0,
+                        padding: EdgeInsets.all(5.0),
+                        width: 80.0,
                         height: 20.0,
                         decoration: BoxDecoration(
                           color: Theme.of(context).primaryColor
