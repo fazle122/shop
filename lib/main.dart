@@ -16,7 +16,7 @@ import 'package:shoptempdb/screens/orders_screen.dart';
 import 'package:shoptempdb/screens/product_detail_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 import 'package:shoptempdb/screens/profile_screen.dart';
-import 'package:shoptempdb/screens/profile_update_screen.dart';
+import 'package:shoptempdb/screens/create_profile_screen.dart';
 import 'package:shoptempdb/screens/delivery_address_screen.dart';
 import 'package:shoptempdb/screens/splash_screen.dart';
 import 'package:shoptempdb/style/app_theme.dart';
@@ -84,7 +84,7 @@ class MyApp extends StatelessWidget {
           ConfirmOrderScreen.routeName:(context) => ConfirmOrderScreen(),
           // OrderConfirmationScreen.routeName:(context) => OrderConfirmationScreen(),
           OrderDetailScreen.routeName: (context) => OrderDetailScreen(),
-          ProfileUpdateScreen.routeName: (context) => ProfileUpdateScreen(),
+          CreateProfileScreen.routeName: (context) => CreateProfileScreen(),
           LoginScreen.routeName: (context) => LoginScreen(),
         },
       ),

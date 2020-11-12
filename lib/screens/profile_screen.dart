@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
-import 'package:shoptempdb/screens/profile_update_screen.dart';
+import 'package:shoptempdb/screens/create_profile_screen.dart';
 import 'package:shoptempdb/widgets/app_drawer.dart';
 import 'package:shoptempdb/widgets/create_shippingAddress_dialog_old.dart';
 import 'package:shoptempdb/widgets/profile_update_dialog.dart';

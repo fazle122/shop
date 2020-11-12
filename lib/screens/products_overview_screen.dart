@@ -192,7 +192,7 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
     final product = Provider.of<Products>(context,listen:false);
     return Scaffold(
       appBar: AppBar(
-        title: Text('Bepari'),
+        title: Text('All Products'),
         actions: <Widget>[
           IconButton(
         icon: product.isList

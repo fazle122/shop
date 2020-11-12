@@ -6,7 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:shoptempdb/models/http_exception.dart';
 import 'package:shoptempdb/providers/auth.dart';
 import 'package:shoptempdb/providers/cart.dart';
+import 'package:shoptempdb/providers/shipping_address.dart';
 import 'package:shoptempdb/screens/delivery_address_screen.dart';
+import 'package:shoptempdb/screens/create_profile_screen.dart';
 import 'package:toast/toast.dart';
 
 
@@ -28,6 +30,28 @@ class _LoginScreenState extends State<LoginScreen>{
 
   int _counter = 0;
   Timer _timer;
+
+  var _isInit = true;
+  var _isLoading = false;
+
+  @override
+  void didChangeDependencies() {
+    if (_isInit) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = true;
+      });
+      Provider.of<ShippingAddress>(context).fetchShippingAddressList().then((_) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+    _isInit = false;
+    super.didChangeDependencies();
+  }
+
 
 
   Widget phoneField() {
@@ -96,13 +120,17 @@ class _LoginScreenState extends State<LoginScreen>{
   }
 
   Future<void> _login() async {
-
+    final shippingData = Provider.of<ShippingAddress>(context,listen: false);
     try {
       if(_otpController.text == null || _otpController.text == '' || _otpController.text == "" || _otpController.text.isEmpty){
         Toast.show('Please provide OTP code', context, duration: Toast.LENGTH_LONG, gravity: Toast.CENTER);
       }else{
         await Provider.of<Auth>(context, listen: false).login(_phoneController.text, _otpController.text);
-        Navigator.of(context).pushReplacementNamed(DeliveryAddressScreen.routeName);
+        if(shippingData.allShippingAddress.length>0){
+          Navigator.of(context).pushReplacementNamed(DeliveryAddressScreen.routeName);
+        }
+        Navigator.of(context).pushReplacementNamed(CreateProfileScreen.routeName,arguments: _phoneController.text);
+
       }
 
 
@@ -162,6 +190,12 @@ class _LoginScreenState extends State<LoginScreen>{
         }
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
   }
 
   @override

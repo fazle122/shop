@@ -426,16 +426,18 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
         int.parse(shippingAddress.selectedArea),
       );
       if (response != null) {
-        String msg = '';
-        for (int i = 0; i < response['data'].value.length; i++) {
-          for (int j = 0; j < response['data'][''].length; j++) {
-            msg += 'error definition goes here';
-          }
-          for (int j = 0; j < response['data'][''].length; j++) {
-            msg += 'error definition goes here';
-          }
-        }
-        _showErrorDialog(msg);
+        Navigator.of(context).pop();
+
+        // String msg = '';
+        // for (int i = 0; i < response['data'].value.length; i++) {
+        //   for (int j = 0; j < response['data'][''].length; j++) {
+        //     msg += 'error definition goes here';
+        //   }
+        //   for (int j = 0; j < response['data'][''].length; j++) {
+        //     msg += 'error definition goes here';
+        //   }
+        // }
+        // _showErrorDialog(msg);
       }
     } catch (error) {
       const errorMessage = 'Some thing wrong, please try again later';
@@ -444,7 +446,6 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
     shippingAddress.selectedDistrict = null;
     shippingAddress.selectedArea = null;
 
-    Navigator.of(context).pop();
   }
 
   File imageFile;

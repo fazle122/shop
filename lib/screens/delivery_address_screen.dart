@@ -211,7 +211,8 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
   @override
   Widget build(BuildContext context) {
 //    final shippingData = Provider.of<ShippingAddress>(context);
-    final cart = ModalRoute.of(context).settings.arguments as Cart;
+//     final cart = ModalRoute.of(context).settings.arguments as Cart;
+  final cart = Provider.of<Cart>(context,listen: false);
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
@@ -243,11 +244,12 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                         builder: (context, shippingData, child) =>
                             Container(
                               padding: EdgeInsets.only(left: 10.0,right: 10.0),
-                              height: MediaQuery.of(context).size.height * 1.7 / 6,
-                              child: ListView(
+                              height: MediaQuery.of(context).size.height * 1.75 / 6,
+                              child: shippingData.allShippingAddress.length>0 ?ListView(
                                 children: createRadioListUsers(shippingData.allShippingAddress),
-                              ),
-                            )),
+                              ):Center(child:Text('No previous delivery address'),
+                            ))
+                    ),
 
                     Container(
                         margin: EdgeInsets.only(left: 12.0,top: 20.0,bottom: 20.0),
@@ -439,34 +441,62 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                                   context: context,
                                   barrierDismissible: false,
                                   builder: (context) => AlertDialog(
-                                    content: Text('Please select a delivery address or create new one'),
-                                    actions: <Widget>[
-                                      FlatButton(
-                                        child: Text('Ok'),
-                                        onPressed: () {
-                                          Navigator.of(context).pop(false);
-                                        },
-                                      ),
-                                    ],
+                                    content: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Text('Please select a delivery address or create new one'),
+                                        Container(
+                                            margin: EdgeInsets.only(top:5.0),
+                                            padding: EdgeInsets.all(5.0),
+                                            width: 80.0,
+                                            height: 30.0,
+                                            decoration: BoxDecoration(
+                                                color: Theme.of(context).primaryColor
+                                            ),
+                                            child: InkWell(
+                                              child: Center(child:Text('Ok',style: TextStyle(fontSize: 12.0,color: Colors.white,fontWeight: FontWeight.bold),),),
+                                              onTap: (){
+                                                Navigator.of(context).pop(false);
+                                              },
+                                            )
+                                        )
+                                      ],
+                                    )
                                   ));
                               // _scaffoldKey.currentState.showSnackBar(_snackBar(
                               //     'Please select a delivery address or create new one'));
 
-                            }else if(_deliveryDate == null && _currentTime == null){
+                            }else if(_deliveryDate == null || _currentTime == null){
                               showDialog(
                                   context: context,
                                   barrierDismissible: false,
-                                  builder: (context) => AlertDialog(
-                                    content: Text('You must select a delivery date and time to place the order'),
-                                    actions: <Widget>[
-                                      FlatButton(
-                                        child: Text('Ok'),
-                                        onPressed: () {
-                                          Navigator.of(context).pop(false);
-                                        },
-                                      ),
-                                    ],
-                                  ));
+                                  builder: (context) =>
+                                      AlertDialog(
+                                          content: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: <Widget>[
+                                              Text('You must select a delivery date and time to place the order'),
+                                              Container(
+                                                  margin: EdgeInsets.only(top:5.0),
+                                                  padding: EdgeInsets.all(5.0),
+                                                  width: 80.0,
+                                                  height: 30.0,
+                                                  decoration: BoxDecoration(
+                                                      color: Theme.of(context).primaryColor
+                                                  ),
+                                                  child: InkWell(
+                                                    child: Center(child:Text('Ok',style: TextStyle(fontSize: 12.0,color: Colors.white,fontWeight: FontWeight.bold),),),
+                                                    onTap: (){
+                                                      Navigator.of(context).pop(false);
+                                                    },
+                                                  )
+                                              )
+                                            ],
+                                          )
+                                      )
+                              );
                               // _scaffoldKey.currentState.showSnackBar(_snackBar(
                               //     'Please choose delivery date and time'));
                             }else {
@@ -480,7 +510,7 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                               }
 
                               addressData.putIfAbsent('delivery_date', () => _deliveryDate.toString());
-                              addressData.putIfAbsent('delivery_time', () => _currentTime.toString());
+                              addressData.putIfAbsent('delivery_time', () => _currentTime);
                               addressData.putIfAbsent('order_note', () => _noteController.text);
                               Navigator.pushNamed(context, ConfirmOrderScreen.routeName,arguments: addressData);
                             }

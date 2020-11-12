@@ -9,6 +9,8 @@ import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/screens/auth_screen.dart';
 import 'package:shoptempdb/screens/delivery_address_screen.dart';
 import 'package:shoptempdb/screens/login_screen.dart';
+import 'package:shoptempdb/screens/create_profile_screen.dart';
+import 'package:shoptempdb/widgets/app_drawer.dart';
 import 'package:shoptempdb/widgets/cart_item.dart';
 import 'package:shoptempdb/widgets/confirm_order_dialog.dart';
 import 'package:dio/dio.dart';
@@ -103,6 +105,7 @@ class _CartScreenState extends BaseState<CartScreen>{
         appBar: AppBar(
           title: Text('My Basket'),
         ),
+        drawer: AppDrawer(),
         body: Consumer<Cart>(builder: (context,cartData,child) =>
         cartData.items.length >0 ?
         Column(
@@ -387,8 +390,7 @@ class _CartScreenState extends BaseState<CartScreen>{
                     )),
                   onTap: () {
                     auth.isAuth?
-                    Navigator.of(context).pushNamed(DeliveryAddressScreen.routeName,arguments: cart)
-                    // :Navigator.of(context).pushNamed(AuthScreen.routeName);
+                    Navigator.of(context).pushNamed(DeliveryAddressScreen.routeName)
                         :Navigator.of(context).pushNamed(LoginScreen.routeName);
                   },),
               ) : SizedBox(width: 0.0, height: 0.0,)

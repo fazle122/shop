@@ -331,7 +331,7 @@ class ShippingAddress with ChangeNotifier{
 
 
       notifyListeners();
-      if (response.statusCode != 200) {
+      if (response.statusCode == 200) {
         return responseData;
       }
       return null;

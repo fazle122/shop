@@ -123,7 +123,7 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen>{
                       groupValue: selectedRadioTile,
                       title: Row(
                         children: <Widget>[
-                          Image.asset('assets/credit-card-Logo.png'),
+                          Image.asset('assets/card-logo.png',scale: 2,),
                           SizedBox(width: 5.0,),
                           Text('credit or debit card')
                         ],
@@ -267,9 +267,10 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen>{
 
                 FormData formData= FormData.fromMap(dt);
 
-                final response = await Provider.of<Orders>(context, listen: false).addOrder(formData);
-                if (response != null) {
-                  var orderId = response['data']['customer_invoice']['invoice']['id'];
+                // final response = await Provider.of<Orders>(context, listen: false).addOrder(formData);
+                // if (response != null) {
+                // var orderId = response['data']['customer_invoice']['invoice']['id'];
+                var orderId = '12345';
                   if(dt.containsKey('customer_shipping_address_id') && dt['customer_shipping_address_id'] != null){
                     Navigator.pushReplacement(context, MaterialPageRoute(
                       builder: (context) => OrderConfirmationScreen(
@@ -284,26 +285,26 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen>{
                         orderId,
                       ),
                     ));
-                  }
-                  else{
-                    Navigator.pushReplacement(context, MaterialPageRoute(
-                      builder: (context) => OrderConfirmationScreen(
-                        null,
-                        dt['city'],
-                        dt['area_id'],
-                        dt['shipping_address_line'],
-                        dt['mobile_no'],
-                        dt['order_note'],
-                        paymentOptionName,
-                        dt['delivery_date'],
-                        dt['delivery_time'],
-                        totalAmount,
-                        delCharge,
-                          orderId
-                      ),
-                    ));
-                  }
-                  cart.clearCartTable();
+                  // }
+                  // else{
+                  //   Navigator.pushReplacement(context, MaterialPageRoute(
+                  //     builder: (context) => OrderConfirmationScreen(
+                  //       null,
+                  //       dt['city'],
+                  //       dt['area_id'],
+                  //       dt['shipping_address_line'],
+                  //       dt['mobile_no'],
+                  //       dt['order_note'],
+                  //       paymentOptionName,
+                  //       dt['delivery_date'],
+                  //       dt['delivery_time'],
+                  //       totalAmount,
+                  //       delCharge,
+                  //         orderId
+                  //     ),
+                  //   ));
+                  // }
+                  // cart.clearCartTable();
                 }
                 else {
                   await cart.removeCartItemRow('1');
