@@ -271,7 +271,7 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
 
   Widget queryItemListDataWidget(BuildContext context) {
 
-    if (finalOrders.isNotEmpty) //has data & performing/not performing
+    // if (finalOrders.isNotEmpty) //has data & performing/not performing
       return Container(
         child:  finalOrders != null && finalOrders.length > 0
             ? ListView.builder(
@@ -296,7 +296,7 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Flexible(child:Text('Invoice date: ' + DateFormat('EEEE, MMM d, ').format(finalOrders[i].invoiceDate),style: TextStyle(fontSize: 15.0),),),
-                            Flexible(child: Text('Invoice created: ' + DateFormat('EEEE, MMM d, hh:mm aaa').format(finalOrders[i].createdAt.toLocal()),style: TextStyle(fontSize: 12.0),),),
+                            Flexible(child: Text('Delivery date: ' + DateFormat('EEEE, MMM d, ').format(finalOrders[i].delivaryDate.toLocal()),style: TextStyle(fontSize: 12.0),),),
                           ],
                         ),
                         trailing: Container(

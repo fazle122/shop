@@ -75,19 +75,19 @@ class _ProductItemListViewState extends State<ProductItemListView>{
           subtitle: Text('BDT ' + product.price.toString(),style: TextStyle(fontSize: 12.0,color: Colors.red,fontWeight: FontWeight.bold),),
 
           trailing: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Text(product.unit,style: TextStyle(fontSize: 14.0,color: Colors.grey,)),
                   newCartItem.keys.contains(product.id) ?
                   Expanded(
                       child:Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           IconButton(
-                            icon: Icon(Icons.add_circle_outline),
+                            icon: Icon(Icons.add_circle_outline,size: 20.0,),
                             color:Colors.red,
                             onPressed: () async{
                               await cart.addItem(
@@ -126,7 +126,7 @@ class _ProductItemListViewState extends State<ProductItemListView>{
                           ),
                           Text(cart.items.firstWhere((d) => d.productId == product.id).quantity.toString(),style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold,color:Colors.red),),
                           IconButton(
-                            icon: Icon(Icons.remove_circle_outline,),
+                            icon: Icon(Icons.remove_circle_outline,size: 20.0,),
                             color: Colors.red,
                             onPressed: () async{
                               await cart.removeSingleItem(product.id);
@@ -158,7 +158,7 @@ class _ProductItemListViewState extends State<ProductItemListView>{
                       )):
                       Container(
                         margin: EdgeInsets.only(top:5.0),
-                        padding: EdgeInsets.all(5.0),
+                        // padding: EdgeInsets.all(5.0),
                         width: 80.0,
                         height: 20.0,
                         decoration: BoxDecoration(

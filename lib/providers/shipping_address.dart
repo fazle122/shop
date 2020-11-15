@@ -55,8 +55,31 @@ class ProfileItem{
   });
 }
 
+class ShippingDateItem{
+  final String date;
+  final List<ShippingTimeItem> time;
+
+  ShippingDateItem({
+    @required this.date,
+    @required this.time,
+  });
+}
+
+class ShippingTimeItem {
+  final String startTime;
+  final String endTime;
+
+  ShippingTimeItem({
+    @required this.startTime,
+    @required this.endTime,
+  });
+}
+
 class ShippingAddress with ChangeNotifier{
   List<AddressItem> _allShippingAddress = [];
+  List<ShippingDateItem> _allShippingDates = [];
+  List<ShippingTimeItem> _allShippingTimes = [];
+
   AddressItem _addressItem;
   final String authToken;
   final String userId;
@@ -73,6 +96,19 @@ class ShippingAddress with ChangeNotifier{
 
   List<AddressItem> get allShippingAddress{
     return [..._allShippingAddress];
+  }
+
+  List<ShippingDateItem> get allShippingDates{
+    return [..._allShippingDates];
+  }
+
+  List<ShippingTimeItem> get allShippingTimes{
+    return [..._allShippingTimes];
+  }
+
+  set allShippingTimes(value){
+    this._allShippingTimes = value;
+    this.notifyListeners();
   }
 
   AddressItem get getDeliveryAddress{
@@ -416,6 +452,40 @@ class ShippingAddress with ChangeNotifier{
     }
   }
 
+  Future<void> fetchShippingDates() async {
+    var url = 'http://new.bepari.net/demo/api/V1.0/accounts/invoice/delivery-schedule';
+    Map<String, String> headers = {
+      'Authorization': 'Bearer ' + authToken,
+      'Content-Type': 'application/json',
+    };
+    try {
+      final http.Response response = await http.get(
+        url,
+        headers: headers,
+      );
+      final data = json.decode(response.body) as Map<String, dynamic>;
+      if (data == null) {
+        return;
+      }
+      final List<ShippingDateItem> loadedDates = [];
+      var alldata = data['data'];
+      for(int  i=0; i<alldata.length;i++){
+        final ShippingDateItem date = ShippingDateItem(
+          date: alldata[i]['date'].toString(),
+          time:(data['data'][i]['time'] as List<dynamic>).map((item) => ShippingTimeItem(
+            startTime: item['start_time'],
+            endTime: item['end_time'],
+        )).toList(),
+        );
+        loadedDates.add(date);
+      }
+      _allShippingDates = loadedDates;
+      notifyListeners();
+    } catch (error) {
+      throw (error);
+    }
+  }
+
   Future<void> fetchShippingAddress(String id) async {
     var url = 'http://new.bepari.net/demo/api/V1.0/crm/customer/view-shipping-address/$id';
     Map<String, String> headers = {
@@ -447,4 +517,75 @@ class ShippingAddress with ChangeNotifier{
       throw (error);
     }
   }
+
+
+  // String _selectedDate;
+  // String _selectedTime;
+  //
+  //
+  // String get selectedDate{
+  //   return this._selectedDate;
+  // }
+  //
+  // set selectedDate(var item) {
+  //   this._selectedDate = item.date.toString();
+  //   this._allShippingTimes = item.time;
+  //   this.notifyListeners();
+  // }
+  //
+  // String get selectedTime {
+  //   return this._selectedTime;
+  // }
+  //
+  // set selectedTime(final String item) {
+  //   this._selectedTime = item;
+  //   this.notifyListeners();
+  // }
+
+
+  ShippingDateItem _selectedDate;
+  ShippingTimeItem _selectedTime;
+
+
+  ShippingDateItem get selectedDate{
+    return this._selectedDate;
+  }
+  set selectedDate(final ShippingDateItem item) {
+    this._selectedDate = item;
+    // this._allShippingTimes = this._selectedDate.time;
+    this.notifyListeners();
+  }
+
+  ShippingTimeItem get selectedTime {
+    return this._selectedTime;
+  }
+
+  set selectedTime(final ShippingTimeItem item) {
+    this._selectedTime = item;
+    this.notifyListeners();
+  }
+
+  ///working///
+
+  // ShippingDateItem _selectedDate;
+  // String _selectedTime;
+  //
+  //
+  // ShippingDateItem get selectedDate{
+  //   return this._selectedDate;
+  // }
+  // set selectedDate(final ShippingDateItem item) {
+  //   this._selectedDate = item;
+  //   // this._allShippingTimes = this._selectedDate.time;
+  //   this.notifyListeners();
+  // }
+  //
+  // String get selectedTime {
+  //   return this._selectedTime;
+  // }
+  //
+  // set selectedTime(final String item) {
+  //   this._selectedTime = item;
+  //   this.notifyListeners();
+  // }
 }

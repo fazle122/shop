@@ -25,7 +25,7 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
   var _isLoading = false;
   String selectedArea;
   String selectedDistrict;
-  String selectedAreaFromLocal;
+  String selectedAreaFromLocal='';
   String addressLine;
   String city;
 
@@ -67,31 +67,33 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
   @override
   void didChangeDependencies() {
 //    selectedAreaFromLocal = null;
-    _currentProfile =
-        Provider.of<ShippingAddress>(context, listen: false).getProfileInfo();
+    _currentProfile = Provider.of<ShippingAddress>(context, listen: false).getProfileInfo();
     Provider.of<ShippingAddress>(context, listen: false).fetchDistrictList();
-    _initValues = {
-      'name': _currentProfile.name,
-      'gender': _currentProfile.gender,
-      'email': _currentProfile.email,
-      'mobileNumber': _currentProfile.mobileNumber,
-      'address': _currentProfile.address,
-      'city': _currentProfile.city,
-      'areaId': _currentProfile.areaId,
-      'contactPerson': _currentProfile.contactPerson,
-      'contactPersonMobileNumber': _currentProfile.contactPersonMobileNumber,
-    };
+
+
+      _initValues = {
+        'name': _currentProfile.name,
+        'gender': _currentProfile.gender,
+        'email': _currentProfile.email,
+        'mobileNumber': _currentProfile.mobileNumber,
+        'address': _currentProfile.address,
+        'city': _currentProfile.city,
+        'areaId': _currentProfile.areaId,
+        'contactPerson': _currentProfile.contactPerson,
+        'contactPersonMobileNumber': _currentProfile.contactPersonMobileNumber,
+      };
 
 //    setState(() {
 //      selectedDistrict = _initValues['city'];
 //    });
-    getAreaName(_currentProfile.areaId);
+    if(_currentProfile.city != null ) {
+      getAreaName(_currentProfile.areaId);
+    }
     super.didChangeDependencies();
   }
 
   getAreaName(String areaId) async {
-    final data = await Provider.of<ShippingAddress>(context, listen: false)
-        .fetchAreaName(areaId.toString());
+    final data = await Provider.of<ShippingAddress>(context, listen: false).fetchAreaName(areaId.toString());
     setState(() {
       selectedAreaFromLocal = data;
     });
@@ -292,13 +294,13 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
     );
   }
 
-  Widget areaDropdown(var shippingAddress, Map<String, dynamic> areas) {
+  Widget areaDropdown(var shippingAddress,Map<String, dynamic> areas){
     return Consumer<ShippingAddress>(
       builder: (
-        final BuildContext context,
-        final ShippingAddress address,
-        final Widget child,
-      ) {
+          final BuildContext context,
+          final ShippingAddress address,
+          final Widget child,
+          ) {
         return DropdownButtonFormField(
           decoration: InputDecoration(
             prefixIcon: Icon(
@@ -314,13 +316,8 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
               ? Text('Select area')
               : Text(selectedAreaFromLocal),
           value: shippingAddress.selectedArea,
-          onSaved: (value) {
-//            shippingAddress.selectedArea = value;
-            if(shippingAddress.selectedArea == null) {
-              shippingAddress.selectedArea = _initValues['areaId'];
-            }else{
-              shippingAddress.selectedArea = value;
-            }
+          onSaved: (value){
+            shippingAddress.selectedArea = value;
           },
           validator: (value) {
             if(shippingAddress.selectedDistrict != null && shippingAddress.selectedArea == null){
@@ -340,52 +337,65 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
             shippingAddress.selectedArea = newValue;
           },
           items: _areaMenuItems(areas),
-        )
-
-//        return Stack(
-//          children: <Widget>[
-//            Container(
-//                decoration: ShapeDecoration(
-//                  shape: RoundedRectangleBorder(
-//                    side: BorderSide(width: 1.0, style: BorderStyle.solid),
-//                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
-//                  ),
-//                ),
-//                padding: EdgeInsets.only(left: 44.0, right: 10.0),
-////              margin: EdgeInsets.only(left: 16.0, right: 16.0),
-//                child: DropdownButtonFormField(
-//                  isExpanded: true,
-////                icon: Icon(Icons.local_gas_station),
-//                  hint: Text('Select area'),
-//                  value: shippingAddress.selectedArea,
-//                  onSaved: (value) {
-//                    shippingAddress.selectedArea = value;
-//                  },
-//                  validator: (value) {
-//                    if (value == null) {
-//                      return 'please choose area';
-//                    }
-//                    return null;
-//                  },
-//                  onChanged: (newValue) {
-//                    shippingAddress.selectedArea = newValue;
-//                  },
-//                  items: _areaMenuItems(areas),
-//                )),
-//            Container(
-//              margin: EdgeInsets.only(top: 24.0, left: 12.0),
-//              child: Icon(
-//                Icons.local_gas_station,
-//                color: Theme.of(context).primaryColor,
-////              size: 20.0,
-//              ),
-//            ),
-//          ],
-//        )
-            ;
+        );
       },
     );
   }
+
+//   Widget areaDropdown(var shippingAddress, Map<String, dynamic> areas) {
+//     return Consumer<ShippingAddress>(
+//       builder: (
+//         final BuildContext context,
+//         final ShippingAddress address,
+//         final Widget child,
+//       ) {
+//         return DropdownButtonFormField(
+//           decoration: InputDecoration(
+//             prefixIcon: Icon(
+//               Icons.local_gas_station,
+//               color: Theme.of(context).primaryColor,
+//             ),
+//             border: OutlineInputBorder(),
+// //                enabledBorder: UnderlineInputBorder(
+// //                    borderSide: BorderSide(color: Colors.white))
+//           ),
+//           isExpanded: true,
+//           hint: selectedAreaFromLocal == ''
+//               ? Text('Select area')
+//               : Text(selectedAreaFromLocal),
+//           value: shippingAddress.selectedArea,
+//           onSaved: (value) {
+// //            shippingAddress.selectedArea = value;
+//             if(shippingAddress.selectedArea == null) {
+//               shippingAddress.selectedArea = _initValues['areaId'];
+//             }else{
+//               shippingAddress.selectedArea = value;
+//             }
+//           },
+//           validator: (value) {
+//             if(shippingAddress.selectedDistrict != null && shippingAddress.selectedArea == null){
+//               return 'please update area';
+//             }
+//             if (shippingAddress.selectedArea == null) {
+//               value = _initValues['areaId'];
+//             } else {
+//               value = shippingAddress.selectedArea;
+//             }
+//             if (value == null) {
+//               return 'please choose area';
+//             }
+//             return null;
+//           },
+//           onChanged: (newValue) {
+//             shippingAddress.selectedArea = newValue;
+//           },
+//           items: _areaMenuItems(areas),
+//         )
+//
+//            ;
+//       },
+//     );
+//   }
 
   Future<void> _saveForm(var shippingAddress) async {
     final isValid = _form.currentState.validate();
@@ -476,6 +486,29 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
     });
     Navigator.of(context).pop();
 
+  }
+
+
+  List<DropdownMenuItem> _districtMenuItems(Map<String, dynamic> items) {
+    List<DropdownMenuItem> itemWidgets = List();
+    items.forEach((key, value) {
+      itemWidgets.add(DropdownMenuItem(
+        value: value,
+        child: Text(value),
+      ));
+    });
+    return itemWidgets;
+  }
+
+  List<DropdownMenuItem> _areaMenuItems(Map<String, dynamic> items) {
+    List<DropdownMenuItem> itemWidgets = List();
+    items.forEach((key, value) {
+      itemWidgets.add(DropdownMenuItem(
+        value: key,
+        child: Text(value),
+      ));
+    });
+    return itemWidgets;
   }
 
   @override
@@ -586,11 +619,9 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
         content: SingleChildScrollView(
             child: Form(
               key: _form,
-              child: selectedAreaFromLocal == null
-                  ? Center(
-                child: CircularProgressIndicator(),
-              )
-                  : Column(
+              child:
+              // selectedAreaFromLocal == null ? Center(child: CircularProgressIndicator(),) :
+              Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   nameField(),
@@ -644,119 +675,18 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
         context: context,
         barrierDismissible: false,
         builder: (ctx) => AlertDialog(
-              title: Text('An Error Occurred!'),
-              content: Text(message),
-              actions: <Widget>[
-                FlatButton(
-                  child: Text('ok'),
-                  onPressed: () {
-                    Navigator.of(ctx).pop();
-                  },
-                )
-              ],
-            ));
-  }
-
-  List<DropdownMenuItem> _districtMenuItems(Map<String, dynamic> items) {
-    List<DropdownMenuItem> itemWidgets = List();
-    items.forEach((key, value) {
-      itemWidgets.add(DropdownMenuItem(
-        value: value,
-        child: Text(value),
-      ));
-    });
-    return itemWidgets;
-  }
-
-  List<DropdownMenuItem> _areaMenuItems(Map<String, dynamic> items) {
-    List<DropdownMenuItem> itemWidgets = List();
-    items.forEach((key, value) {
-      itemWidgets.add(DropdownMenuItem(
-        value: key,
-        child: Text(value),
-      ));
-    });
-    return itemWidgets;
+          title: Text('An Error Occurred!'),
+          content: Text(message),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('ok'),
+              onPressed: () {
+                Navigator.of(ctx).pop();
+              },
+            )
+          ],
+        ));
   }
 }
 
-class DistrictDropDown extends StatelessWidget {
-  String selectedDistrict;
 
-//  DistrictDropDown(this.selectedDistrict);
-  List<DropdownMenuItem> _districtMenuItems(Map<String, dynamic> items) {
-    List<DropdownMenuItem> itemWidgets = List();
-    items.forEach((key, value) {
-      itemWidgets.add(DropdownMenuItem(
-        value: value,
-        child: Text(value),
-      ));
-    });
-    return itemWidgets;
-  }
-
-  @override
-  Widget build(final BuildContext context) {
-    final shippingAddress = Provider.of<ShippingAddress>(context);
-
-    Map<String, dynamic> district = shippingAddress.allDistricts;
-    return Consumer<ShippingAddress>(
-      builder: (
-        final BuildContext context,
-        final ShippingAddress address,
-        final Widget child,
-      ) {
-        return DropdownButton(
-          isExpanded: true,
-          icon: Icon(Icons.location_city),
-          hint: Text('Select district'),
-          value: shippingAddress.selectedDistrict,
-          onChanged: (newValue) {
-            shippingAddress.selectedDistrict = newValue;
-            shippingAddress.selectedArea = null;
-          },
-          items: _districtMenuItems(district),
-        );
-      },
-    );
-  }
-}
-
-class AreaDropDown extends StatelessWidget {
-  String selectedArea;
-
-  List<DropdownMenuItem> _districtMenuItems(Map<String, dynamic> items) {
-    List<DropdownMenuItem> itemWidgets = List();
-    items.forEach((key, value) {
-      itemWidgets.add(DropdownMenuItem(
-        value: value,
-        child: Text(value),
-      ));
-    });
-    return itemWidgets;
-  }
-
-  @override
-  Widget build(final BuildContext context) {
-    final shippingAddress = Provider.of<ShippingAddress>(context);
-    Map<String, dynamic> district = shippingAddress.allAreas;
-    return Consumer<ShippingAddress>(
-      builder: (
-        final BuildContext context,
-        final ShippingAddress address,
-        final Widget child,
-      ) {
-        return DropdownButton(
-          isExpanded: true,
-          icon: Icon(Icons.local_gas_station),
-          hint: Text('Select area'),
-          value: shippingAddress.selectedArea,
-          onChanged: (newValue) {
-            shippingAddress.selectedArea = newValue;
-          },
-          items: _districtMenuItems(district),
-        );
-      },
-    );
-  }
-}

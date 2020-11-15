@@ -47,13 +47,48 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text(
-          'Bepari',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+    return
+      Material(
+      color: Colors.white,
+      child: Center(
+        child: Container(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Expanded(
+                flex: 2,
+                child: Container(
+                  padding: EdgeInsets.only(top: 100.0),
+                  child: Image(
+                    width: 200.0,
+                    image: AssetImage(
+                      'assets/splash-screen.png',
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  padding: EdgeInsets.only(top: 100.0),
+                  child: Text(
+                    'version 1.0',
+                    style: TextStyle(color: Colors.black38),
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
+    //   Scaffold(
+    //   body: Center(
+    //     child: Text(
+    //       'Bepari',
+    //       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
+    //     ),
+    //   ),
+    // );
   }
 }

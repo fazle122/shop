@@ -73,6 +73,7 @@ class OrderDetailScreen extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
                                 Flexible(child:Text('Invoice date: ' + DateFormat('EEEE, MMM d, ').format(orderDetailData.singOrderItem.invoiceDate),style: TextStyle(fontSize: 15.0),),),
+                                Flexible(child:Text('Delivery date: ' + DateFormat('EEEE, MMM d, ').format(orderDetailData.singOrderItem.delivaryDate),style: TextStyle(fontSize: 15.0),),),
                                 // Flexible(child: Text('Invoice created: ' + DateFormat('EEEE, MMM d, hh:mm aaa').format(orderDetailData.singOrderItem.createdAt.toLocal()),style: TextStyle(fontSize: 12.0),),),
 
                               ],

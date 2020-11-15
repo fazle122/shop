@@ -256,7 +256,8 @@ class ProductTileState extends State<ProductTile> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 IconButton(
-                  icon: Icon(Icons.add),
+                  icon: Icon(Icons.add_circle_outline),
+                  color:Colors.red,
                   onPressed: () async{
                     await cart.addItem(
                         product.id,
@@ -295,7 +296,8 @@ class ProductTileState extends State<ProductTile> {
                 ),
                 Text(cart.items.firstWhere((d) => d.productId == product.id).quantity.toString(),style: TextStyle(fontSize: 20.0),),
                 IconButton(
-                  icon: Icon(Icons.remove),
+                  icon: Icon(Icons.remove_circle_outline,),
+                  color: Colors.red,
                   onPressed: () async{
                     await cart.removeSingleItem(product.id);
                     Future.delayed(const Duration(milliseconds: 500), () async{

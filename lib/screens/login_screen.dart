@@ -34,22 +34,48 @@ class _LoginScreenState extends State<LoginScreen>{
   var _isInit = true;
   var _isLoading = false;
 
-  @override
-  void didChangeDependencies() {
+  // @override
+  // void didChangeDependencies() {
+  //   if (_isInit) {
+  //     if (!mounted) return;
+  //     setState(() {
+  //       _isLoading = true;
+  //     });
+  //     Provider.of<ShippingAddress>(context).fetchShippingAddressList().then((_) {
+  //       if (!mounted) return;
+  //       setState(() {
+  //         _isLoading = false;
+  //       });
+  //     });
+  //   }
+  //   _isInit = false;
+  //   super.didChangeDependencies();
+  // }
+
+  _fetchShippingAddressList() async{
+    final shippingData = Provider.of<ShippingAddress>(context,listen: false);
+
     if (_isInit) {
       if (!mounted) return;
       setState(() {
         _isLoading = true;
       });
-      Provider.of<ShippingAddress>(context).fetchShippingAddressList().then((_) {
+      await Provider.of<ShippingAddress>(context,listen: false).fetchShippingAddressList().then((_) {
         if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
+        if (shippingData.allShippingAddress.length > 0) {
+          Navigator.of(context).pushReplacementNamed(
+              DeliveryAddressScreen.routeName);
+        } else {
+          Navigator.of(context).pushReplacementNamed(
+              CreateProfileScreen.routeName,
+              arguments: _phoneController.text);
+        }
       });
     }
     _isInit = false;
-    super.didChangeDependencies();
   }
 
 
@@ -120,17 +146,14 @@ class _LoginScreenState extends State<LoginScreen>{
   }
 
   Future<void> _login() async {
-    final shippingData = Provider.of<ShippingAddress>(context,listen: false);
     try {
       if(_otpController.text == null || _otpController.text == '' || _otpController.text == "" || _otpController.text.isEmpty){
         Toast.show('Please provide OTP code', context, duration: Toast.LENGTH_LONG, gravity: Toast.CENTER);
       }else{
         await Provider.of<Auth>(context, listen: false).login(_phoneController.text, _otpController.text);
-        if(shippingData.allShippingAddress.length>0){
-          Navigator.of(context).pushReplacementNamed(DeliveryAddressScreen.routeName);
-        }
-        Navigator.of(context).pushReplacementNamed(CreateProfileScreen.routeName,arguments: _phoneController.text);
-
+        Future.delayed(const Duration(milliseconds: 500), ()  async{
+          await _fetchShippingAddressList();
+        });
       }
 
 

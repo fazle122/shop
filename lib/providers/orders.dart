@@ -13,7 +13,7 @@ class OrderItem{
   final double totalDue;
   final List<InvoiceItem> invoiceItem;
   final DateTime invoiceDate;
-  final DateTime createdAt;
+  final DateTime delivaryDate;
   final int status;
 
   OrderItem({
@@ -22,7 +22,7 @@ class OrderItem{
     @required this.totalDue,
     @required this.invoiceItem,
     @required this.invoiceDate,
-    @required this.createdAt,
+    @required this.delivaryDate,
     @required this.status,
 });
 
@@ -242,7 +242,7 @@ class Orders with ChangeNotifier{
           invoiceAmount: double.parse(allOrders[i]['invoice_amount']),
           totalDue: double.parse(allOrders[i]['total_due']),
           invoiceDate: DateTime.parse(allOrders[i]['invoice_date']),
-          createdAt: DateTime.parse(allOrders[i]['created_at']),
+          delivaryDate: DateTime.parse(allOrders[i]['delivery_date']),
           status: allOrders[i]['status'],
 
         );
@@ -282,7 +282,8 @@ class Orders with ChangeNotifier{
       final OrderItem orderItem = OrderItem(
         id: allOrders['id'],
         totalDue: double.parse(allOrders['total_due']),
-         invoiceDate: DateTime.parse(allOrders['delivery_date']),
+        invoiceDate: DateTime.parse(allOrders['invoice_date']),
+        delivaryDate: DateTime.parse(allOrders['delivery_date']),
 //        invoiceAmount: allOrders['invoice_amount'].toDouble(),
         invoiceAmount: double.parse(allOrders['invoice_amount']),
         invoiceItem: (allOrders['invoice_details'] as List<dynamic>).map((item) => InvoiceItem(

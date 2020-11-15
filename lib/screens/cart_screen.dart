@@ -222,7 +222,8 @@ class _CartScreenState extends BaseState<CartScreen>{
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: <Widget>[
                                       IconButton(
-                                        icon: Icon(Icons.add),
+                                        icon: Icon(Icons.add_circle_outline,size: 20.0,),
+                                        color:Colors.red,
                                         onPressed: (){
                                           cart.addItem(cartData.items[i].productId, cartData.items[i].title, cartData.items[i].price,cartData.items[i].isNonInventory,cartData.items[i].discount,cartData.items[i].discountId,cartData.items[i].discountType);
                                           Scaffold.of(context).hideCurrentSnackBar();
@@ -265,7 +266,8 @@ class _CartScreenState extends BaseState<CartScreen>{
                                       ),
                                       Text(cartData.items[i].quantity.toString(),style: TextStyle(fontSize: 20.0),),
                                       IconButton(
-                                        icon: Icon(Icons.remove),
+                                        icon: Icon(Icons.remove_circle_outline,size: 20.0,),
+                                        color: Colors.red,
                                         onPressed: (){
                                           cart.removeSingleItem(cartData.items[i].productId);
                                           Scaffold.of(context).hideCurrentSnackBar();
