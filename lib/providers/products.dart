@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:shoptempdb/data_helper/api_service.dart';
+import 'package:shoptempdb/utility/api_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 

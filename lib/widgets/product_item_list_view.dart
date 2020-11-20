@@ -56,201 +56,167 @@ class _ProductItemListViewState extends State<ProductItemListView>{
             tag: product.id,
             child: FadeInImage(
               image: NetworkImage(product.imageUrl),
-              height: 70.0,
-              width: 50.0,
+              width: MediaQuery.of(context).size.width * 0.6/5,
               fit: BoxFit.contain,
               placeholder: AssetImage('assets/products.png'),
             ),
           ),
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                product.title,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 15.0),
-              ),
-            ],
-          ),
+          title:
+          // Align(
+          //   child:
+            Text(
+              product.title,
+              textAlign: TextAlign.start,
+              style: TextStyle(fontSize: 15.0),
+            ),
+          //   alignment: Alignment(-2.5, 75.0),
+          // ),
+
           subtitle: Text('BDT ' + product.price.toString(),style: TextStyle(fontSize: 12.0,color: Colors.red,fontWeight: FontWeight.bold),),
 
-          trailing: Column(
-                // crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(product.unit,style: TextStyle(fontSize: 14.0,color: Colors.grey,)),
-                  newCartItem.keys.contains(product.id) ?
-                  Expanded(
-                      child:Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          IconButton(
-                            icon: Icon(Icons.add_circle_outline,size: 20.0,),
-                            color:Colors.red,
-                            onPressed: () async{
-                              await cart.addItem(
-                                  product.id,
-                                  product.title,
-                                  product.price,
-                                  product.isNonInventory,
-                                  product.discount,
-                                  product.discountId,
-                                  product.discountType);
-                              Future.delayed(const Duration(milliseconds: 500), () async{
-                                await getDeliveryCharge(cart,cart.totalAmount);
+          trailing:
+          Container(
+            // decoration: BoxDecoration(
+            //     border: Border.all(color: Colors.blueAccent)
+            // ),
+            width: MediaQuery.of(context).size.width * 1.4/5,
+            // padding: EdgeInsets.only(left: 10.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.only(right: 5.0),
+                  child: Text(product.unit,style: TextStyle(fontSize: 14.0,color: Colors.grey,)),
+                ),
 
-                                Scaffold.of(context).showSnackBar(SnackBar(
-                                  backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
-                                  content: cart.totalAmount > cart.maxDeliveryRange
-                                      ? Container(
-                                      padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                                      child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT')
-                                  )
-                                      : Row(
-                                    children: <Widget>[
-                                      SizedBox(
-                                        width: 5.0,
-                                      ),
-                                      Container(
-                                        width: MediaQuery.of(context).size.width * 4 / 7,
-                                        child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
-                                      )
-                                    ],
-                                  ),
-                                  duration: Duration(seconds: 2),
-                                ));
-                              });
-                            },
-                          ),
-                          Text(cart.items.firstWhere((d) => d.productId == product.id).quantity.toString(),style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold,color:Colors.red),),
-                          IconButton(
-                            icon: Icon(Icons.remove_circle_outline,size: 20.0,),
-                            color: Colors.red,
-                            onPressed: () async{
-                              await cart.removeSingleItem(product.id);
-                              Future.delayed(const Duration(milliseconds: 500), () async{
-                                await getDeliveryCharge(cart,cart.totalAmount);
+                newCartItem.keys.contains(product.id) ?
+                Expanded(
+                    child:Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            IconButton(
+                              icon: Icon(Icons.add_circle_outline,size: 25.0,),
+                              color:Colors.red,
+                              onPressed: () async{
+                                Scaffold.of(context).removeCurrentSnackBar();
 
-                                Scaffold.of(context).showSnackBar(SnackBar(
-                                  backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
-                                  content: cart.totalAmount > cart.maxDeliveryRange
-                                      ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                                      child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT'))
-                                      : Row(
-                                    children: <Widget>[
-                                      SizedBox(
-                                        width: 5.0,
-                                      ),
-                                      Container(
-                                        width: MediaQuery.of(context).size.width * 4 / 7,
-                                        child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
-                                      )
-                                    ],
-                                  ),
-                                  duration: Duration(seconds: 2),
-                                ));
-                              });
-                            },
-                          ),
-                        ],
-                      )):
-                      Container(
-                        margin: EdgeInsets.only(top:5.0),
-                        // padding: EdgeInsets.all(5.0),
-                        width: 80.0,
-                        height: 20.0,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor
-                        ),
-                        child: InkWell(
-                          child: Center(child:Text('Add to cart',style: TextStyle(fontSize: 12.0,color: Colors.white,fontWeight: FontWeight.bold),),),
-                          onTap: () async{
-                            await cart.addItem(
-                                product.id,
-                                product.title,
-                                product.price,
-                                product.isNonInventory,
-                                product.discount,
-                                product.discountId,
-                                product.discountType);
-                            Future.delayed(const Duration(milliseconds: 500), () async{
-                              await getDeliveryCharge(cart,cart.totalAmount);
+                                await cart.addItem(
+                                    product.id,
+                                    product.title,
+                                    product.price,
+                                    product.isNonInventory,
+                                    product.discount,
+                                    product.discountId,
+                                    product.discountType);
+                                Future.delayed(const Duration(milliseconds: 500), () async{
+                                  await getDeliveryCharge(cart,cart.totalAmount);
+                                  // Scaffold.of(context).showSnackBar(SnackBar(
+                                  //   backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
+                                  //   content: cart.totalAmount > cart.maxDeliveryRange
+                                  //       ? Container(
+                                  //       padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                                  //       child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT')
+                                  //   )
+                                  //       : Row(
+                                  //     children: <Widget>[
+                                  //       SizedBox(
+                                  //         width: 5.0,
+                                  //       ),
+                                  //       Container(
+                                  //         width: MediaQuery.of(context).size.width * 4 / 7,
+                                  //         child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
+                                  //       )
+                                  //     ],
+                                  //   ),
+                                  //   duration: Duration(seconds: 2),
+                                  // ));
+                                });
+                              },
+                            ),
+                            Text(cart.items.firstWhere((d) => d.productId == product.id).quantity.toString(),style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold,color:Colors.red),),
+                            IconButton(
+                              icon: Icon(Icons.remove_circle_outline,size: 25.0,),
+                              color: Colors.red,
+                              onPressed: () async{
+                                Scaffold.of(context).removeCurrentSnackBar();
+                                await cart.removeSingleItem(product.id);
+                                Future.delayed(const Duration(milliseconds: 500), () async{
+                                  await getDeliveryCharge(cart,cart.totalAmount);
+                                  // Scaffold.of(context).showSnackBar(SnackBar(
+                                  //   backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
+                                  //   content: cart.totalAmount > cart.maxDeliveryRange
+                                  //       ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                                  //       child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT'))
+                                  //       : Row(
+                                  //     children: <Widget>[
+                                  //       SizedBox(width: 5.0,),
+                                  //       Container(
+                                  //         width: MediaQuery.of(context).size.width * 4 / 7,
+                                  //         child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
+                                  //       )
+                                  //     ],
+                                  //   ),
+                                  //   duration: Duration(seconds: 2),
+                                  // ));
+                                });
+                              },
+                            ),
+                          ],
+                        )
+                ) :
+                Container(
+                    margin: EdgeInsets.only(top:5.0),
+                    width: MediaQuery.of(context).size.width * 1/5,
+                    height: MediaQuery.of(context).size.height * 1.2/30,
+                    decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.all(Radius.circular(5.0))
+                    ),
+                    child: InkWell(
+                      child: Center(child:Text('Add to cart',style: TextStyle(fontSize: 12.0,color: Colors.white,fontWeight: FontWeight.bold),),),
+                      onTap: () async{
+                        await cart.addItem(
+                            product.id,
+                            product.title,
+                            product.price,
+                            product.isNonInventory,
+                            product.discount,
+                            product.discountId,
+                            product.discountType);
+                        Future.delayed(const Duration(milliseconds: 500), () async{
+                          await getDeliveryCharge(cart,cart.totalAmount);
 
-                              Scaffold.of(context).showSnackBar(SnackBar(
-                                backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
-                                content: cart.totalAmount > cart.maxDeliveryRange
-                                    ? Container(
-                                    padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                                    child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT')
-                                )
-                                    : Row(
-                                  children: <Widget>[
-                                    SizedBox(
-                                      width: 5.0,
-                                    ),
-                                    Container(
-                                      width: MediaQuery.of(context).size.width * 4 / 7,
-                                      child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
-                                    )
-                                  ],
-                                ),
-                                duration: Duration(seconds: 2),
-                              ));
-                            });
-                          },
-                      )
-                      )
+                          // Scaffold.of(context).showSnackBar(SnackBar(
+                          //   backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
+                          //   content: cart.totalAmount > cart.maxDeliveryRange
+                          //       ? Container(
+                          //       padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
+                          //       child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT')
+                          //   )
+                          //       : Row(
+                          //     children: <Widget>[
+                          //       SizedBox(
+                          //         width: 5.0,
+                          //       ),
+                          //       Container(
+                          //         width: MediaQuery.of(context).size.width * 4 / 7,
+                          //         child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
+                          //       )
+                          //     ],
+                          //   ),
+                          //   duration: Duration(seconds: 2),
+                          // ));
+                        });
+                      },
+                    )
+                )
+              ],
 
-
-                      // IconButton(
-                      //   color: Theme.of(context).accentColor,
-                      //   icon: Icon(Icons.shopping_cart),
-                      //   onPressed: () async{
-                      //     await cart.addItem(
-                      //         product.id,
-                      //         product.title,
-                      //         product.price,
-                      //         product.isNonInventory,
-                      //         product.discount,
-                      //         product.discountId,
-                      //         product.discountType);
-                      //     Future.delayed(const Duration(milliseconds: 500), () async{
-                      //       await getDeliveryCharge(cart,cart.totalAmount);
-                      //
-                      //       Scaffold.of(context).showSnackBar(SnackBar(
-                      //         backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
-                      //         content: cart.totalAmount > cart.maxDeliveryRange
-                      //             ? Container(
-                      //             padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                      //             child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT')
-                      //         )
-                      //             : Row(
-                      //           children: <Widget>[
-                      //             SizedBox(
-                      //               width: 5.0,
-                      //             ),
-                      //             Container(
-                      //               width: MediaQuery.of(context).size.width * 4 / 7,
-                      //               child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
-                      //             )
-                      //           ],
-                      //         ),
-                      //         duration: Duration(seconds: 2),
-                      //       ));
-                      //     });
-                      //   },
-                      // ),
-
-
-
-                    // ),
-
-
-                ],
-
-              ),
+            ),
+          ),
 
           onTap: () {
             Navigator.of(context)

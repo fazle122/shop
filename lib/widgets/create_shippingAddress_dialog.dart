@@ -9,6 +9,7 @@ import 'package:shoptempdb/screens/confirm_order_screen.dart';
 import 'package:shoptempdb/screens/orders_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 import 'package:flushbar/flushbar.dart';
+import 'package:toast/toast.dart';
 
 
 
@@ -151,10 +152,28 @@ class _CreateShippingAddressDialogState
         dt.putIfAbsent('shipping_address_line', ()=>homeAddress);
         dt.putIfAbsent('mobile_no', ()=>mobileNumber);
 
-        shippingAddress.selectedDistrict = null;
-        shippingAddress.selectedArea = null;
-        // Navigator.pushNamed(context, ConfirmOrderScreen.routeName,arguments: dt);
-        Navigator.of(context).pop(dt,);
+        // shippingAddress.selectedDistrict = null;
+        // shippingAddress.selectedArea = null;
+        // Navigator.of(context).pop(dt);
+
+
+        ///new code///
+        var response = await Provider.of<ShippingAddress>(context, listen: false).createShippingAddress(
+          shippingAddress.selectedArea.toString(),
+          shippingAddress.selectedDistrict,
+          homeAddress,
+          mobileNumber,
+        );
+        if(response != null){
+          var id = response['data']['customer_shipping_address']['id'];
+          shippingAddress.selectedDistrict = null;
+          shippingAddress.selectedArea = null;
+          Navigator.of(context).pop(id);
+        }else{
+          Toast.show('Something went wrong, please try again', context,gravity: Toast.BOTTOM,duration: Toast.LENGTH_LONG);
+        }
+
+        /// end ///
 
       }else{
         _scaffoldKey.currentState.showSnackBar(
@@ -234,8 +253,7 @@ class _CreateShippingAddressDialogState
 //                    print(shippingAddress.selectedArea);
 //                    print(_phoneEditController.text);
 //                    print(_addressEditController.text);
-//                    Provider.of<ShippingAddress>(context, listen: false)
-//                        .createShippingAddress(
+//                    Provider.of<ShippingAddress>(context, listen: false).createShippingAddress(
 //                      shippingAddress.selectedArea.toString(),
 //                      _addressEditController.text,
 //                      _phoneEditController.text,
@@ -349,16 +367,6 @@ class _CreateShippingAddressDialogState
                           style: TextStyle(fontSize: 14)),
                       onPressed: () async{
                         FocusScope.of(context).requestFocus(new FocusNode());
-                        // if (product != null) {
-                        //   await cart.addItem(
-                        //       product['id'].toString(),
-                        //       product['name'],
-                        //       product['unit_price'].toDouble(),
-                        //       product['is_non_inventory'],
-                        //       product['discount'] != null ? product['discount'] : 0.0,
-                        //       product['discount_id'],
-                        //       product['discount_type']);
-                        // }
                         Future.delayed(Duration(milliseconds: 500), () async {
                           await _saveForm(shippingAddress, cart);
                         });
@@ -470,47 +478,6 @@ class _CreateShippingAddressDialogState
           },
           items: _areaMenuItems(areas),
         );
-//        return Stack(
-//          children: <Widget>[
-//            Container(
-//                decoration: ShapeDecoration(
-//                  shape: RoundedRectangleBorder(
-//                    side: BorderSide(width: 1.0, style: BorderStyle.solid),
-//                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
-//                  ),
-//                ),
-//                padding: EdgeInsets.only(left: 44.0, right: 10.0),
-////              margin: EdgeInsets.only(left: 16.0, right: 16.0),
-//                child: DropdownButtonFormField(
-//                  isExpanded: true,
-////                icon: Icon(Icons.local_gas_station),
-//                  hint: Text('Select area'),
-//                  value: shippingAddress.selectedArea,
-//                  onSaved: (value){
-//                    shippingAddress.selectedArea = value;
-//
-//                  },
-//                  validator: (value){
-//                    if (value == null) {
-//                      return 'please choose area';
-//                    }
-//                    return null;
-//                  },
-//                  onChanged: (newValue) {
-//                    shippingAddress.selectedArea = newValue;
-//                  },
-//                  items: _areaMenuItems(areas),
-//                )),
-//            Container(
-//              margin: EdgeInsets.only(top: 24.0, left: 12.0),
-//              child: Icon(
-//                Icons.local_gas_station,
-//                color: Theme.of(context).primaryColor,
-////              size: 20.0,
-//              ),
-//            ),
-//          ],
-//        );
       },
     );
   }

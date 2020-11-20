@@ -43,7 +43,7 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
   Map<String, dynamic> newAddressData = Map();
 
 
-
+  bool _isRadioListLoading = false;
 
   @override
   void didChangeDependencies() {
@@ -208,7 +208,7 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                     ),
                     alignment: Alignment.centerRight,
                     padding: EdgeInsets.only(right: 20),
-                    margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
+                    // margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
                   ),
                   confirmDismiss: (direction) {
                     return showDialog(
@@ -237,15 +237,10 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                   onDismissed: (direction) async {
                     if (!mounted) return;
                     setState(() {
-                      _isLoading = true;
+                      _isRadioListLoading = true;
                     });
-                    await Provider.of<ShippingAddress>(context, listen: false)
-                        .deleteShippingAddress(data.id);
-                    if (!mounted) return;
-                    setState(() {
-                      _isInit = true;
-                      _isLoading = false;
-                    });
+                    await Provider.of<ShippingAddress>(context, listen: false).deleteShippingAddress(data.id);
+                    _refreshList();
                   },
                   child:
                   ListTile(
@@ -268,21 +263,13 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                       child: Text('Edit',style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold),),
                       // icon: Icon(Icons.edit),
                       onTap: () async {
-//                        await showDialog(
-//                            context: context,
-//                            child: TestWidget(
-//                              addressItem: data,
-//                            ));
                         await showDialog(
                             context: context,
                             barrierDismissible: false,
                             child: UpdateShippingAddressDialog(
                               addressItem: data,
                             ));
-                        if (!mounted) return;
-                        setState(() {
-                          _isInit = true;
-                        });
+                        _refreshList();
                       },
                     ),
                   )),
@@ -312,11 +299,22 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
 
   }
 
+  _refreshList () async{
+    setState(() {
+      _isRadioListLoading = true;
+    });
+    Provider.of<ShippingAddress>(context,listen: false).fetchShippingAddressList().then((_) {
+      if (!mounted) return;
+      setState(() {
+        _isRadioListLoading = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
    final shippingData = Provider.of<ShippingAddress>(context);
-//     final cart = ModalRoute.of(context).settings.arguments as Cart;
-  final cart = Provider.of<Cart>(context,listen: false);
+    final cart = Provider.of<Cart>(context,listen: false);
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: Scaffold(
@@ -335,7 +333,7 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
               children: <Widget>[
 
                 Container(
-                  height: MediaQuery.of(context).size.height * .5 / 6,
+                  height: MediaQuery.of(context).size.height * .4 / 6,
                   padding: EdgeInsets.only(left:10.0),
                   child: Row(
                     children: <Widget>[
@@ -348,43 +346,49 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
 
                 Consumer<ShippingAddress>(
                     builder: (context, shippingData, child) =>
+                        _isRadioListLoading ?
+                        Container(
+                            height: MediaQuery.of(context).size.height * 1.4 / 6,
+                            child:Center(child:CircularProgressIndicator()))
+                            :
                         Container(
                             padding: EdgeInsets.only(left: 10.0,right: 10.0),
-                            height: MediaQuery.of(context).size.height * 1.75 / 6,
+                            height: MediaQuery.of(context).size.height * 1.4 / 6,
                             child: shippingData.allShippingAddress.length>0 ?ListView(
                               children: createRadioListUsers(shippingData.allShippingAddress),
-                            ):Center(child:Text('No previous delivery address'),
-                            ))
+                            ):
+                            Center(child:Text('No previous delivery address'),)
+                        )
                 ),
 
                 Container(
-                    margin: EdgeInsets.only(left: 12.0,top: 20.0,bottom: 20.0),
-                    height: MediaQuery.of(context).size.height * .4/ 6,
-                    width: 160.0,
+                    margin: EdgeInsets.only(left: 12.0),
+                    padding: EdgeInsets.only(top:20),
+                    height: MediaQuery.of(context).size.height * .8/ 6,
+                    width: MediaQuery.of(context).size.width * 2.5/ 6,
                     child: Column(
                       children: <Widget>[
                         MaterialButton(
-                          height: 40.0,
+                          height: MediaQuery.of(context).size.height * .4/6,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(0.0),
-                              side: BorderSide(color: Colors.grey)),
+
+                              borderRadius: BorderRadius.circular(5.0),
+                              side: BorderSide(color: Colors.black,width: 2.0),
+                          ),
                           onPressed: () async{
-                            if (cart.items.length > 0) {
                               selectedAddress = null;
                               selectedAddressId = null;
-                              Map<String,dynamic> data =  await showDialog(
+                              var data =  await showDialog(
                                   context: context,
                                   barrierDismissible: false,
                                   child: CreateShippingAddressDialog(cart: cart));
                               if(data != null){
+                                _refreshList();
                                 setState(() {
-                                  newAddressData = data;
+                                  //// newAddressData = data;
+                                  selectedAddressId = data.toString();
                                 });
                               }
-                            } else {
-                              _scaffoldKey.currentState.showSnackBar(
-                                  _snackBar('Please add item to cart'));
-                            }
                           },
                           textColor: Colors.black,
                           child: Row(
@@ -399,25 +403,24 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                     )
                 ),
 
-
-                Padding(
+                Container(
+                  height: MediaQuery.of(context).size.height * .3/ 6,
                   padding: EdgeInsets.only(left: 20.0),
-                  child:Text('Preferred delivery date & time',style: TextStyle(fontSize: 15.0,fontWeight: FontWeight.bold,color:Colors.grey),),
+                  child:Text('Preferred delivery date & time',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold,color:Colors.grey),),
 
                 ),
 
                 Container(
-                  height: 100.0,
-
-                  child: Card(
-                      margin: EdgeInsets.all(10.0),
-                      child:
-                      Row(
+                  height: MediaQuery.of(context).size.height * .7/ 6,
+                  child:
+                  Card(
+                    elevation: 5.0,
+                      margin: EdgeInsets.only(left:10.0,right: 10.0),
+                      child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: <Widget>[
                           Container(
-
                             width:MediaQuery.of(context).size.width *1.3/3,
                             child: dateDropdown(shippingData,shippingData.allShippingDates),
                           ),
@@ -425,84 +428,24 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                             width:MediaQuery.of(context).size.width *1.3/3,
                             child: timeDropdown(shippingData,shippingData.allShippingTimes),
                           )
-
-
-                          ///old///
-                          // Container(
-                          //   width:MediaQuery.of(context).size.width * 1.35/3,
-                          //   height: 40.0,
-                          //   child: DateTimeField(
-                          //     textAlign: TextAlign.start,
-                          //     format: format,
-                          //     onChanged: (dt) {
-                          //       setState(() {
-                          //         _deliveryDate = dt;
-                          //       });
-                          //     },
-                          //     decoration: InputDecoration(
-                          //         labelText: 'Select date',
-                          //         suffixIcon: Icon(
-                          //           Icons.arrow_drop_down,
-                          //           size: 40.0,
-                          //           color: Colors.grey,
-                          //         ),
-                          //         contentPadding:
-                          //         EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-                          //         border: OutlineInputBorder(
-                          //             borderRadius: BorderRadius.circular(2.0))),
-                          //     onShowPicker: (context, currentValue) {
-                          //       return showDatePicker(
-                          //           context: context,
-                          //           firstDate: DateTime(1900),
-                          //           initialDate: currentValue ?? DateTime.now(),
-                          //           lastDate: DateTime(2100));
-                          //     },
-                          //   ),
-                          // ),
-                          // Container(
-                          //   width:MediaQuery.of(context).size.width * 1.35/3,
-                          //   height: 40.0,
-                          //   child:
-                          //   DateTimeField(
-                          //     format: timeFormat,
-                          //     decoration: InputDecoration(
-                          //         labelText: 'Select time',
-                          //         suffixIcon: Icon(
-                          //           Icons.arrow_drop_down,
-                          //           size: 40.0,
-                          //           color: Colors.grey,
-                          //         ),
-                          //         contentPadding:
-                          //         EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-                          //         border: OutlineInputBorder(
-                          //             borderRadius: BorderRadius.circular(2.0))),
-                          //     onShowPicker: (context, currentValue) async {
-                          //       _currentTime = await showTimePicker(
-                          //         context: context,
-                          //         initialTime: TimeOfDay.fromDateTime(currentValue ?? DateTime.now()),
-                          //         builder: (context, child) => MediaQuery(
-                          //             data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-                          //             child: child),
-                          //       );
-                          //       return DateTimeField.convert(_currentTime);
-                          //     },
-                          //   ),
-                          // )
                         ],
                       )
                   ),
                 ),
 
-                Padding(
-                  padding: EdgeInsets.only(left: 20.0),
-                  child:Text('Add order note',style: TextStyle(fontSize: 15.0,fontWeight: FontWeight.bold,color:Colors.grey),),
+                Container(
+                  height: MediaQuery.of(context).size.height * .3/ 6,
+                  padding: EdgeInsets.only(top:20,left: 20.0),
+                  child:Text('Add order note',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold,color:Colors.grey),),
 
                 ),
 
                 Container(
-                    height: 100.0,
+                    height: MediaQuery.of(context).size.height * .71/ 6,
+
                     child:Card(
-                        margin: EdgeInsets.all(10.0),
+                      elevation: 5.0,
+                        margin: EdgeInsets.only(top:10.0,left:10.0,right: 10.0),
                         child: TextFormField(
                           textAlign: TextAlign.left,
                           controller: _noteController,
@@ -520,25 +463,22 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
 
                 InkWell(
                   child: Container(
-                      height: 50.0,
-                      color: Theme.of(context).primaryColor,
+                      padding: EdgeInsets.only(top:10.0),
+                      height: MediaQuery.of(context).size.height * .5/6,
                       child: Row(
                         children: <Widget>[
                           Container(
                               width: MediaQuery.of(context).size.width * 5/7,
-                              padding: EdgeInsets.only(left: 20.0, top: 2.0),
+                              padding: EdgeInsets.only(left: 20.0),
                               color: Color(0xffFB0084),
                               child: Column(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
                                   Text(' Place order',style: TextStyle(fontSize:18.0,fontWeight: FontWeight.bold,color: Colors.white),)
                                 ],
                               )),
                           Container(
-                            height: MediaQuery.of(context).size.height,
                             width: MediaQuery.of(context).size.width * 2 / 7,
                             color: Color(0xffB40060),
                             child: Center(
@@ -569,7 +509,7 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                                     children: <Widget>[
                                       Text('Please select a delivery address or create new one'),
                                       Container(
-                                          margin: EdgeInsets.only(top:5.0),
+                                          // margin: EdgeInsets.only(top:5.0),
                                           padding: EdgeInsets.all(5.0),
                                           width: 80.0,
                                           height: 30.0,
@@ -602,7 +542,7 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                                         children: <Widget>[
                                           Text('You must select a delivery date and time to place the order'),
                                           Container(
-                                              margin: EdgeInsets.only(top:5.0),
+                                              // margin: EdgeInsets.only(top:5.0),
                                               padding: EdgeInsets.all(5.0),
                                               width: 80.0,
                                               height: 30.0,
@@ -654,161 +594,3 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
   }
 }
 
-
-
-
-
-
-
-
-
-///old code///
-
-//                     Container(
-//                       height: 40.0,
-//                       width: 150.0,
-//                       child: RaisedButton(
-//                         color: Theme.of(context).primaryColor,
-//                         textColor: Colors.white,
-//                         child: Text("CONFIRM ORDER".toUpperCase(),
-//                             style: TextStyle(fontSize: 14)),
-//                         shape: RoundedRectangleBorder(
-//                             borderRadius: BorderRadius.circular(25.0),
-//                             side: BorderSide(color: Colors.grey)),
-//                         onPressed: () async {
-//                           FocusScope.of(context).requestFocus(new FocusNode());
-//                           // cart.addItem(
-//                           // cartData.items[i].productId, cartData.items[i].title,
-//                           // cartData.items[i].price,cartData.items[i].isNonInventory,
-//                           // cartData.items[i].discount,cartData.items[i].discountId,
-//                           // cartData.items[i].discountType);
-//
-//                           if (product != null) {
-//                             await cart.addItem(
-//                                 product['id'].toString(),
-//                                 product['name'],
-//                                 product['unit_price'].toDouble(),
-//                                 product['is_non_inventory'],
-//                                 product['discount'] != null ? product['discount'] : 0.0,
-//                                 product['discount_id'],
-//                                 product['discount_type']);
-//                           }
-//                           Future.delayed(Duration(milliseconds: 500), () async {
-//                             if (cart.items.length > 0) {
-//                               List<Cart> ct = [];
-//                               ct = cart.items.map((e) => Cart(id: e.id, cartItem: e)).toList();
-//                               Map<String, dynamic> data = Map();
-//                               for (int i = 0; i < ct.length; i++) {
-//                                 data.putIfAbsent('product_id[$i]', () => ct[i].cartItem.productId);
-//                                 data.putIfAbsent('quantity[$i]', () => ct[i].cartItem.quantity);
-//                                 data.putIfAbsent('unit_price[$i]', () => ct[i].cartItem.price);
-//                                 data.putIfAbsent('is_non_inventory[$i]', () => ct[i].cartItem.isNonInventory);
-//                                 data.putIfAbsent('discount[$i]', () => ct[i].cartItem.discount);
-//                               }
-//                               data.putIfAbsent('customer_shipping_address_id', () => selectedAddressId);
-//                               FormData formData = FormData.fromMap(data);
-//
-//                               if (selectedAddressId != null) {
-//                                 setState(() {
-//                                   _isLoading = true;
-//                                 });
-//                                 final response = await Provider.of<Orders>(context, listen: false).addOrder(formData);
-//                                 if (response != null) {
-//                                   setState(() {
-//                                     _isLoading = false;
-//                                   });
-//                                   await cart.clearCartTable();
-//                                   Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName);
-//                                   Flushbar(
-//                                     duration: Duration(seconds: 10),
-//                                     margin: EdgeInsets.only(bottom: 2),
-//                                     padding: EdgeInsets.all(10),
-//                                     borderRadius: 8,
-//                                     backgroundColor: Colors.green.shade400,
-//                                     boxShadows: [
-//                                       BoxShadow(
-//                                         color: Colors.black45,
-//                                         offset: Offset(3, 3),
-//                                         blurRadius: 3,
-//                                       ),
-//                                     ],
-//                                     // All of the previous Flushbars could be dismissed by swiping down
-//                                     // now we want to swipe to the sides
-//                                     dismissDirection:
-//                                         FlushbarDismissDirection.HORIZONTAL,
-//                                     // The default curve is Curves.easeOut
-//                                     forwardAnimationCurve:
-//                                         Curves.fastLinearToSlowEaseIn,
-//                                     title: 'Order confirmation',
-//                                     message: response['msg'],
-//                                     mainButton: FlatButton(
-//                                       child: Text('view order'),
-//                                       onPressed: () {
-//                                         Navigator.of(context)
-//                                             .pushNamed(OrdersScreen.routeName);
-//                                       },
-//                                     ),
-//                                   )..show(context);
-// //                          showDialog(
-// //                              context: context,
-// //                              barrierDismissible: false,
-// //                              builder: (ctx) => AlertDialog(
-// //                                title: Text('Order confirmation'),
-// //                                content: Text(response['msg']),
-// //                                actions: <Widget>[
-// //                                  FlatButton(
-// //                                    child: Text('view order'),
-// //                                    onPressed: () {
-// //                                      Navigator.of(context).pushNamed(
-// //                                          OrdersScreen.routeName);
-// //                                    },
-// //                                  ),
-// //                                  FlatButton(
-// //                                    child: Text('create another'),
-// //                                    onPressed: () {
-// //                                      Navigator.of(context).pushNamed(
-// //                                          ProductsOverviewScreen
-// //                                              .routeName);
-// //                                    },
-// //                                  )
-// //                                ],
-// //                              ));
-//                                 } else {
-//                                   await cart.removeCartItemRow('1');
-//                                   setState(() {
-//                                     _isLoading = false;
-//                                   });
-//                                   Flushbar(
-//                                     duration: Duration(seconds: 5),
-//                                     margin: EdgeInsets.only(bottom: 2),
-//                                     padding: EdgeInsets.all(10),
-//                                     borderRadius: 8,
-//                                     backgroundColor: Colors.red.shade400,
-//                                     boxShadows: [
-//                                       BoxShadow(
-//                                         color: Colors.black45,
-//                                         offset: Offset(3, 3),
-//                                         blurRadius: 3,
-//                                       ),
-//                                     ],
-//                                     dismissDirection:
-//                                         FlushbarDismissDirection.HORIZONTAL,
-//                                     forwardAnimationCurve:
-//                                         Curves.fastLinearToSlowEaseIn,
-//                                     title: 'Order confirmation',
-//                                     message:
-//                                         'Something wrong. Please try again',
-//                                   )..show(context);
-//                                 }
-//                               } else {
-//                                 _scaffoldKey.currentState.showSnackBar(_snackBar(
-//                                     'Please select a delivery address or create new one'));
-//                               }
-//                             } else {
-//                               _scaffoldKey.currentState.showSnackBar(
-//                                   _snackBar('Please add item to cart'));
-//                             }
-//                           });
-//                         },
-//                       ),
-//                     ),

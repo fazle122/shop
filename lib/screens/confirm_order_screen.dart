@@ -268,10 +268,10 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen>{
 
                 FormData formData= FormData.fromMap(dt);
 
-                final response = await Provider.of<Orders>(context, listen: false).addOrder(formData);
-                if (response != null) {
-                var orderId = response['data']['customer_invoice']['invoice']['id'];
-                // var orderId = '12345';
+                // final response = await Provider.of<Orders>(context, listen: false).addOrder(formData);
+                // if (response != null) {
+                // var orderId = response['data']['customer_invoice']['invoice']['id'];
+                var orderId = '12345';
                   if(dt.containsKey('customer_shipping_address_id') && dt['customer_shipping_address_id'] != null){
                     Navigator.pushReplacement(context, MaterialPageRoute(
                       builder: (context) => OrderConfirmationScreen(
@@ -287,53 +287,53 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen>{
                         orderId,
                       ),
                     ));
-                  }
-                  else{
-                    Navigator.pushReplacement(context, MaterialPageRoute(
-                      builder: (context) => OrderConfirmationScreen(
-                        null,
-                        dt['city'],
-                        dt['area_id'],
-                        dt['shipping_address_line'],
-                        dt['mobile_no'],
-                        dt['comment'],
-                        paymentOptionName,
-                        dt['delivery_date'],
-                          dt['delivery_slot_start'],
-                          dt['delivery_slot_end'],
-                        totalAmount,
-                        delCharge,
-                          orderId
-                      ),
-                    ));
-                  }
-                  cart.clearCartTable();
-                  shippingAddress.selectedDate = null;
-                  shippingAddress.selectedTime = null;
-                }
-                else {
-                  await cart.removeCartItemRow('1');
-                  setState(() {
-                    _isLoading = false;
-                  });
-                  Flushbar(
-                    duration: Duration(seconds: 5),
-                    margin: EdgeInsets.only(bottom: 2),
-                    padding: EdgeInsets.all(10),
-                    borderRadius: 8,
-                    backgroundColor: Colors.red.shade400,
-                    boxShadows: [
-                      BoxShadow(
-                        color: Colors.black45,
-                        offset: Offset(3, 3),
-                        blurRadius: 3,
-                      ),
-                    ],
-                    dismissDirection: FlushbarDismissDirection.HORIZONTAL,
-                    forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
-                    title: 'Order confirmation',
-                    message: 'Something wrong. Please try again',
-                  )..show(context);
+                //   }
+                //   else{
+                //     Navigator.pushReplacement(context, MaterialPageRoute(
+                //       builder: (context) => OrderConfirmationScreen(
+                //         null,
+                //         dt['city'],
+                //         dt['area_id'],
+                //         dt['shipping_address_line'],
+                //         dt['mobile_no'],
+                //         dt['comment'],
+                //         paymentOptionName,
+                //         dt['delivery_date'],
+                //           dt['delivery_slot_start'],
+                //           dt['delivery_slot_end'],
+                //         totalAmount,
+                //         delCharge,
+                //           orderId
+                //       ),
+                //     ));
+                //   }
+                //   cart.clearCartTable();
+                //   shippingAddress.selectedDate = null;
+                //   shippingAddress.selectedTime = null;
+                // }
+                // else {
+                //   await cart.removeCartItemRow('1');
+                //   setState(() {
+                //     _isLoading = false;
+                //   });
+                //   Flushbar(
+                //     duration: Duration(seconds: 5),
+                //     margin: EdgeInsets.only(bottom: 2),
+                //     padding: EdgeInsets.all(10),
+                //     borderRadius: 8,
+                //     backgroundColor: Colors.red.shade400,
+                //     boxShadows: [
+                //       BoxShadow(
+                //         color: Colors.black45,
+                //         offset: Offset(3, 3),
+                //         blurRadius: 3,
+                //       ),
+                //     ],
+                //     dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+                //     forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+                //     title: 'Order confirmation',
+                //     message: 'Something wrong. Please try again',
+                //   )..show(context);
                 }
               });
             },

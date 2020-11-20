@@ -366,7 +366,7 @@ class _UpdateShippingAddressDialogState
     setState(() {
       _isLoading = true;
     });
-    final response = await Provider.of<ShippingAddress>(context, listen: false).createShippingAddress1(widget.addressItem.id.toString(),data);
+    final response = await Provider.of<ShippingAddress>(context, listen: false).createShippingAddressWithOrder(widget.addressItem.id.toString(),data);
     if (response != null) {
       setState(() {
         _isLoading = false;

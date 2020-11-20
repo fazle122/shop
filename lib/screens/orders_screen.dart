@@ -1,26 +1,6 @@
-// import 'package:flutter/material.dart';
-// import 'package:http/http.dart';
-// import 'package:provider/provider.dart';
-// import 'package:shoptempdb/providers/orders.dart';
-// import 'package:shoptempdb/screens/completed_orders_screen.dart';
-// import 'package:shoptempdb/screens/order_detail_screen.dart';
-// import 'package:shoptempdb/widgets/app_drawer.dart';
-// import 'package:shoptempdb/widgets/order_fiter_dialog.dart';
-// import 'package:shoptempdb/widgets/order_item.dart';
-// import 'package:intl/intl.dart';
-//
-// import '../base_state.dart';
 
-
-
-
-
-import 'package:flushbar/flushbar.dart';
 import 'package:shoptempdb/base_state.dart';
-import 'package:shoptempdb/data_helper/local_db_helper.dart';
-import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/orders.dart';
-import 'package:shoptempdb/screens/cart_screen.dart';
 import 'package:shoptempdb/screens/order_detail_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 import 'package:shoptempdb/widgets/app_drawer.dart';

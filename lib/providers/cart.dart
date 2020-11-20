@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shoptempdb/data_helper/local_db_helper.dart';
+import 'package:shoptempdb/utility/local_db_helper.dart';
 
 class CartItem {
   final String id;

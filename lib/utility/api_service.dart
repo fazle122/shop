@@ -74,7 +74,6 @@ class ApiService {
     return responseData;
   }
 
-
   static Future<List<dynamic>> getDistrictDataFromLocalDB() async  {
     var databasesPath = await getDatabasesPath();
     var path = join(databasesPath, "areas.db");
@@ -98,7 +97,6 @@ class ApiService {
 //    db.close();
     return root;
   }
-
 
   static Future<List<dynamic>> getAreaDataFromLocalDB(String district) async  {
     var databasesPath = await getDatabasesPath();

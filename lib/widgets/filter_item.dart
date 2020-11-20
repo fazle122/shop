@@ -11,8 +11,33 @@ import 'package:shoptempdb/widgets/product_item_list_view.dart';
 class DataSearch extends SearchDelegate<String> {
   final bool _showList;
   int PageCount = 1;
+  bool _isInit= false;
 
   DataSearch(this._showList);
+
+  getDeliveryCharge(BuildContext context,Cart cart,double totalAmount) async{
+      List deliveryChargeMatrix = [];
+
+      await Provider.of<Products>(context,listen: false).fetchDeliveryCharMatrix().then((data){
+        deliveryChargeMatrix = data['range'];
+        for(int i=0;i<deliveryChargeMatrix.length;i++){
+          if(i == 0 && totalAmount<=deliveryChargeMatrix[i]['max']){
+            // setState(() {
+            cart.deliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+            // });
+          }else if( i>0 && totalAmount >= deliveryChargeMatrix[i]['min']){
+            // setState(() {
+            cart.deliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+            // });
+          }else if( i>0){
+            // setState(() {
+            cart.maxDeliveryRange = deliveryChargeMatrix[i]['min'].toDouble();
+            // cart.minDeliveryCharge = deliveryChargeMatrix[i]['charge'].toDouble();
+            // });
+          }
+        }
+      });
+  }
 
   List<TextSpan> highlightOccurrences(String source, String query) {
     if (query == null || query.isEmpty || !source.toLowerCase().contains(query.toLowerCase())) {
@@ -62,10 +87,12 @@ class DataSearch extends SearchDelegate<String> {
 
   @override
   Widget buildLeading(BuildContext context) {
+    final cart = Provider.of<Cart>(context,);
     return IconButton(
         icon: AnimatedIcon(
             icon: AnimatedIcons.menu_arrow, progress: transitionAnimation),
-        onPressed: () {
+        onPressed: () async{
+          // await getDeliveryCharge(context,cart,cart.totalAmount);
           close(context, null);
         });
   }
@@ -96,6 +123,345 @@ class DataSearch extends SearchDelegate<String> {
       },
     );
   }
+
+
+  // @override
+  // Widget buildSuggestions(BuildContext context) {
+  //   final cart = Provider.of<Cart>(context,);
+  //   Map<String,dynamic> newCartItem = Map.fromIterable(cart.items, key: (v) => v.productId, value: (v) => v.quantity);
+  //
+  //   return query.trim().isEmpty ? SizedBox(width: 0.0,height: 0.0,): FutureBuilder(
+  //     future: Provider.of<Products>(context).searchAndSetProducts(pageCount:PageCount,keyword: query.trim()),
+  //     builder: (context, snapshot) {
+  //       return Consumer<Products>(
+  //         builder: (context, data,child) =>
+  //             ListView.builder(
+  //               itemCount: data.items.length,
+  //               itemBuilder: (context, i) =>
+  //                   ListTile(
+  //                     title:
+  //                     Container(
+  //                       // width: MediaQuery.of(context).size.width * 4/8,
+  //                       child: RichText(
+  //                         text: TextSpan(
+  //                           children: highlightOccurrences(data.items[i].title, query),
+  //                           style: TextStyle(color: Colors.grey),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                     // Column(
+  //                     //   crossAxisAlignment: CrossAxisAlignment.start,
+  //                     //   children: <Widget>[
+  //                     //     Text(
+  //                     //       data.items[i].title,
+  //                     //       textAlign: TextAlign.center,
+  //                     //     ),
+  //                     //     SizedBox(height: 05.0,),
+  //                     //   ],
+  //                     // ),
+  //                     subtitle: Text('BDT ' + data.items[i].price.toString() + '/' + data.items[i].unit,style: TextStyle(fontSize: 15.0,color: Colors.grey),),
+  //                     leading: Hero(
+  //                       tag: data.items[i].id,
+  //                       child: FadeInImage(
+  //                         image: NetworkImage(data.items[i].imageUrl),
+  //                         height: 70.0,
+  //                         width: 50.0,
+  //                         fit: BoxFit.contain,
+  //                         placeholder: AssetImage('assets/products.png'),
+  //                       ),
+  //                     ),
+  //                     trailing:
+  //                     Container(
+  //                       width: 110.0,
+  //                       child: newCartItem.keys.contains(data.items[i].id) ? Row(
+  //                         mainAxisAlignment: MainAxisAlignment.end,
+  //                         children: <Widget>[
+  //                           IconButton(
+  //                             icon: Icon(Icons.add_circle_outline),
+  //                             color:Colors.red,
+  //                             onPressed: () async{
+  //                               await cart.addItem(
+  //                                   data.items[i].id,
+  //                                   data.items[i].title,
+  //                                   data.items[i].price,
+  //                                   data.items[i].isNonInventory,
+  //                                   data.items[i].discount,
+  //                                   data.items[i].discountId,
+  //                                   data.items[i].discountType);
+  //                               // Future.delayed(const Duration(milliseconds: 500), () async{
+  //                               //   await getDeliveryCharge(context,cart,cart.totalAmount);
+  //                               //
+  //                               // });
+  //
+  //                             },
+  //                           ),
+  //                           Text(cart.items.firstWhere((d) => d.productId == data.items[i].id).quantity.toString(),style: TextStyle(fontSize: 20.0),),
+  //                           IconButton(
+  //                             icon: Icon(Icons.remove_circle_outline,),
+  //                             color: Colors.red,
+  //                             onPressed: () async{
+  //                               await cart.removeSingleItem(data.items[i].id);
+  //                               // Future.delayed(const Duration(milliseconds: 500), () async{
+  //                               //   await getDeliveryCharge(context,cart,cart.totalAmount);
+  //                               //
+  //                               // });
+  //                             },
+  //                           ),
+  //                         ],
+  //                       ):Container(
+  //                           margin: EdgeInsets.only(top:5.0),
+  //                           // padding: EdgeInsets.all(5.0),
+  //                           width: 90.0,
+  //                           height: 20.0,
+  //                           decoration: BoxDecoration(
+  //                               color: Theme.of(context).primaryColor
+  //                           ),
+  //                           child: InkWell(
+  //                             child: Center(child:Text('Add to cart',style: TextStyle(fontSize: 12.0,color: Colors.white,fontWeight: FontWeight.bold),),),
+  //                             onTap: () async{
+  //                               await cart.addItem(
+  //                                   data.items[i].id,
+  //                                   data.items[i].title,
+  //                                   data.items[i].price,
+  //                                   data.items[i].isNonInventory,
+  //                                   data.items[i].discount,
+  //                                   data.items[i].discountId,
+  //                                   data.items[i].discountType);
+  //                               // Future.delayed(const Duration(milliseconds: 500), () async{
+  //                               //   await getDeliveryCharge(context,cart,cart.totalAmount);
+  //                               //
+  //                               //
+  //                               // });
+  //                             },
+  //                           )
+  //                       ),
+  //                       // IconButton(
+  //                       //   color: Theme.of(context).accentColor,
+  //                       //   icon: Icon(Icons.shopping_cart),
+  //                       //   onPressed: () async{
+  //                       //     await cart.addItem(
+  //                       //         product.id,
+  //                       //         product.title,
+  //                       //         product.price,
+  //                       //         product.isNonInventory,
+  //                       //         product.discount,
+  //                       //         product.discountId,
+  //                       //         product.discountType);
+  //                       //     Future.delayed(const Duration(milliseconds: 500), () async{
+  //                       //       await getDeliveryCharge(cart,cart.totalAmount);
+  //                       //
+  //                       //
+  //                       //     });
+  //                       //   },
+  //                       // ),
+  //                     ),
+  //                     onTap: () {
+  //                       showResults(context);
+  //                       // Navigator.of(context)
+  //                       //     .pushNamed(ProductDetailScreen.routeName, arguments: data.items[i].id);
+  //                     },
+  //                   )
+  //               //     ListTile(
+  //               //     onTap: () {
+  //               //       showResults(context);
+  //               //     },
+  //               //     leading:
+  //               //       Container(
+  //               //         width: MediaQuery.of(context).size.width * 1/8,
+  //               //         child: Hero(
+  //               //           tag: data.items[i].id,
+  //               //           child: FadeInImage(
+  //               //             image: NetworkImage(data.items[i].imageUrl),
+  //               //             height: 20.0,
+  //               //             width: 20.0,
+  //               //             fit: BoxFit.contain,
+  //               //             placeholder: AssetImage('assets/products.png'),
+  //               //           ),
+  //               //         ),
+  //               //       ),
+  //               //     title:
+  //               //           Container(
+  //               //             width: MediaQuery.of(context).size.width * 4/8,
+  //               //             child: RichText(
+  //               //               text: TextSpan(
+  //               //                 children: highlightOccurrences(data.items[i].title, query),
+  //               //                 style: TextStyle(color: Colors.grey),
+  //               //               ),
+  //               //             ),
+  //               //           ),
+  //               //     trailing:
+  //               //     newCartItem.keys.contains(data.items[i].id) ?
+  //               //
+  //               //     Container(
+  //               //         width: MediaQuery.of(context).size.width * 3/8,
+  //               //
+  //               //         // padding: EdgeInsets.only(left: 10.0),
+  //               //       child: Expanded(
+  //               //               child:Row(
+  //               //                 mainAxisAlignment: MainAxisAlignment.end,
+  //               //                 mainAxisSize: MainAxisSize.min,
+  //               //                 children: <Widget>[
+  //               //                   IconButton(
+  //               //                     icon: Icon(Icons.add_circle_outline,size: 18.0,),
+  //               //                     color:Colors.red,
+  //               //                     onPressed: () async{
+  //               //                       Scaffold.of(context).removeCurrentSnackBar();
+  //               //
+  //               //                       await cart.addItem(
+  //               //                           data.items[i].id,
+  //               //                           data.items[i].title,
+  //               //                           data.items[i].price,
+  //               //                           data.items[i].isNonInventory,
+  //               //                           data.items[i].discount,
+  //               //                           data.items[i].discountId,
+  //               //                           data.items[i].discountType);
+  //               //                       Future.delayed(const Duration(milliseconds: 500), () async{
+  //               //                         await getDeliveryCharge(context,cart,cart.totalAmount);
+  //               //
+  //               //                       });
+  //               //                     },
+  //               //                   ),
+  //               //                   Text(cart.items.firstWhere((d) => d.productId == data.items[i].id).quantity.toString(),style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold,color:Colors.red),),
+  //               //                   IconButton(
+  //               //                     icon: Icon(Icons.remove_circle_outline,size: 18.0,),
+  //               //                     color: Colors.red,
+  //               //                     onPressed: () async{
+  //               //                       Scaffold.of(context).removeCurrentSnackBar();
+  //               //                       await cart.removeSingleItem(data.items[i].id);
+  //               //                       Future.delayed(const Duration(milliseconds: 500), () async{
+  //               //                         await getDeliveryCharge(context,cart,cart.totalAmount);
+  //               //                       });
+  //               //                     },
+  //               //                   ),
+  //               //                 ],
+  //               //               )
+  //               //           ) ):
+  //               //           Container(
+  //               //               // margin: EdgeInsets.only(top:5.0),
+  //               //               // padding: EdgeInsets.all(5.0),
+  //               //               width: MediaQuery.of(context).size.width * 3/8,
+  //               //               height: 25.0,
+  //               //               decoration: BoxDecoration(
+  //               //                   color: Theme.of(context).primaryColor
+  //               //               ),
+  //               //               child: InkWell(
+  //               //                 child: Center(child:Text('Add to cart',style: TextStyle(fontSize: 12.0,color: Colors.white,fontWeight: FontWeight.bold),),),
+  //               //                 onTap: () async{
+  //               //                   await cart.addItem(
+  //               //                       data.items[i].id,
+  //               //                       data.items[i].title,
+  //               //                       data.items[i].price,
+  //               //                       data.items[i].isNonInventory,
+  //               //                       data.items[i].discount,
+  //               //                       data.items[i].discountId,
+  //               //                       data.items[i].discountType);
+  //               //                   Future.delayed(const Duration(milliseconds: 500), () async{
+  //               //                     await getDeliveryCharge(context,cart,cart.totalAmount);
+  //               //                   });
+  //               //                 },
+  //               //               )
+  //               //           )
+  //               //     // Container(
+  //               //     //   width: 120.0,
+  //               //     //   child: newCartItem.keys.contains(data.items[i].id) ?
+  //               //     //   Row(
+  //               //     //     mainAxisAlignment: MainAxisAlignment.end,
+  //               //     //     children: <Widget>[
+  //               //     //       IconButton(
+  //               //     //         icon: Icon(Icons.add_circle_outline),
+  //               //     //         color:Colors.red,
+  //               //     //         onPressed: () async{
+  //               //     //           await cart.addItem(
+  //               //     //               data.items[i].id,
+  //               //     //               data.items[i].title,
+  //               //     //               data.items[i].price,
+  //               //     //               data.items[i].isNonInventory,
+  //               //     //               data.items[i].discount,
+  //               //     //               data.items[i].discountId,
+  //               //     //               data.items[i].discountType);
+  //               //     //           Future.delayed(const Duration(milliseconds: 500), () async{
+  //               //     //             // await getDeliveryCharge(cart,cart.totalAmount);
+  //               //     //
+  //               //     //           });
+  //               //     //
+  //               //     //         },
+  //               //     //       ),
+  //               //     //       Text(cart.items.firstWhere((d) => d.productId == data.items[i].id).quantity.toString(),style: TextStyle(fontSize: 20.0),),
+  //               //     //       IconButton(
+  //               //     //         icon: Icon(Icons.remove_circle_outline,),
+  //               //     //         color: Colors.red,
+  //               //     //         onPressed: () async{
+  //               //     //           await cart.removeSingleItem(data.items[i].id);
+  //               //     //           Future.delayed(const Duration(milliseconds: 500), () async{
+  //               //     //             // await getDeliveryCharge(cart,cart.totalAmount);
+  //               //     //
+  //               //     //           });
+  //               //     //         },
+  //               //     //       ),
+  //               //     //     ],
+  //               //     //   ):
+  //               //     //   Container(
+  //               //     //       margin: EdgeInsets.only(top:5.0),
+  //               //     //       // padding: EdgeInsets.all(5.0),
+  //               //     //       // width: 60.0,
+  //               //     //       height: 25.0,
+  //               //     //       decoration: BoxDecoration(
+  //               //     //           color: Theme.of(context).primaryColor
+  //               //     //       ),
+  //               //     //       child:InkWell(
+  //               //     //     child: Center(child:Text('Add to cart',style: TextStyle(fontSize: 12.0,color: Colors.white,fontWeight: FontWeight.bold),),),
+  //               //     //     onTap: () async{
+  //               //     //       await cart.addItem(
+  //               //     //           data.items[i].id,
+  //               //     //           data.items[i].title,
+  //               //     //           data.items[i].price,
+  //               //     //           data.items[i].isNonInventory,
+  //               //     //           data.items[i].discount,
+  //               //     //           data.items[i].discountId,
+  //               //     //           data.items[i].discountType);
+  //               //     //       Future.delayed(const Duration(milliseconds: 500), () async{
+  //               //     //         // await getDeliveryCharge(cart,cart.totalAmount);
+  //               //     //
+  //               //     //
+  //               //     //       });;
+  //               //     //     },
+  //               //     //   )
+  //               //     //   )
+  //               //     //   // IconButton(
+  //               //     //   //   color: Theme.of(context).accentColor,
+  //               //     //   //   icon: Icon(Icons.shopping_cart),
+  //               //     //   //   onPressed: () async{
+  //               //     //   //     await cart.addItem(
+  //               //     //   //         data.items[i].id,
+  //               //     //   //         data.items[i].title,
+  //               //     //   //         data.items[i].price,
+  //               //     //   //         data.items[i].isNonInventory,
+  //               //     //   //         data.items[i].discount,
+  //               //     //   //         data.items[i].discountId,
+  //               //     //   //         data.items[i].discountType);
+  //               //     //   //     Future.delayed(const Duration(milliseconds: 500), () async{
+  //               //     //   //       // await getDeliveryCharge(cart,cart.totalAmount);
+  //               //     //   //
+  //               //     //   //
+  //               //     //   //     });
+  //               //     //   //   },
+  //               //     //   // ),
+  //               //     // ),
+  //               //
+  //               // ),
+  //             ),
+  //       );
+  //
+  //     },
+  //     // builder: (context, snapshot) {
+  //     //   return Consumer<Products>(
+  //     //     builder: (context, data,child) =>
+  //     //         ProductTile(products: data.items,query:query),
+  //     //   );
+  //     //
+  //     // },
+  //   );
+  // }
 
   @override
   Widget buildResults(BuildContext context) {
@@ -250,7 +616,8 @@ class ProductTileState extends State<ProductTile> {
               placeholder: AssetImage('assets/products.png'),
             ),
           ),
-          trailing: Container(
+          trailing:
+          Container(
             width: 110.0,
             child: newCartItem.keys.contains(product.id) ? Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -270,26 +637,6 @@ class ProductTileState extends State<ProductTile> {
                     Future.delayed(const Duration(milliseconds: 500), () async{
                       await getDeliveryCharge(cart,cart.totalAmount);
 
-                      Scaffold.of(context).showSnackBar(SnackBar(
-                        backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
-                        content: cart.totalAmount > cart.maxDeliveryRange
-                            ? Container(
-                            padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                            child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT')
-                        )
-                            : Row(
-                          children: <Widget>[
-                            SizedBox(
-                              width: 5.0,
-                            ),
-                            Container(
-                              width: MediaQuery.of(context).size.width * 4 / 7,
-                              child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
-                            )
-                          ],
-                        ),
-                        duration: Duration(seconds: 2),
-                      ));
                     });
 
                   },
@@ -303,66 +650,56 @@ class ProductTileState extends State<ProductTile> {
                     Future.delayed(const Duration(milliseconds: 500), () async{
                       await getDeliveryCharge(cart,cart.totalAmount);
 
-                      Scaffold.of(context).showSnackBar(SnackBar(
-                        backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
-                        content: cart.totalAmount > cart.maxDeliveryRange
-                            ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                            child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT'))
-                            : Row(
-                          children: <Widget>[
-                            SizedBox(
-                              width: 5.0,
-                            ),
-                            Container(
-                              width: MediaQuery.of(context).size.width * 4 / 7,
-                              child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
-                            )
-                          ],
-                        ),
-                        duration: Duration(seconds: 2),
-                      ));
                     });
                   },
                 ),
               ],
-            ):IconButton(
-              color: Theme.of(context).accentColor,
-              icon: Icon(Icons.shopping_cart),
-              onPressed: () async{
-                await cart.addItem(
-                    product.id,
-                    product.title,
-                    product.price,
-                    product.isNonInventory,
-                    product.discount,
-                    product.discountId,
-                    product.discountType);
-                Future.delayed(const Duration(milliseconds: 500), () async{
-                  await getDeliveryCharge(cart,cart.totalAmount);
+            ):Container(
+                margin: EdgeInsets.only(top:5.0),
+                // padding: EdgeInsets.all(5.0),
+                width: 90.0,
+                height: 20.0,
+                decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor
+                ),
+                child: InkWell(
+                  child: Center(child:Text('Add to cart',style: TextStyle(fontSize: 12.0,color: Colors.white,fontWeight: FontWeight.bold),),),
+                  onTap: () async{
+                    await cart.addItem(
+                        product.id,
+                        product.title,
+                        product.price,
+                        product.isNonInventory,
+                        product.discount,
+                        product.discountId,
+                        product.discountType);
+                    Future.delayed(const Duration(milliseconds: 500), () async{
+                      await getDeliveryCharge(cart,cart.totalAmount);
 
-                  Scaffold.of(context).showSnackBar(SnackBar(
-                    backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
-                    content: cart.totalAmount > cart.maxDeliveryRange
-                        ? Container(
-                        padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                        child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT')
-                    )
-                        : Row(
-                      children: <Widget>[
-                        SizedBox(
-                          width: 5.0,
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.width * 4 / 7,
-                          child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
-                        )
-                      ],
-                    ),
-                    duration: Duration(seconds: 2),
-                  ));
-                });
-              },
+
+                    });
+                  },
+                )
             ),
+            // IconButton(
+            //   color: Theme.of(context).accentColor,
+            //   icon: Icon(Icons.shopping_cart),
+            //   onPressed: () async{
+            //     await cart.addItem(
+            //         product.id,
+            //         product.title,
+            //         product.price,
+            //         product.isNonInventory,
+            //         product.discount,
+            //         product.discountId,
+            //         product.discountType);
+            //     Future.delayed(const Duration(milliseconds: 500), () async{
+            //       await getDeliveryCharge(cart,cart.totalAmount);
+            //
+            //
+            //     });
+            //   },
+            // ),
           ),
           onTap: () {
             Navigator.of(context)

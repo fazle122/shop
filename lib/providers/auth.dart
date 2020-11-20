@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
-import 'package:shoptempdb/data_helper/api_service.dart';
+import 'package:shoptempdb/utility/api_service.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:shoptempdb/models/http_exception.dart';

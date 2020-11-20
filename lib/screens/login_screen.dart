@@ -33,6 +33,7 @@ class _LoginScreenState extends State<LoginScreen>{
 
   var _isInit = true;
   var _isLoading = false;
+  var _isLoginLoading = false;
 
   // @override
   // void didChangeDependencies() {
@@ -64,6 +65,7 @@ class _LoginScreenState extends State<LoginScreen>{
         if (!mounted) return;
         setState(() {
           _isLoading = false;
+          _isLoginLoading = false;
         });
         if (shippingData.allShippingAddress.length > 0) {
           Navigator.of(context).pushReplacementNamed(
@@ -150,6 +152,9 @@ class _LoginScreenState extends State<LoginScreen>{
       if(_otpController.text == null || _otpController.text == '' || _otpController.text == "" || _otpController.text.isEmpty){
         Toast.show('Please provide OTP code', context, duration: Toast.LENGTH_LONG, gravity: Toast.CENTER);
       }else{
+        setState(() {
+          _isLoginLoading = true;
+        });
         await Provider.of<Auth>(context, listen: false).login(_phoneController.text, _otpController.text);
         Future.delayed(const Duration(milliseconds: 500), ()  async{
           await _fetchShippingAddressList();
@@ -275,7 +280,12 @@ class _LoginScreenState extends State<LoginScreen>{
               },
             ),
             SizedBox(height: 30,),
-            GestureDetector(
+
+            _isLoginLoading ? Container(
+              width: MediaQuery.of(context).size.width *1/2,
+              height: MediaQuery.of(context).size.height *1/15,
+              child: Center(child: CircularProgressIndicator(),),
+            ):GestureDetector(
                 onTap: () {
                   if(_phoneController.text == null || _phoneController.text == '' || _phoneController.text == "" || _phoneController.text.isEmpty){
                     Toast.show('Please provide a valid mobile number', context,duration: Toast.LENGTH_LONG,gravity: Toast.CENTER);
@@ -288,7 +298,8 @@ class _LoginScreenState extends State<LoginScreen>{
                   }
 
                 },
-                child: Container(
+                child:
+                Container(
                   width: MediaQuery.of(context).size.width *1/2,
                   height: MediaQuery.of(context).size.height *1/15,
                   decoration: BoxDecoration(

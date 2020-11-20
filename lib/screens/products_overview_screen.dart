@@ -245,45 +245,56 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
             : Container(
           child: Column(
             children: <Widget>[
-              Expanded(
-                  child: queryItemListDataWidget(context,product)),
+              Expanded(child: queryItemListDataWidget(context,product)),
 
+              Consumer<Cart>(
+                builder: (context, cartData, child) =>
+                cart.items.length > 0 ?
+                Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height * 1 / 25,
+                    padding: EdgeInsets.only(top:10.0,left:10.0),
+                    color: Color(0xffC6C6C6),
+                      child:
+                      cart.totalAmount > cart.maxDeliveryRange?
+                      Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT'):
+                      Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
+                ): SizedBox(
+                  width: 0.0,
+                  height: 0.0,
+                ),
+              ),
               Consumer<Cart>(
                 builder: (context, cartData, child) =>
                 cart.items.length > 0
                     ?
                 InkWell(
                   child:Container(
-                    height: 50.0,
+                    height: MediaQuery.of(context).size.height * 1 / 15,
                     color: Theme.of(context).primaryColor,
                     child: Row(
                       children: <Widget>[
                         Container(
-                            width: MediaQuery.of(context).size.width *
-                                5 /
-                                7,
-                            padding:
-                            EdgeInsets.only(left: 20.0, top: 2.0),
+                            width: MediaQuery.of(context).size.width * 5 / 7,
+                            padding: EdgeInsets.only(left: 5.0, top: 2.0),
                             color: Color(0xffFB0084),
-                            child: Column(
-                              crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                              mainAxisAlignment:
-                              MainAxisAlignment.center,
+                            child:
+                            // Text(' View My Basket',style: TextStyle(fontSize:18.0,fontWeight: FontWeight.bold,color: Colors.white),)
+
+                          Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
-                                // Text('SubTotal: ' + cartData.totalAmount.toStringAsFixed(2) + ' BDT'),
-                                // Text('Delivery charge: ' + cartData.deliveryCharge.toString() + ' BDT'),
-                                // Text('Total amount : ' + (cartData.totalAmount + cartData.deliveryCharge).toStringAsFixed(2) + ' BDT'),
                                 Text(' View My Basket',style: TextStyle(fontSize:18.0,fontWeight: FontWeight.bold,color: Colors.white),)
                               ],
-                            )),
+                            )
+                        ),
                         Container(
                           height: MediaQuery.of(context).size.height,
                           width:
                           MediaQuery.of(context).size.width * 2 / 7,
                           color: Color(0xffB40060),
                           child: Center(
-                              // child: Text('Check out', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
                               child: Text((cartData.totalAmount + cartData.deliveryCharge).toStringAsFixed(2) + ' BDT',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.white),),
                           ),
                         ),

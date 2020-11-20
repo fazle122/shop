@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shoptempdb/data_helper/api_service.dart';
+import 'package:shoptempdb/utility/api_service.dart';
 import 'package:shoptempdb/providers/cart.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -214,7 +214,7 @@ class ShippingAddress with ChangeNotifier{
 //  }
 
 
-  Future<void> createShippingAddress(String areaId, String address,String phone) async {
+  Future<Map<String,dynamic>> createShippingAddress(String areaId, String city,String address,String phone) async {
     var responseData;
     String qString = "http://new.bepari.net/demo/api/V1.0/crm/customer/create-shipping-address";
 
@@ -225,6 +225,7 @@ class ShippingAddress with ChangeNotifier{
 
     final Map<String, dynamic> authData = {
       'area_id': areaId,
+      'city' : city,
       'shipping_address_line': address,
       'mobile_no': phone,
     };
@@ -236,16 +237,18 @@ class ShippingAddress with ChangeNotifier{
       );
       responseData = json.decode(response.body);
 
-      if (responseData['error'] != null) {
-        throw HttpException(responseData['error']['message']);
+      if(response.statusCode == 200) {
+        return responseData;
+      }else{
+        return null;
       }
-      notifyListeners();
     } catch (error) {
-      throw error;
+      // throw error;
+      return null;
     }
   }
 
-  Future<Map<String,dynamic>> createShippingAddress1(String shippingAddressId,FormData data) async {
+  Future<Map<String,dynamic>> createShippingAddressWithOrder(String shippingAddressId,FormData data) async {
     String qString;
     Dio dioService = new Dio();
     if(shippingAddressId != null){

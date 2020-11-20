@@ -207,7 +207,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>{
                     SizedBox(height: 10.0,),
                     Container(
                         width: MediaQuery.of(context).size.width * 1.5/2,
-                        padding: EdgeInsets.only(left:5.0,right: 5.0),
+                        padding: EdgeInsets.all(5.0),
                         height: 50.0,
                         decoration: BoxDecoration(border: outerBorder, borderRadius: BorderRadius.circular(0.0)),
                         child: Scrollbar(
@@ -277,25 +277,33 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>{
                                       FlatButton(
                                         child: Text('Confirm'),
                                         onPressed: () async{
-
-                                          var response = await Provider.of<Orders>(context, listen: false).cancelOrder(widget.orderId.toString(), _cancelCommentController.text);
-                                          if(response != null){
-                                            Toast.show(response['msg'], context,duration: Toast.LENGTH_LONG,gravity: Toast.BOTTOM);
-                                            Navigator.pushNamed(context, ProductsOverviewScreen.routeName);
+                                          var response;
+                                          if(_cancelCommentController.text.isEmpty || _cancelCommentController.text == null || _cancelCommentController.text == ""){
+                                            Toast.show('Write down some comment', context,duration: Toast.LENGTH_LONG,gravity: Toast.BOTTOM);
                                           }else{
-                                            Toast.show('Something went wrong, please try again.', context,duration: Toast.LENGTH_LONG,gravity: Toast.BOTTOM);
-                                            Navigator.of(context).pop(false);
+                                            response = await Provider.of<Orders>(context, listen: false).cancelOrder(widget.orderId.toString(), _cancelCommentController.text);
+                                            if(response != null){
+                                              Toast.show(response['msg'], context,duration: Toast.LENGTH_LONG,gravity: Toast.BOTTOM);
+                                              Navigator.pushNamed(context, ProductsOverviewScreen.routeName);
+                                            }else{
+                                              Toast.show('Something went wrong, please try again.', context,duration: Toast.LENGTH_LONG,gravity: Toast.BOTTOM);
+                                              Navigator.of(context).pop(false);
 
+                                            }
+                                            if (!mounted) return;
+                                            setState(() {
+                                              _cancelCommentController.text = '';
+                                            });
                                           }
-                                          if (!mounted) return;
-                                          setState(() {
-                                            _cancelCommentController.text = '';
-                                          });
+
                                         },
                                       ),
                                       FlatButton(
                                         child: Text('Cancel'),
                                         onPressed: () {
+                                          setState(() {
+                                            _cancelCommentController.text = '';
+                                          });
                                           Navigator.of(context).pop(false);
                                         },
                                       ),
@@ -397,7 +405,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>{
                 SizedBox(height: 10.0,),
                 Container(
                   height: MediaQuery.of(context).size.height * 1.5/12,
-                  padding: EdgeInsets.all(10.0),
+                  // padding: EdgeInsets.all(10.0),
                   child:Column(children: <Widget>[
                     Text('Delivery Date & time',style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold,color: Colors.grey),),
                     SizedBox(height: 10.0,),
