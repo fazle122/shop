@@ -7,7 +7,7 @@ import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
 import 'package:dio/dio.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
-import 'package:shoptempdb/models/http_exception.dart';
+import 'package:shoptempdb/utility/http_exception.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfileUpdateDialog extends StatefulWidget {
@@ -427,7 +427,7 @@ class _ProfileUpdateDialogDialogState extends State<ProfileUpdateDialog> {
     try {
       Map<String, dynamic> response =
           await Provider.of<ShippingAddress>(context, listen: false)
-              .updateProfileInfo1(
+              .updateProfileInfo(
         addressLine,
         mobileNo,
         name,

@@ -2,11 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/cart.dart';
-import 'package:shoptempdb/providers/orders.dart';
-import 'package:shoptempdb/providers/product.dart';
 import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/screens/product_detail_screen.dart';
-import 'package:flushbar/flushbar.dart';
 
 class ProductItemGridView extends StatefulWidget {
 
@@ -140,7 +137,9 @@ class _ProductItemGridView extends State<ProductItemGridView> {
                                     await cart.addItem(
                                         product.id,
                                         product.title,
+                                        product.imageUrl,
                                         product.price,
+                                        product.vatRate,
                                         product.isNonInventory,
                                         product.discount,
                                         product.discountId,
@@ -207,7 +206,9 @@ class _ProductItemGridView extends State<ProductItemGridView> {
                                 await cart.addItem(
                                     product.id,
                                     product.title,
+                                    product.imageUrl,
                                     product.price,
+                                    product.vatRate,
                                     product.isNonInventory,
                                     product.discount,
                                     product.discountId,

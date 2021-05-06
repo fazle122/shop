@@ -2,13 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
-import 'package:shoptempdb/screens/confirm_order_screen.dart';
-import 'package:shoptempdb/screens/delivery_address_screen.dart';
-import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
-import 'package:shoptempdb/screens/product_detail_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 import 'package:shoptempdb/widgets/app_drawer.dart';
 import 'package:toast/toast.dart';
@@ -24,7 +19,6 @@ class OrderConfirmationScreen extends StatefulWidget{
   final orderNote;
   final paymentOption;
   final deliveryDate;
-  // final TimeOfDay deliveryTime;
   final deliveryTimeStart;
   final deliveryTimeEnd;
   final totalAmount;
@@ -41,9 +35,7 @@ class OrderConfirmationScreen extends StatefulWidget{
 }
 
 
-
 class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>{
-  DateTime _deliveryDate;
   TimeOfDay currentTime = TimeOfDay.now();
   final format = DateFormat('yyyy-MM-dd');
   final timeFormat = DateFormat("HH:mm");
@@ -92,7 +84,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>{
 
   @override
   Widget build(BuildContext context) {
-    final cart = Provider.of<Cart>(context);
     final shippingAddress = Provider.of<ShippingAddress>(context);
     var outerBorder = Border.all(width: 2.0, color: Colors.black.withOpacity(0.2));
     var buttonBorder = Border.all(width: 2.0, color: Colors.red.withOpacity(1));
@@ -220,12 +211,6 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>{
                           ),
                         )
                     ),
-                    // Container(
-                    //   width: MediaQuery.of(context).size.width * 1.5/2,
-                    //   height: 50.0,
-                    //   decoration: BoxDecoration(border: outerBorder, borderRadius: BorderRadius.circular(0.0)),
-                    //   child: Center(child:widget.orderNote !=null ?Text(widget.orderNote):Text('no order note')),
-                    // ),
                   ],),
                 ),
 
@@ -237,11 +222,11 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen>{
                     Text('Cancel Order',style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold,color: Colors.grey),),
                     SizedBox(height: 10.0,),
                     Container(
-                      width: MediaQuery.of(context).size.width * 1/5,
+                      width: MediaQuery.of(context).size.width * 1.2/5,
                       height: 30.0,
                       decoration: BoxDecoration(border: buttonBorder, borderRadius: BorderRadius.circular(0.0)),
                       child: MaterialButton(
-                        child: Text('Cancel',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red,fontSize: 12.0),),
+                        child: Center(child:Text('Cancel',style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red,fontSize: 12.0),)),
                         onPressed: () async{
                           showDialog(
                               context: context,

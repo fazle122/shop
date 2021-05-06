@@ -10,6 +10,7 @@ class Product with ChangeNotifier {
   final String category;
   final String description;
   final double price;
+  final double vatRate;
   final String unit;
   final String imageUrl;
   final int isNonInventory;
@@ -25,6 +26,7 @@ class Product with ChangeNotifier {
     @required this.category,
     @required this.description,
     @required this.price,
+    @required this.vatRate,
     @required this.unit,
     @required this.imageUrl,
     @required this.isNonInventory,
@@ -42,7 +44,6 @@ class Products with ChangeNotifier {
   List<Product> _items = [];
   int lastPageCount;
   bool _isList = false;
-  var _showFavoritesOnly = false;
 
   Product _productItem;
 
@@ -50,7 +51,6 @@ class Products with ChangeNotifier {
     return _productItem;
   }
   List<Product> get items {
-//    return [..._items];
     return [..._items];
   }
 
@@ -68,8 +68,7 @@ class Products with ChangeNotifier {
   }
 
   Future<Map<String, dynamic>> fetchDeliveryCharMatrix() async {
-    String url = ApiService.BASE_URL +
-        'api/V1.0/accounts/invoice/send-delivery-charge-matrix';
+    String url = ApiService.BASE_URL + 'api/V1.0/accounts/invoice/send-delivery-charge-matrix';
     Dio dioService = Dio();
     dioService.options.headers = {
       'Content-Type': 'Application/json',
@@ -89,8 +88,7 @@ class Products with ChangeNotifier {
 
   Future<Map<String, dynamic>> fetchDeliveryCharge(FormData formData) async {
     Dio dioService = new Dio();
-    final url =
-        ApiService.BASE_URL + 'api/V1.0/accounts/invoice/send-delivery-charge';
+    final url = ApiService.BASE_URL + 'api/V1.0/accounts/invoice/send-delivery-charge';
 
     dioService.options.headers = {
       'Content-Type': 'application/json',
@@ -112,9 +110,7 @@ class Products with ChangeNotifier {
   }
 
   Future<List<Product>> fetchAndSetProducts(int pageCount, int catId) async {
-    print('test');
-    var url =
-        'http://new.bepari.net/demo/api/V1.0/product-catalog/product/list-product?page_size=30&page=$pageCount&category_id=$catId';
+    var url = ApiService.BASE_URL + 'api/V1.0/product-catalog/product/list-product?page_size=30&page=$pageCount&category_id=$catId';
     try {
       final response = await http.get(url);
       if (response.statusCode != 200) {
@@ -130,25 +126,19 @@ class Products with ChangeNotifier {
         final Product product = Product(
           id: allProduct[i]['id'].toString(),
           title: allProduct[i]['name'],
-//          category: allProduct[i]['category_name'],
           category: allProduct[i]['product_category_id'].toString(),
           description: allProduct[i]['description'],
           unit: allProduct[i]['unit_name'],
-//          price: allProduct[i]['unit_price'].toDouble(),
           price: double.parse(allProduct[i]['unit_price']),
-          isNonInventory: allProduct[i]['is_non_inventory'],
-//          discount: allProduct[i]['discount_amount'].toDouble(),
-          discount: allProduct[i]['discount_amount'] != null
-              ? double.parse(allProduct[i]['discount_amount'])
-              : 0,
+          vatRate: double.parse(allProduct[i]['vat_rate']),
+          isNonInventory: int.parse(allProduct[i]['is_non_inventory']),
+          discount: allProduct[i]['discount_amount'] != null ? double.parse(allProduct[i]['discount_amount']) : 0,
           discountType: allProduct[i]['discount_type'],
           discountId: allProduct[i]['discount_id'],
           imageUrl: allProduct[i]['thumb_image'] != null
-              ? ApiService.CDN_URl +
-                  'product-catalog-images/product/' +
-                  allProduct[i]['thumb_image']
+              // ? ApiService.CDN_URl + 'product-catalog-images/product/' + allProduct[i]['thumb_image']
+              ? ApiService.CDN_URl + allProduct[i]['thumb_image']
               : 'https://www.jessicagavin.com/wp-content/uploads/2019/02/honey-1-600x900.jpg',
-//          imageUrl: 'https://www.jessicagavin.com/wp-content/uploads/2019/02/honey-1-600x900.jpg',
         );
         loadedProducts.add(product);
       }
@@ -163,9 +153,7 @@ class Products with ChangeNotifier {
 
   Future<List<Product>> searchAndSetProducts({String keyword,int pageCount}) async {
 
-    var url =
-        // 'http://new.bepari.net/demo/api/V1.0/product-catalog/product/list-product?page_size=100&keyword=$keyword';
-    'http://new.bepari.net/demo/api/V1.0/product-catalog/product/list-product?page_size=10&page=$pageCount&keyword=$keyword';
+    var url = ApiService.BASE_URL + 'api/V1.0/product-catalog/product/list-product?page_size=10&page=$pageCount&keyword=$keyword';
     try {
       final response = await http.get(url);
       if (response.statusCode != 200) {
@@ -181,25 +169,18 @@ class Products with ChangeNotifier {
         final Product product = Product(
           id: allProduct[i]['id'].toString(),
           title: allProduct[i]['name'],
-//          category: allProduct[i]['category_name'],
           category: allProduct[i]['product_category_id'].toString(),
           description: allProduct[i]['description'],
           unit: allProduct[i]['unit_name'],
-//          price: allProduct[i]['unit_price'].toDouble(),
           price: double.parse(allProduct[i]['unit_price']),
           isNonInventory: allProduct[i]['is_non_inventory'],
-//          discount: allProduct[i]['discount_amount'].toDouble(),
-          discount: allProduct[i]['discount_amount'] != null
-              ? double.parse(allProduct[i]['discount_amount'])
-              : 0,
+          discount: allProduct[i]['discount_amount'] != null ? double.parse(allProduct[i]['discount_amount']) : 0,
           discountType: allProduct[i]['discount_type'],
           discountId: allProduct[i]['discount_id'],
           imageUrl: allProduct[i]['thumb_image'] != null
-              ? ApiService.CDN_URl +
-                  'product-catalog-images/product/' +
-                  allProduct[i]['thumb_image']
+              // ? ApiService.CDN_URl + 'product-catalog-images/product/' + allProduct[i]['thumb_image']
+              ? ApiService.CDN_URl + allProduct[i]['thumb_image']
               : 'https://www.jessicagavin.com/wp-content/uploads/2019/02/honey-1-600x900.jpg',
-//          imageUrl: ApiService.CDN_URl + 'product-catalog-images/product/' +allProduct[i]['thumb_image'],
 //          imageUrl: 'https://www.jessicagavin.com/wp-content/uploads/2019/02/honey-1-600x900.jpg',
         );
         loadedProducts.add(product);
@@ -213,7 +194,7 @@ class Products with ChangeNotifier {
   }
 
   Future<Product> fetchSingleProduct(int productId) async {
-    final url = 'http://new.bepari.net/demo/api/V1.0/product-catalog/product/view-product/$productId';
+    final url = ApiService.BASE_URL + 'api/V1.0/product-catalog/product/view-product/$productId';
     Map<String, String> headers = {
       'Content-Type': 'application/json',
     };
@@ -229,32 +210,27 @@ class Products with ChangeNotifier {
     var product = extarctedData['data'];
     final Product selectedProduct = Product(
       id: product['id'].toString(),
-
       title: product['name'],
       category: product['product_category_id'].toString(),
       description: product['description'],
       unit: product['unit_name'],
       price: product['unit_price'].toDouble(),
       isNonInventory: product['is_non_inventory'],
-      discount: product['discount_amount'] != null
-          ? product['discount_amount'].toDouble()
-          : 0.0,
+      discount: product['discount_amount'] != null ? product['discount_amount'].toDouble() : 0.0,
       discountType: product['discount_type'],
-      discountId: product['discount_id'],
+      discountId: product['discount_id'].toString(),
       // imageUrl: product['thumb_image'] != null
       //     ? ApiService.CDN_URl + 'product-catalog-images/product/' + product['thumb_image']
       //     : 'https://www.jessicagavin.com/wp-content/uploads/2019/02/honey-1-600x900.jpg',
-      imageUrl: 'https://www.jessicagavin.com/wp-content/uploads/2019/02/honey-1-600x900.jpg',
+      imageUrl: product['thumb_image'] != null
+          ? ApiService.CDN_URl + product['thumb_image']
+          : 'https://www.jessicagavin.com/wp-content/uploads/2019/02/honey-1-600x900.jpg',
     );
     _productItem = selectedProduct;
     notifyListeners();
     return _productItem;
 
   }
-
-//  List<Product> get favoriteItems {
-//    return _items.where((prodItem) => prodItem.isFavorite).toList();
-//  }
 
   Product findById(String id) {
     return _items.firstWhere((prod) => prod.id == id);

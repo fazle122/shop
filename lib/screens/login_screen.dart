@@ -3,13 +3,14 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shoptempdb/models/http_exception.dart';
 import 'package:shoptempdb/providers/auth.dart';
 import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
 import 'package:shoptempdb/screens/delivery_address_screen.dart';
 import 'package:shoptempdb/screens/create_profile_screen.dart';
+import 'package:shoptempdb/utility/http_exception.dart';
 import 'package:toast/toast.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 
 class LoginScreen extends StatefulWidget{
@@ -34,24 +35,6 @@ class _LoginScreenState extends State<LoginScreen>{
   var _isInit = true;
   var _isLoading = false;
   var _isLoginLoading = false;
-
-  // @override
-  // void didChangeDependencies() {
-  //   if (_isInit) {
-  //     if (!mounted) return;
-  //     setState(() {
-  //       _isLoading = true;
-  //     });
-  //     Provider.of<ShippingAddress>(context).fetchShippingAddressList().then((_) {
-  //       if (!mounted) return;
-  //       setState(() {
-  //         _isLoading = false;
-  //       });
-  //     });
-  //   }
-  //   _isInit = false;
-  //   super.didChangeDependencies();
-  // }
 
   _fetchShippingAddressList() async{
     final shippingData = Provider.of<ShippingAddress>(context,listen: false);
@@ -122,10 +105,6 @@ class _LoginScreenState extends State<LoginScreen>{
   Future<void> _getOTPCode() async {
     try {
         await Provider.of<Auth>(context, listen: false).signUp(_phoneController.text);
-      // setState(() {
-      //   _phoneController.text = null;
-      // });
-
 
     } on HttpException catch (error) {
       var errorMessage = 'Authentication failed';
@@ -150,7 +129,14 @@ class _LoginScreenState extends State<LoginScreen>{
   Future<void> _login() async {
     try {
       if(_otpController.text == null || _otpController.text == '' || _otpController.text == "" || _otpController.text.isEmpty){
-        Toast.show('Please provide OTP code', context, duration: Toast.LENGTH_LONG, gravity: Toast.CENTER);
+        // Toast.show('Please provide OTP code', context, duration: Toast.LENGTH_LONG, gravity: Toast.CENTER);
+        context.showToast(
+          msg: 'Please provide OTP code',
+          showTime: 5000,
+          position: VxToastPosition.bottom,
+          bgColor: Colors.red,
+          textColor: Colors.white,
+        );
       }else{
         setState(() {
           _isLoginLoading = true;
@@ -180,9 +166,6 @@ class _LoginScreenState extends State<LoginScreen>{
       const errorMessage = 'Could not authenticate you, please try again later';
       _showErrorDialog(errorMessage);
     }
-    // setState(() {
-    //   _isLoading = false;
-    // });
   }
 
   void _showErrorDialog(String message) {
@@ -229,7 +212,6 @@ class _LoginScreenState extends State<LoginScreen>{
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<Auth>(context);
-    final cart = Provider.of<Cart>(context,listen: false);
     return Scaffold(
       appBar: AppBar(title: Text('Mobile Login'),),
       body:SingleChildScrollView(
@@ -248,8 +230,8 @@ class _LoginScreenState extends State<LoginScreen>{
             _getOTP?otpField():phoneField(),
             SizedBox(height: 5,),
 
-            Consumer<Auth>(builder: (context,authData,child) =>
-            authData.otp!= null?Text(authData.otp):SizedBox(width: 0.0,height: 0.0,),),
+            // Consumer<Auth>(builder: (context,authData,child) =>
+            // authData.otp!= null?Text(authData.otp):SizedBox(width: 0.0,height: 0.0,),),
             SizedBox(height: 20,),
 
             !_getOTP? SizedBox(width: 0.0,height: 0.0,):GestureDetector(
@@ -288,7 +270,14 @@ class _LoginScreenState extends State<LoginScreen>{
             ):GestureDetector(
                 onTap: () {
                   if(_phoneController.text == null || _phoneController.text == '' || _phoneController.text == "" || _phoneController.text.isEmpty){
-                    Toast.show('Please provide a valid mobile number', context,duration: Toast.LENGTH_LONG,gravity: Toast.CENTER);
+                    // Toast.show('Please provide a valid mobile number', context,duration: Toast.LENGTH_LONG,gravity: Toast.CENTER);
+                    context.showToast(
+                      msg: 'Please provide a valid mobile number',
+                      showTime: 5000,
+                      position: VxToastPosition.bottom,
+                      bgColor: Colors.red,
+                      textColor: Colors.white,
+                    );
                   }else{
                     _startTimer();
                     setState(() {

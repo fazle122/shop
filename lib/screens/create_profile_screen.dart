@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
 import 'package:shoptempdb/screens/delivery_address_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
-import 'package:shoptempdb/screens/profile_screen.dart';
+import 'package:shoptempdb/utility/util.dart';
 
 class CreateProfileScreen extends StatefulWidget {
   static const routeName = '/update_profile';
@@ -21,7 +21,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   String selectedAreaFromLocal;
 
   String mobileNo;
-  // String homeAddress;
   String name;
   String email;
   String addressLine;
@@ -70,21 +69,10 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
     try {
       Map<String, dynamic> response =
       await Provider.of<ShippingAddress>(context, listen: false)
-          .updateProfileInfo1(addressLine, mobileNo, name, email, city, areaID,
+          .updateProfileInfo(addressLine, mobileNo, name, email, city, areaID,
       );
       if (response != null) {
-        // Navigator.pushNamed(context, DeliveryAddressScreen.routeName);
         Navigator.of(context).pushReplacementNamed(DeliveryAddressScreen.routeName);
-        // String msg = '';
-        // for (int i = 0; i < response['data'].value.length; i++) {
-        //   for (int j = 0; j < response['data'][''].length; j++) {
-        //     msg += 'error definition goes here';
-        //   }
-        //   for (int j = 0; j < response['data'][''].length; j++) {
-        //     msg += 'error definition goes here';
-        //   }
-        // }
-        // _showErrorDialog(msg);
       }
     } catch (error) {
       const errorMessage = 'Some thing wrong, please try again later';
@@ -285,8 +273,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                     isExpanded: true,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
-//                enabledBorder: UnderlineInputBorder(
-//                    borderSide: BorderSide(color: Colors.white))
                     ),
                     hint: Text('Select city'),
                     value: shippingAddress.selectedDistrict,
@@ -341,8 +327,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                     isExpanded: true,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
-//                enabledBorder: UnderlineInputBorder(
-//                    borderSide: BorderSide(color: Colors.white))
                     ),
                     hint: Text('Select area'),
                     value: shippingAddress.selectedArea,
@@ -439,7 +423,6 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                     ),
                     Container(
                       width: MediaQuery.of(context).size.width * 1.2/5,
-                      // padding: EdgeInsets.only(left: MediaQuery.of(context).size.width * 1/5),
                       child: RaisedButton(
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(2.0),
@@ -479,11 +462,8 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                         ),
                       )
                     ],
-
                   )
               ),
-
-
             ],
           ),
         ),

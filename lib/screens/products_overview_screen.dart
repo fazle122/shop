@@ -28,7 +28,6 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
   ScrollController _scrollController = new ScrollController();
   int pageCount = 1;
   int lastPage;
-  String keyword = '';
   int oldPageCount;
   DateTime currentBackPressTime;
   int lastItemId = 0;
@@ -83,7 +82,8 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
     _scrollController.addListener(() {
       if (pageCount - oldPageCount == 1 || oldPageCount - pageCount == 1) {
         _isInit = true;
-        if (pageCount < lastPage) if (_scrollController.position.pixels ==
+        if (pageCount < lastPage)
+          if (_scrollController.position.pixels ==
             _scrollController.position.maxScrollExtent) {
           setState(() {
             pageCount += 1;
@@ -92,7 +92,6 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
         }
       }
     });
-
     super.didChangeDependencies();
   }
 
@@ -110,6 +109,8 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
       }
     });
   }
+
+
 
 
   List<Product> getData() {
@@ -279,8 +280,6 @@ class _ProductsOverviewScreenState extends BaseState<ProductsOverviewScreen> {
                             padding: EdgeInsets.only(left: 5.0, top: 2.0),
                             color: Color(0xffFB0084),
                             child:
-                            // Text(' View My Basket',style: TextStyle(fontSize:18.0,fontWeight: FontWeight.bold,color: Colors.white),)
-
                           Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisAlignment: MainAxisAlignment.center,

@@ -37,29 +37,7 @@ class _OrderFilterDialogState extends BaseState<OrderFilterDialog> {
 //    _defaultFilters['status'] = ['Pending','Requested for Cancellation'];
     super.initState();
   }
-
-
-//  Widget _statusDropdown(){
-//    return DropdownButton(
-//      items: status.map((description, value) {
-//        return MapEntry(
-//            description,
-//            DropdownMenuItem(
-//              value: value,
-//              child: Text(description),
-//            ));
-//      })
-//          .values
-//          .toList(),
-//      value: _currentStatus,
-//      onChanged: (newValue) {
-//        setState(() {
-//          _currentStatus = newValue;
-//        });
-//      },
-//
-//    );
-//  }
+  
 
   Widget _statusDropdown(){
     return DropdownButtonFormField(
@@ -117,7 +95,6 @@ class _OrderFilterDialogState extends BaseState<OrderFilterDialog> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                //
                 // _statusDropdown(),
                 // SizedBox(height: 10.0,),
                 Container(

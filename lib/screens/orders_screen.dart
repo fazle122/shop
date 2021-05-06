@@ -156,7 +156,6 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
   @override
   Widget build(BuildContext context) {
     final orders = Provider.of<Orders>(context, listen: false);
-
     return Scaffold(
         appBar: AppBar(
           title: Text('All orders'),
@@ -199,59 +198,48 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
                 getOrderData(orders,filters,1);
               },
             ),
-//             PopupMenuButton<String>(
-//               onSelected: (val) async {
-//                 switch (val) {
-//                   case 'FILTER':
-//                     var newFilter = await _orderFilterDialog();
-//                     if(newFilter != null && newFilter.length>0){
-//                       setState(() {
-//                         pageCount = 1;
-//                         finalOrders = [];
-//                         filters = newFilter;
-//                         _isInit = true;
-//                       });
-//                     }
-//                     getOrderData(orders,filters,1);
-//                     break;
-//
-//                 }
-//               },
-//               itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-// //                PopupMenuItem<String>(
-// //                  value: 'COMPLETED_ORDERS',
-// //                  child: Text('Completed orders'),
-// //                ),
-//                 PopupMenuItem<String>(
-//                   value: 'FILTER',
-//                   child: Text('Filter'),
-//                 )
-//               ],
-//             ),
           ],
         ),
         drawer: AppDrawer(),
         body: _isLoading
             ? Center(child: CircularProgressIndicator(),)
             : Container(
-//          height: MediaQuery.of(context).size.height * 7/10,
           child: Column(
             children: <Widget>[
               Expanded(
                   child: queryItemListDataWidget(context)
               ),
-
             ],
           ),
         )
-
     );
   }
 
 
-  Widget queryItemListDataWidget(BuildContext context) {
+  String _getStatus(var statusCode){
+    switch(statusCode){
+      case '0':
+        return 'Draft';
+      case '1':
+        return 'Cancelled';
+      case '2':
+        return 'In Delivery';
+      case '3':
+        return 'Delivered';
+      case '4':
+        return 'Partially Paid';
+      case '5':
+        return 'Fully Paid';
+      case 'not-delivered':
+        return 'Not-delivered';
+      case 'delivered':
+        return 'Delivered';
+      default:
+        return '';
+    }
+  }
 
-    // if (finalOrders.isNotEmpty) //has data & performing/not performing
+  Widget queryItemListDataWidget(BuildContext context) {
       return Container(
         child:  finalOrders != null && finalOrders.length > 0
             ? ListView.builder(
@@ -261,7 +249,6 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
             if(i == finalOrders.length){
               return _buildProgressIndicator();
             }else{
-//            return ChangeNotifierProvider.value(value: null,child:Text(''));
 
               return
                 Card(
@@ -269,7 +256,7 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
                   child: Column(
                     children: <Widget>[
                       ListTile(
-                        title: Text('Invoice amount: ' + '\$ ${finalOrders[i].invoiceAmount}',style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold),),
+                        title: Text('Invoice amount: ' + 'BDT ${finalOrders[i].invoiceAmount}',style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold),),
                         subtitle:Column(
                           mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -277,10 +264,11 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
                           children: <Widget>[
                             Flexible(child:Text('Invoice date: ' + DateFormat('EEEE, MMM d, ').format(finalOrders[i].invoiceDate),style: TextStyle(fontSize: 15.0),),),
                             Flexible(child: Text('Delivery date: ' + DateFormat('EEEE, MMM d, ').format(finalOrders[i].delivaryDate.toLocal()),style: TextStyle(fontSize: 12.0),),),
+                            Flexible(child: Text('Status: ' + _getStatus(finalOrders[i].status.toString()),style: TextStyle(fontSize: 12.0),),),
                           ],
                         ),
                         trailing: Container(
-                          width: 100,
+                          width: 80,
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: <Widget>[
@@ -379,246 +367,9 @@ class _OrdersScreenState extends BaseState<OrdersScreen> {
         ),
 
       );
-    if (isPerformingRequest)
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-
-    return Center(
-      child: Text('no order found'),
-    );
   }
-
 }
 
-
-
-///------------last and working class-----------------------
-//class OrdersScreen extends StatelessWidget {
-//
-//  static const routeName = '/orders';
-//
-//  @override
-//  Widget build(BuildContext context) {
-//    return Scaffold(
-//      appBar: AppBar(title: Text('My orders'),),
-//      drawer: AppDrawer(),
-//      body: FutureBuilder(
-//          future: Provider.of<Orders>(context).fetchAndSetOrders(),
-//          builder: (context,dataSnapshot) {
-//            if(dataSnapshot.connectionState == ConnectionState.waiting) {
-//              return Center(child: CircularProgressIndicator(),);
-//            }else{
-//              if(dataSnapshot.error != null){
-//                return Center(child: Text('error occurred'),);
-//              }else{
-//                return Consumer<Orders>(builder: (context,orderData,child) => ListView.builder(
-//                  itemCount: orderData.orders.length,
-//                  itemBuilder: (context,i) => OrderItemWidget(orderData.orders[i]),
-//                ),);
-//              }
-//            }
-//          }
-//      ),
-//    );
-//  }
-//
-//}
-
-
-
-
-///------------with out future builder-----------------------
-
-// class OrdersScreen extends StatefulWidget {
-//
-//   static const routeName = '/orders';
-//   @override
-//   _OrdersScreenState createState() => _OrdersScreenState();
-//
-// }
-//
-// class _OrdersScreenState extends BaseState<OrdersScreen>{
-//
-//   var _isInit = true;
-//   var _isLoading = false;
-//   Map<String, dynamic> filters = Map();
-//
-//
-//   @override
-//   void didChangeDependencies(){
-//     if(_isInit) {
-//       if (!mounted) return;
-//       setState(() {
-//         _isLoading = true;
-//       });
-//       Provider.of<Orders>(context).fetchAndSetOrders(filters).then((_){
-//         if (!mounted) return;
-//         setState(() {
-//           _isLoading = false;
-//         });
-//       });
-//     }
-//     _isInit = false;
-//     super.didChangeDependencies();
-//   }
-//
-//   getData(Map<String,dynamic> filters){
-//     if(_isInit) {
-//       if (!mounted) return;
-//       setState(() {
-//         _isLoading = true;
-//       });
-//       Provider.of<Orders>(context,listen: false).fetchAndSetOrders(filters).then((_){
-//         if (!mounted) return;
-//         setState(() {
-//           _isLoading = false;
-//         });
-//       });
-//     }
-//     _isInit = false;
-//   }
-//
-//   String convert12(String str) {
-//     String finalTime;
-//     int h1 = int.parse(str.substring(0, 1)) - 0;
-//     int h2 = int.parse(str.substring(1, 2));
-//     int hh = h1 * 10 + h2;
-//
-//     String Meridien;
-//     if (hh < 12) {
-//       Meridien = " AM";
-//     } else
-//       Meridien = " PM";
-//     hh %= 12;
-//     if (hh == 0 && Meridien == ' PM') {
-//       finalTime = '12' + str.substring(2);
-//     } else {
-//       finalTime = hh.toString() + str.substring(2);
-//     }
-//     finalTime = finalTime + Meridien;
-//     return finalTime;
-//   }
-//
-//   Future<Map<String, dynamic>> _orderFilterDialog() async {
-//     return showDialog<Map<String, dynamic>>(
-//       barrierDismissible: false,
-//       context: context,
-//       builder: (BuildContext context) => OrderFilterDialog(),
-//     );
-//   }
-//
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//         appBar: AppBar(
-//           title: Text('Pending orders'),
-//           actions: <Widget>[
-//             PopupMenuButton<String>(
-//               onSelected: (val) async {
-//                 switch (val) {
-//                   // case 'COMPLETED_ORDERS':
-//                   //   Navigator.of(context).pushNamed(CompletedOrdersScreen.routeName);
-//                   //   break;
-//                   case 'FILTER':
-//                     var newFilter = await _orderFilterDialog();
-//                     if(newFilter != null){
-//                       setState(() {
-//                         filters = newFilter;
-//                         _isInit = true;
-//                       });
-//                     }
-//                     getData(filters);
-//                     break;
-//
-//                 }
-//               },
-//               itemBuilder: (BuildContext context) =>
-//               <PopupMenuItem<String>>[
-//                 // PopupMenuItem<String>(
-//                 //   value: 'COMPLETED_ORDERS',
-//                 //   child: Text('Completed orders'),
-//                 // ),
-//                 PopupMenuItem<String>(
-//                   value: 'FILTER',
-//                   child: Text('Filter'),
-//                 ),
-//               ],
-//             ),
-//           ],
-//         ),
-//         drawer: AppDrawer(),
-//         body:
-//         _isLoading?
-//         Center(child: CircularProgressIndicator(),)
-//             : Consumer<Orders>(builder: (context,orderData,child) =>
-//         orderData.orders.length >0 ?ListView.builder(
-//           itemCount: orderData.orders.length,
-// //                  itemBuilder: (context,i) => OrderItemWidget(orderData.orders[i]),
-//           itemBuilder: (context,i){
-//             return Dismissible(
-// //                      key:Key(orderData.orders[i].id.toString()),
-//               key:UniqueKey(),
-//               direction: DismissDirection.endToStart,
-//               background: Container(
-//                 color: Theme.of(context).errorColor,
-//                 child: Icon(Icons.delete,color: Colors.white,size: 40,),
-//                 alignment: Alignment.centerRight,
-//                 padding: EdgeInsets.only(right: 20),
-//                 margin: EdgeInsets.symmetric(horizontal: 15, vertical: 4),
-//               ),
-//               confirmDismiss: (direction){
-//                 return   showDialog(
-//                     context: context,
-//                     barrierDismissible: false,
-//                     builder: (context) => AlertDialog(
-//                       title: Text('Are you sure?'),
-//                       content: Text('Do you want to cancel this order?'),
-//                       actions: <Widget>[
-//                         FlatButton(child: Text('No'), onPressed: (){Navigator.of(context).pop(false);},),
-//                         FlatButton(child: Text('Yes'), onPressed: (){Navigator.of(context).pop(true);},),
-//                       ],
-//                     )
-//                 );
-//               },
-//               onDismissed: (direction) async{
-// //                        setState(() {
-// //                          _isLoading = true;
-// //                        });
-//                 await Provider.of<Orders>(context,listen: false).cancelOrder(orderData.orders[i].id.toString(),'test');
-//                 if (!mounted) return;
-//                 setState(() {
-//                   _isInit = true;
-//                 });
-//               },
-//               child: Card(
-//                 margin: EdgeInsets.all(10),
-//                 child: Column(
-//                   children: <Widget>[
-//                     ListTile(
-//                       title: Text(
-//                         DateFormat('EEEE, MMM d, ').format(orderData.orders[i].dateTime) +
-//                             convert12(DateFormat('hh:mm').format(orderData.orders[i].dateTime)),
-//                       ),
-//                       subtitle: Text('Total amount: ' +'\$${orderData.orders[i].invoiceAmount}'),
-//
-//                       onTap: (){
-//                         Navigator.of(context).pushNamed(OrderDetailScreen.routeName,
-//                             arguments: orderData.orders[i].id);
-//                       },
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             );
-//           },
-//         ):Center(child: Text('No pending order'),),
-//         )
-//     );
-//   }
-//
-// }
 
 
 

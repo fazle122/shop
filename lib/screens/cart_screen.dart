@@ -4,19 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:shoptempdb/base_state.dart';
 import 'package:shoptempdb/providers/auth.dart';
 import 'package:shoptempdb/providers/cart.dart';
-import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/providers/products.dart';
-import 'package:shoptempdb/screens/auth_screen.dart';
 import 'package:shoptempdb/screens/delivery_address_screen.dart';
 import 'package:shoptempdb/screens/login_screen.dart';
-import 'package:shoptempdb/screens/create_profile_screen.dart';
+import 'package:shoptempdb/utility/util.dart';
 import 'package:shoptempdb/widgets/app_drawer.dart';
-import 'package:shoptempdb/widgets/cart_item.dart';
-import 'package:shoptempdb/widgets/confirm_order_dialog.dart';
-import 'package:dio/dio.dart';
-import 'package:sqflite/sqflite.dart';
-import 'package:shoptempdb/screens/test.dart';
-import 'package:provider/provider.dart';
 
 
 
@@ -33,25 +25,6 @@ class CartScreen extends StatefulWidget {
 class _CartScreenState extends BaseState<CartScreen>{
 
   var _isInit = true;
-  var _isLoading = false;
-
-//  @override
-//  void didChangeDependencies(){
-//    if(_isInit) {
-//      if (!mounted) return;
-//      setState(() {
-//        _isLoading = true;
-//      });
-//      Provider.of<Cart>(context).fetchAndSetCartItems().then((_){
-//        if (!mounted) return;
-//        setState(() {
-//          _isLoading = false;
-//        });
-//      });
-//    }
-//    _isInit = false;
-//    super.didChangeDependencies();
-//  }
 
   @override
   void didChangeDependencies(){
@@ -141,51 +114,40 @@ class _CartScreenState extends BaseState<CartScreen>{
                           child: Column(
                             children: <Widget>[
                               ListTile(
-                                leading: CircleAvatar(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(5),
-                                    child: FittedBox(
-                                      child: Text('\$${cart.items[i].price.toString()}'),
+                                leading: Container(
+                                  color:Colors.white,
+                                  child: CircleAvatar(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(5),
+                                      child: FittedBox(
+                                          child: FadeInImage(
+                                            image: NetworkImage(cart.items[i].imgUrl),
+                                            height: 30.0,
+                                            width: 25.0,
+                                            fit: BoxFit.contain,
+                                            placeholder: AssetImage('assets/products.png'),
+                                          )
+                                        // Text('{cart.items[i].price.toString()}'),
+                                      ),
                                     ),
                                   ),
                                 ),
                                 title: Text(cartData.items[i].title),
-                                subtitle: Text('Total : \$${(cart.items[i].price.toDouble() * cart.items[i].quantity)}'),
+                                subtitle: Text('Total : ' + (cart.items[i].price.toDouble() * cart.items[i].quantity).toString() + ' BDT'),
                                 trailing: Container(
                                   width: MediaQuery.of(context).size.width * 1.4/5,
-                                  child: cartData.items[i].quantity != null ? Row(
+                                  child: Row(
                                     mainAxisAlignment: MainAxisAlignment.end,
                                     children: <Widget>[
                                       IconButton(
                                         icon: Icon(Icons.add_circle_outline,size: 25.0,),
                                         color:Colors.red,
                                         onPressed: (){
-                                          cart.addItem(cartData.items[i].productId, cartData.items[i].title, cartData.items[i].price,cartData.items[i].isNonInventory,cartData.items[i].discount,cartData.items[i].discountId,cartData.items[i].discountType);
+                                          cart.addItem(cartData.items[i].productId, cartData.items[i].title, cartData.items[i].imgUrl,cartData.items[i].price,cartData.items[i].vatRate,cartData.items[i].isNonInventory,cartData.items[i].discount,cartData.items[i].discountId,cartData.items[i].discountType);
                                           Scaffold.of(context).hideCurrentSnackBar();
                                           Future.delayed(const Duration(milliseconds: 500), () async{
-                                            await getDeliveryCharge(cart,cart.totalAmount);
-
-                                            // if(cart.items.length> 0)
-                                            //   Scaffold.of(context).showSnackBar(SnackBar(
-                                            //     backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
-                                            //     content: cart.totalAmount > cart.maxDeliveryRange
-                                            //         ? Container(
-                                            //         padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                                            //         child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT')
-                                            //     )
-                                            //         : Row(
-                                            //       children: <Widget>[
-                                            //         SizedBox(
-                                            //           width: 5.0,
-                                            //         ),
-                                            //         Container(
-                                            //           width: MediaQuery.of(context).size.width * 4 / 7,
-                                            //           child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
-                                            //         )
-                                            //       ],
-                                            //     ),
-                                            //     duration: Duration(seconds: 2),
-                                            //   ));
+                                            // await getDeliveryCharge(cart,cart.totalAmount);
+                                            await Util.getDeliveryCharge(context,cart);
                                           });
 
 
@@ -199,53 +161,14 @@ class _CartScreenState extends BaseState<CartScreen>{
                                           cart.removeSingleItem(cartData.items[i].productId);
                                           Scaffold.of(context).hideCurrentSnackBar();
                                           Future.delayed(const Duration(milliseconds: 500), () async{
-                                            await getDeliveryCharge(cart,cart.totalAmount);
-
-                                            // if(cart.items.length> 0)
-                                            //   Scaffold.of(context).showSnackBar(SnackBar(
-                                            //     backgroundColor: cart.totalAmount > cart.maxDeliveryRange ? Theme.of(context).primaryColor : Colors.red[300],
-                                            //     content: cart.totalAmount > cart.maxDeliveryRange
-                                            //         ? Container(padding: EdgeInsets.only(top: 5.0,bottom: 5.0),
-                                            //         child:Text('Delivery charge : ' + cart.deliveryCharge.toString() + ' BDT'))
-                                            //         : Row(
-                                            //       children: <Widget>[
-                                            //         // Container(
-                                            //         //     decoration: BoxDecoration(
-                                            //         //         border: Border(
-                                            //         //             right: BorderSide(
-                                            //         //                 color: Colors.white,
-                                            //         //                 width: 1.0))),
-                                            //         //     width: MediaQuery.of(context).size.width * 1 / 7,
-                                            //         //     child: Text(cart.minDeliveryCharge.toString())),
-                                            //         SizedBox(
-                                            //           width: 5.0,
-                                            //         ),
-                                            //         Container(
-                                            //           width: MediaQuery.of(context).size.width * 4 / 7,
-                                            //           child: Text('Shop more item of ' +  (cart.maxDeliveryRange-cart.totalAmount).toString() +  ' BDT to reduce delivery charge.'),
-                                            //         )
-                                            //       ],
-                                            //     ),
-                                            //     duration: Duration(seconds: 2),
-                                            //   ));
+                                            // await getDeliveryCharge(cart,cart.totalAmount);
+                                            await Util.getDeliveryCharge(context,cart);
                                           });
-
-
                                         },
                                       ),
                                     ],
-                                  ):IconButton(
-                                    color: Theme.of(context).accentColor,
-                                    icon: Icon(Icons.shopping_cart),
-                                    onPressed: () {
-//                          cart.addItem(widget.id, widget.title, widget.price,widget.isNonInventory,widget.discount,widget.discountId,widget.discountType);
-                                    },
                                   ),
                                 ),
-                                onTap: (){
-//                        Navigator.of(context).pushNamed(OrderDetailScreen.routeName,
-//                            arguments: orderData.orders[i].id);
-                                },
                               ),
                             ],
                           ),
@@ -303,7 +226,6 @@ class _CartScreenState extends BaseState<CartScreen>{
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
                                 Text('Place order',style: TextStyle(fontSize: 18.0,fontWeight: FontWeight.bold,color: Colors.white),),
-
                               ],
                             )),
                         Container(
@@ -324,9 +246,7 @@ class _CartScreenState extends BaseState<CartScreen>{
                   },),
               ) : SizedBox(width: 0.0, height: 0.0,)
             ]
-        )
-
-            :Center(child: Text('no item added to cart yet.',style: TextStyle(fontSize: 22.0),),),
+        ) :Center(child: Text('no item added to cart yet.',style: TextStyle(fontSize: 22.0),),),
         )
     );
   }

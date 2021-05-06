@@ -7,15 +7,23 @@ import 'package:sqflite/sqflite.dart';
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:flutter/services.dart';
-
-
+// http://api.bepari.info/product-catalog-images/product/6_thumb.jpeg
+// http://api.bepari.info/product-catalog-images/product/supub/5_thumb_2x.png
 class ApiService {
 
-  static final String BASE_URL = "http://new.bepari.net/demo/"; //dev
-  static final String CDN_URl = "http://new.bepari.net/"; //dev
+  // static final String BASE_URL = "http://new.bepari.net/demo/"; //dev
+  // static final String CDN_URl = "http://new.bepari.net/"; //dev
 
-//  for product --- http://new.bepari.net/product-catalog-images/product/def-thumb.png
-//  for category --- http://new.bepari.net/product-catalog-images/category/def-cat-thumb.png
+  ///  for product --- http://new.bepari.net/product-catalog-images/product/def-thumb.png
+  ///  for category --- http://new.bepari.net/product-catalog-images/category/def-cat-thumb.png
+
+  static final String BASE_URL = "http://api.bepari.info/supub/";
+  // static final String CDN_URl = "http://api.bepari.info/product-catalog-images/product/supub/";
+  static final String CDN_URl = "http://api.bepari.info/";
+  // static final String CAT_CDN_URl = "http://api.bepari.info/product-catalog-images/category/supub/";
+  static final String CAT_CDN_URl = "http://api.bepari.info/";
+
+
 
   static final Dio dioService = new Dio();
 

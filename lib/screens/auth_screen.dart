@@ -1,32 +1,21 @@
-
-
-
-import 'dart:math';
-import 'package:shoptempdb/models/http_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/auth.dart';
 import 'package:shoptempdb/providers/cart.dart';
-import 'package:shoptempdb/screens/cart_screen.dart';
-import 'package:shoptempdb/screens/products_overview_screen.dart';
 import 'package:shoptempdb/screens/verifty_user.dart';
+import 'package:shoptempdb/utility/http_exception.dart';
 
 import '../base_state.dart';
 
-enum AuthMode { Signup, Login }
+// enum AuthMode { Signup, Login }
 
 class AuthScreen extends StatelessWidget {
   static const routeName = '/auth';
 
   @override
   Widget build(BuildContext context) {
-    final deviceSize = MediaQuery
-        .of(context)
-        .size;
-    // final transformConfig = Matrix4.rotationZ(-8 * pi / 180);
-    // transformConfig.translate(-10.0);
+    final deviceSize = MediaQuery.of(context).size;
     return Scaffold(
-      // resizeToAvoidBottomInset: false,
       body: Stack(
         children: <Widget>[
           Container(
@@ -174,11 +163,6 @@ class _AuthCardState extends BaseState<AuthCard> {
                     hintText: 'Phone number',
                   ),
                   keyboardType: TextInputType.number,
-//                  validator: (value) {
-//                    if (value.isEmpty || !value.contains('@')) {
-//                      return 'Invalid email!';
-//                    }
-//                  },
                   onSaved: (value) {
                     _authData['mobile_no'] = value;
                   },
@@ -199,14 +183,8 @@ class _AuthCardState extends BaseState<AuthCard> {
                     ),
                     padding:
                     EdgeInsets.symmetric(horizontal: 30.0, vertical: 8.0),
-                    color: Theme
-                        .of(context)
-                        .primaryColor,
-                    textColor: Theme
-                        .of(context)
-                        .primaryTextTheme
-                        .button
-                        .color,
+                    color: Theme.of(context).primaryColor,
+                    textColor: Theme.of(context).primaryTextTheme.button.color,
                   ),
               ],
             ),

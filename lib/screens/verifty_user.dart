@@ -4,12 +4,11 @@ import 'package:shoptempdb/providers/auth.dart';
 import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/screens/cart_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
-import 'package:shoptempdb/widgets/numeric_pad.dart';
-import 'package:shoptempdb/models/http_exception.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:flutter/gestures.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:shoptempdb/utility/http_exception.dart';
 
 class VerifyPhone extends StatefulWidget {
 
@@ -198,8 +197,6 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                               },
                               beforeTextPaste: (text) {
                                 print("Allowing to paste $text");
-                                //if you return true then it will show the paste confirmation dialog. Otherwise if false, then nothing will happen.
-                                //but you can show anything you want here, like your pop up saying wrong paste format or etc
                                 return false;
                               },
                             )),
@@ -215,11 +212,11 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                         ),
                       ),
 
-                      auth.otp != null
-                          ? Text(auth.otp,style: TextStyle(fontSize: 10),)
-                          : SizedBox(
-                        height: 0.0,
-                      ),
+                      // auth.otp != null
+                      //     ? Text(auth.otp,style: TextStyle(fontSize: 10),)
+                      //     : SizedBox(
+                      //   height: 0.0,
+                      // ),
 
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 14),
@@ -295,25 +292,12 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
-//                            _submit(cart,auth.otp);
                             formKey.currentState.validate();
-                            // conditions for validating
                             if (currentText.length != 6) {
-//                              errorController.add(ErrorAnimationType.shake); // Triggering error shake animation
                               setState(() {
                                 hasError = true;
                               });
-                            } else {
-                              _submit(cart,currentText);
-//                              setState(() {
-//                                hasError = false;
-//                                scaffoldKey.currentState.showSnackBar(SnackBar(
-//                                  content: Text("Aye!!"),
-//                                  duration: Duration(seconds: 2),
-//                                ));
-//                              });
-                            }
-                            //                            _submit(cart,auth.otp);
+                            } else {_submit(cart,currentText);}
 
                           },
                           child: Container(
@@ -341,24 +325,6 @@ class _VerifyPhoneState extends State<VerifyPhone> {
                   ),
                 ),
               ),
-
-//              NumericPad(
-//                onNumberSelected: (value) {
-//                  print(value);
-//                  setState(() {
-//                    if(value != -1){
-//                      if(code.length < 6){
-//                        code = code + value.toString();
-//                      }
-//                    }
-//                    else{
-//                      code = code.substring(0, code.length - 1);
-//                    }
-//                    print(code);
-//                  });
-//                },
-//              ),
-
             ],
           )
       ),

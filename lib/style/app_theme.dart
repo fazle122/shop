@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 class AppTheme {
   static themeBepari() {
     return ThemeData(
-
-      // primaryColor: Color(0xFF008165),
-      // primaryColorDark: Color(0xFFC9C9C9),
       primarySwatch: Colors.teal,
       accentColor: Colors.blueGrey,
       fontFamily: 'Josephin Sans',
@@ -16,8 +13,6 @@ class AppTheme {
       //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.0))
       // ),
       //
-
-
 
 
     );

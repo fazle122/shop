@@ -6,34 +6,37 @@ class CartItem {
   final String id;
   final String productId;
   final String title;
+  final String imgUrl;
   final int quantity;
   final double price;
+  final double vatRate;
   final int isNonInventory;
   final double discount;
   final String discountType;
   final String discountId;
-//  final double perUnitDiscount;
 
   CartItem({
     @required this.id,
     @required this.productId,
     @required this.title,
+    @required this.imgUrl,
     @required this.quantity,
     @required this.price,
+    @required this.vatRate,
     @required this.isNonInventory,
     @required this.discount,
     @required this.discountType,
     @required this.discountId,
-//    @required this.perUnitDiscount,
   });
 
   factory CartItem.fromJson(Map<String, dynamic> data) => new CartItem(
     id: data["id"].toString(),
     productId: data["productId"],
-
     title: data["title"],
+    imgUrl: data["imageUrl"],
     quantity: data["quantity"],
     price:data['price'].toDouble(),
+    vatRate:data['vatRate'] != null ?data['vatRate'].toDouble():0.0,
     isNonInventory: data['isNonInventory'],
     discount: data['discount'].toDouble(),
     discountType: data['discountType'],
@@ -48,6 +51,7 @@ class CartItem {
   String get cartItemTitle => title;
   int get cartItemQuantity => quantity;
   double get cartItemPrice => price;
+  double get cartVatRate => vatRate;
   int get cartItemIsNonInventory => isNonInventory;
   double get cartItemDiscount => discount;
   String get cartItemDiscountType => discountType;
@@ -61,8 +65,10 @@ class CartItem {
     }
     map['productID'] = productId;
     map['title'] = title;
+    map['imageUrl'] = title;
     map['quantity'] = quantity;
     map['price'] = price;
+    map['vatRate'] = vatRate;
     map['isNonInventory'] = isNonInventory;
     map['discount'] = discount;
     map['discountType'] = discountType;
@@ -78,8 +84,8 @@ class Cart with ChangeNotifier {
 
   String id;
   CartItem cartItem;
-
   Cart({this.id,this.cartItem});
+
 
   List<CartItem> _items = [];
   double _deliveryCharge =0.0;
@@ -103,7 +109,6 @@ class Cart with ChangeNotifier {
     });
 
     return total;
-//    notifyListeners();
   }
 
   double get deliveryCharge{
@@ -145,36 +150,38 @@ class Cart with ChangeNotifier {
         id: item['id'].toString(),
         productId: item['productId'],
         title: item['title'],
+        imgUrl: item['imageUrl'],
         quantity: item['quantity'],
         price: item['price'].toDouble(),
+        vatRate: item['vatRate'] != null ?item['vatRate'].toDouble():0.0,
         isNonInventory: item['isNonInventory'],
         discount: item['discount'] != null ?item['discount'].toDouble():0.0,
         discountType: item['discountType'],
         discountId: item['discountId'],
-
       ),
     ).toList();
     notifyListeners();
   }
 
-  Future<void> addItem(String productId,
+  Future<void> addItem(
+      String productId,
       String title,
+      String imgUrl,
       double price,
+      double vatRate,
       int isNonInventory,
       double discount,
       String discountId,
       String discountType)  async {
-
-    bool item = await DBHelper.isProductExist(productId);
-
-
+    bool item = await DBHelper.isProductExist('cartTable',productId);
     if(!item) {
       await DBHelper.insert('cartTable', {
-//      'id': newPlace.id,
         'productId': productId,
         'title': title,
+        'imageUrl': imgUrl,
         'quantity': 1,
         'price': price,
+        'vatRate':vatRate,
         'isNonInventory': isNonInventory,
         'discount': discount,
         'discountType': discountType,
@@ -183,190 +190,29 @@ class Cart with ChangeNotifier {
     }else{
       await DBHelper.increaseItemQuantity('cartTable',productId);
     }
-//    notifyListeners();
-
     fetchAndSetCartItems();
 
   }
 
   Future<void> removeSingleItem(String productId) async{
-
-    CartItem cartData= await DBHelper.getSingleData(productId);
-
+    CartItem cartData= await DBHelper.getSingleData('cartTable',productId);
     if(cartData.quantity == 1) {
-      await DBHelper.deleteCartItm(productId);
+      await DBHelper.deleteCartItm('cartTable',productId);
     }else{
-      await DBHelper.decreaseItemQuantity(productId);
+      await DBHelper.decreaseItemQuantity('cartTable',productId);
     }
-//    notifyListeners();
-
     fetchAndSetCartItems();
   }
 
   Future<void> removeCartItemRow(String productId) async{
-    await DBHelper.deleteCartItm(productId);
-//    notifyListeners();
-
+    await DBHelper.deleteCartItm('cartTable',productId);
     fetchAndSetCartItems();
   }
 
   void clearCartTable(){
-    DBHelper.clearCart();
+    DBHelper.clearCart('cartTable');
     _items = [];
     notifyListeners();
   }
 
-  double getDiscount(double discount, String discountType,double unitPrice,int quantity){
-//    double discountAmount;
-//    if(discount != 0.0){
-//      if(discountType == 'percent'){
-//        discountAmount =(discount/100);
-//        discountAmount = unitPrice * discountAmount;
-//      }
-//      else if(discountType == 'amount'){
-//        discountAmount = discount*quantity;
-//      }
-//    }else{
-//      discountAmount = 0.0;
-//    }
-//    return discountAmount;
-//  }
-//
-////  Future<void> fetchAndSetCartItems() async {
-////
-////    try {
-////      final data = db.getAllCartItems();
-////      if (data == null) {
-////        return;
-////      }
-////      final List<CartItem> loadedProducts = [];
-////
-//////      _items = loadedProducts;
-////      notifyListeners();
-////    } catch (error) {
-////      throw (error);
-////    }
-  }
-
-  void removeItem(String productId){
-//    _items.remove(productId);
-//    notifyListeners();
-  }
-
-//  void clear(){
-//    _items = [];
-//    notifyListeners();
-//  }
 }
-
-
-
-
-
-
-
-//class Cart with ChangeNotifier {
-//
-//  String id;
-//  CartItem cartItem;
-//
-//  Cart({this.id,this.cartItem});
-//
-//  Map<String, CartItem> _items = {};
-//
-//  Map<String, CartItem> get items {
-//    return {..._items};
-//  }
-//
-////  List<CartItem> _items = [];
-////
-////  List<CartItem> get items{
-////    return [...items];
-////  }
-//
-//  int get itemCount{
-//    return _items.length;
-//  }
-//
-//  double get totalAmount{
-//    var total = 0.0;
-//    _items.forEach((key,cartItem){
-//      total += cartItem.price * cartItem.quantity;
-//    });
-//    return total;
-//  }
-//
-//  double getDiscount(double discount, String discountType,double unitPrice,int quantity){
-//    double discountAmount;
-//    if(discount != 0.0){
-//      if(discountType == 'percent'){
-//        discountAmount =(discount/100);
-//        discountAmount = unitPrice * discountAmount;
-//      }
-//      else if(discountType == 'amount'){
-//        discountAmount = discount*quantity;
-//    }
-//    }else{
-//    discountAmount = 0.0;
-//    }
-//    return discountAmount;
-//  }
-//
-//  void addItem(String productId, String title, double price,int isNonInventory,double discount,String discountId,String discountType) {
-//    if (_items.containsKey(productId)) {
-//      _items.update(productId, (existingCartItem) =>
-//          CartItem(id: existingCartItem.id,
-//              title: existingCartItem.title,
-//              price: existingCartItem.price,
-//              isNonInventory: existingCartItem.isNonInventory,
-////              discount: existingCartItem.discount,
-//              discount: getDiscount(existingCartItem.discount.toDouble(), existingCartItem.discountType, existingCartItem.price.toDouble(),existingCartItem.quantity+1),
-//              discountId: existingCartItem.discountId,
-//              discountType: existingCartItem.discountType,
-//              quantity: existingCartItem.quantity + 1));
-//    } else {
-//      _items.putIfAbsent(productId, () =>
-//          CartItem(
-//              id: productId,
-//              title: title,
-//              price: price,
-//              isNonInventory: isNonInventory,
-////              discount: discount,
-//              discount: getDiscount(discount.toDouble(), discountType,price.toDouble(), 1),
-//              discountId: discountId,
-//              discountType: discountType,
-//              quantity: 1));
-//    }
-//    notifyListeners();
-//  }
-//
-//
-//  void removeItem(String productId){
-//    _items.remove(productId);
-//    notifyListeners();
-//  }
-//
-//  void removeSingleItem(String productId){
-//    if(!items.containsKey(productId)){
-//      return;
-//    }
-//    if(_items[productId].quantity > 1){
-//      _items.update(productId, (existingCartItem) => CartItem(
-//        id: existingCartItem.id,
-//        title: existingCartItem.title,
-//        price: existingCartItem.price,
-//          isNonInventory: existingCartItem.isNonInventory,
-//          quantity: existingCartItem.quantity -1
-//      ));
-//    }else{
-//      _items.remove(productId);
-//    }
-//    notifyListeners();
-//
-//  }
-//
-//  void clear(){
-//    _items ={};
-//    notifyListeners();
-//  }
-//}

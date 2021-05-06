@@ -4,19 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/auth.dart';
 import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
-import 'package:shoptempdb/screens/delivery_address_screen.dart';
 
-
-//class SplashScreen extends StatelessWidget{
-//  @override
-//  Widget build(BuildContext context) {
-//
-//    return Scaffold(
-//      body: Center(child: Text('Loading...'),),
-//    );
-//  }
-//
-//}
 
 
 
@@ -39,9 +27,6 @@ class _SplashScreenState extends State<SplashScreen> {
   void didChangeDependencies() {
     Provider.of<Auth>(context).tryAutoLogin();
     Provider.of<Cart>(context,listen: false).fetchAndSetCartItems();
-//    Future.delayed(Duration(seconds: 2), () {
-//      Navigator.of(context).pushReplacementNamed(ProductsOverviewScreen.routeName);
-//    });
     super.didChangeDependencies();
   }
 
@@ -82,13 +67,5 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       ),
     );
-    //   Scaffold(
-    //   body: Center(
-    //     child: Text(
-    //       'Bepari',
-    //       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.0),
-    //     ),
-    //   ),
-    // );
   }
 }

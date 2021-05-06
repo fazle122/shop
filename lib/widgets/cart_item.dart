@@ -2,23 +2,24 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/cart.dart';
-import 'package:shoptempdb/providers/product.dart';
+
 
 class CartItemWidget extends StatefulWidget {
   final String id;
   final String productId;
   final double price;
+  final double vatRate;
   final int quantity;
   final String title;
+  final String imageUrl;
   final int isNonInventory;
   final double discount;
   final String discountId;
   final String discountType;
-//  final double perUnitDiscount;
 
 
-  CartItemWidget(this.id, this.productId, this.price, this.quantity,
-      this.title,this.isNonInventory,this.discount,this.discountId,this.discountType);
+  CartItemWidget(this.id, this.productId, this.price,this.vatRate, this.quantity,
+      this.title,this.imageUrl,this.isNonInventory,this.discount,this.discountId,this.discountType);
 
   _CartItemWidgetState createState() => _CartItemWidgetState();
 }
@@ -27,7 +28,6 @@ class _CartItemWidgetState extends State<CartItemWidget>{
 
   @override
   Widget build(BuildContext context) {
-//    final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<Cart>(context,listen: false);
 
     return Dismissible(
@@ -81,7 +81,7 @@ class _CartItemWidgetState extends State<CartItemWidget>{
                   IconButton(
                     icon: Icon(Icons.add),
                     onPressed: (){
-                      cart.addItem(widget.productId, widget.title, widget.price,widget.isNonInventory,widget.discount,widget.discountId,widget.discountType);
+                      cart.addItem(widget.productId, widget.title, widget.imageUrl,widget.price,widget.vatRate,widget.isNonInventory,widget.discount,widget.discountId,widget.discountType);
                       Scaffold.of(context).hideCurrentSnackBar();
                       if(cart.items.length> 0)
                         Scaffold.of(context).showSnackBar(SnackBar(
@@ -100,18 +100,14 @@ class _CartItemWidgetState extends State<CartItemWidget>{
                                               color: Colors.white,
                                               width: 1.0))),
                                   width:
-                                  MediaQuery.of(context).size.width *
-                                      1 /
-                                      7,
+                                  MediaQuery.of(context).size.width * 1 / 7,
                                   child:
                                   Text('Delivery charge \n50 BDT')),
                               SizedBox(
                                 width: 5.0,
                               ),
                               Container(
-                                width: MediaQuery.of(context).size.width *
-                                    4 /
-                                    7,
+                                width: MediaQuery.of(context).size.width * 4 / 7,
                                 child: Text(
                                     'Shop more for free delivery charge.'),
                               )
@@ -144,18 +140,14 @@ class _CartItemWidgetState extends State<CartItemWidget>{
                                               color: Colors.white,
                                               width: 1.0))),
                                   width:
-                                  MediaQuery.of(context).size.width *
-                                      1 /
-                                      7,
+                                  MediaQuery.of(context).size.width * 1 / 7,
                                   child:
                                   Text('Delivery charge \n50 BDT')),
                               SizedBox(
                                 width: 5.0,
                               ),
                               Container(
-                                width: MediaQuery.of(context).size.width *
-                                    4 /
-                                    7,
+                                width: MediaQuery.of(context).size.width * 4 / 7,
                                 child: Text(
                                     'Shop more for free delivery charge.'),
                               )
@@ -170,7 +162,7 @@ class _CartItemWidgetState extends State<CartItemWidget>{
                 color: Theme.of(context).accentColor,
                 icon: Icon(Icons.shopping_cart),
                 onPressed: () {
-                  cart.addItem(widget.id, widget.title, widget.price,widget.isNonInventory,widget.discount,widget.discountId,widget.discountType);
+                  cart.addItem(widget.id, widget.title,widget.imageUrl, widget.price,widget.vatRate,widget.isNonInventory,widget.discount,widget.discountId,widget.discountType);
                 },
               ),
             ),

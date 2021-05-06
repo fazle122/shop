@@ -12,6 +12,7 @@ class DBHelper {
   final String columnProductId = 'productId';
   final String columnQuantity = 'quantity';
   final String columnPrice = 'price';
+  final String columnVatRate = 'vatRate';
   final String columnIsNonInventory = 'isNonInventory';
   final String columnDiscount = 'discount';
   final String columnDiscountType = 'discountType';
@@ -27,8 +28,10 @@ class DBHelper {
                   'id INTEGER PRIMARY KEY AUTOINCREMENT, '
                   'productId TEXT, '
                   'title TEXT,'
+                  'imageUrl TEXT,'
                   'quantity INTEGER,'
                   'price NUMERIC,'
+                  'vatRate NUMERIC,'
                   'isNonInventory INTEGER,'
                   'discount NUMERIC,'
                   'discountType TEXT,'
@@ -36,11 +39,9 @@ class DBHelper {
         }, version: 1);
   }
 
-  static Future<bool> isProductExist(String id) async {
+  static Future<bool> isProductExist(String table,String id) async {
     final db = await DBHelper.database();
-    var result = await db.rawQuery(
-        'SELECT * FROM cartTable WHERE productId = $id');
-
+    var result = await db.rawQuery('SELECT * FROM $table WHERE productId = $id');
     if (result.length != 0) {
       return true;
     }
@@ -51,39 +52,22 @@ class DBHelper {
 
   static Future<void> insert(String table, Map<String, Object> data) async {
     final db = await DBHelper.database();
-    db.insert(
-      table,
-      data,
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    db.insert(table, data, conflictAlgorithm: ConflictAlgorithm.replace,);
   }
 
   static Future<void> increaseItemQuantity(String table, String productId) async {
     final db = await DBHelper.database();
-    db.rawUpdate(
-        'UPDATE cartTable SET quantity = quantity+1 WHERE productId = $productId');
+    db.rawUpdate('UPDATE $table SET quantity = quantity+1 WHERE productId = $productId');
   }
 
-  static Future<void> decreaseItemQuantity(String productId) async {
+  static Future<void> decreaseItemQuantity(String table,String productId) async {
     final db = await DBHelper.database();
-    db.rawUpdate(
-        'UPDATE cartTable SET quantity = quantity-1 WHERE productId = $productId');
-
-
-//    CartItem item = await getSingleData(data['productId']);
-//    int quantity = item.quantity;
-//    if(quantity == 1){
-//      db.rawDelete('DELETE FROM cartTable WHERE productId = ${data['productId']}');
-//    }else {
-//      db.rawUpdate('UPDATE cartTable SET quantity = quantity-1 WHERE productId = ${data['productId']}');
-//    }
-
+    db.rawUpdate('UPDATE $table SET quantity = quantity-1 WHERE productId = $productId');
   }
 
-  static Future<void> deleteCartItm(String productId) async {
+  static Future<void> deleteCartItm(String table,String productId) async {
     final db = await DBHelper.database();
-    await db.rawDelete(
-        'DELETE FROM cartTable WHERE productId = $productId');
+    await db.rawDelete('DELETE FROM $table WHERE productId = $productId');
   }
 
 
@@ -92,10 +76,9 @@ class DBHelper {
     return await db.query(table);
   }
 
-  static Future<CartItem> getSingleData(String productId) async {
+  static Future<CartItem> getSingleData(String table,String productId) async {
     final db = await DBHelper.database();
-    final result = await db.rawQuery(
-        'SELECT * FROM cartTable WHERE productId = $productId');
+    final result = await db.rawQuery('SELECT * FROM $table WHERE productId = $productId');
     if (result.length > 0) {
       return await new CartItem.fromJson(result.first);
     }
@@ -103,10 +86,9 @@ class DBHelper {
   }
 
 
-  static Future<void> clearCart() async {
+  static Future<void> clearCart(String table) async {
     final db = await DBHelper.database();
-    await db.rawQuery('DELETE  FROM cartTable');
-//    db.rawDelete('DELETE * from cartTable ');
+    await db.rawQuery('DELETE  FROM $table');
   }
 
 }

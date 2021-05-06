@@ -8,10 +8,7 @@ import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
-import 'package:shoptempdb/screens/delivery_address_screen.dart';
-import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:shoptempdb/screens/order_confirmation_screen.dart';
-import 'package:shoptempdb/screens/orders_screen.dart';
 
 
 class ConfirmOrderScreen extends StatefulWidget{
@@ -24,14 +21,12 @@ class ConfirmOrderScreen extends StatefulWidget{
 
 }
 
-
 class _ConfirmOrderScreenState extends State<ConfirmOrderScreen>{
   var _isLoading = false;
-  DateTime _deliveryDate;
   TimeOfDay currentTime = TimeOfDay.now();
   final format = DateFormat('yyyy-MM-dd');
   final timeFormat = DateFormat("HH:mm");
-  Map<String, dynamic> product;
+  Map<String, dynamic> delivery_Charge_product;
   String paymentOptionName;
   int selectedRadioTile;
 
@@ -43,7 +38,7 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen>{
     super.initState();
     selectedRadioTile = 3;
     paymentOptionName = 'cash on delivery';
-    getDeliveryCharge();
+    getDeliveryChargeProduct();
 
   }
 
@@ -53,13 +48,8 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen>{
     });
   }
 
-  // @override
-  // void didChangeDependencies() {
-  //   // getDeliveryCharge();
-  //   super.didChangeDependencies();
-  // }
 
-  getDeliveryCharge() async {
+  getDeliveryChargeProduct() async {
     final cart = await Provider.of<Cart>(context, listen: false);
     Map<String, dynamic> data = Map();
     data.putIfAbsent('amount', () => cart.totalAmount.toDouble());
@@ -67,7 +57,7 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen>{
     var response = await Provider.of<Products>(context, listen: false).fetchDeliveryCharge(formData);
     if (response != null) {
       setState(() {
-        product = response['data']['product'];
+        delivery_Charge_product = response['data']['product'];
       });
     }
   }
@@ -243,35 +233,39 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen>{
                 totalAmount = cart.totalAmount;
                 delCharge = cart.deliveryCharge;
               });
-              if (product != null) {
+              if (delivery_Charge_product != null) {
                 await cart.addItem(
-                    product['id'].toString(),
-                    product['name'],
-                    product['unit_price'].toDouble(),
-                    product['is_non_inventory'],
-                    product['discount'] != null ? product['discount'] : 0.0,
-                    product['discount_id'],
-                    product['discount_type']);
+                    delivery_Charge_product['id'].toString(),
+                    delivery_Charge_product['name'],
+                    delivery_Charge_product['imageUrl'],
+                    delivery_Charge_product['unit_price'].toDouble(),
+                    0.0,
+                    // delivery_Charge_product['vatRate'].toDouble(),
+                    delivery_Charge_product['is_non_inventory'],
+                    delivery_Charge_product['discount'] != null ? delivery_Charge_product['discount'] : 0.0,
+                    delivery_Charge_product['discount_id'],
+                    delivery_Charge_product['discount_type']);
               }
               Future.delayed(Duration(milliseconds: 500), () async{
                 List<Cart> ct = [];
                 ct = cart.items.map((e) => Cart(id: e.id, cartItem: e)).toList();
-                // Map<String,dynamic> dt = Map();
                 for (int i = 0; i < ct.length; i++) {
                   dt.putIfAbsent('product_id[$i]', ()=>ct[i].cartItem.productId);
                   dt.putIfAbsent('quantity[$i]', ()=>ct[i].cartItem.quantity);
                   dt.putIfAbsent('unit_price[$i]', ()=>ct[i].cartItem.price);
+                  dt.putIfAbsent('vat_rate[$i]', ()=>ct[i].cartItem.vatRate);
                   dt.putIfAbsent('is_non_inventory[$i]', ()=>ct[i].cartItem.isNonInventory);
-                  dt.putIfAbsent('discount[$i]', ()=>ct[i].cartItem.discount);
+                  dt.putIfAbsent('per_unit_discount[$i]', ()=>ct[i].cartItem.discount);
+                  dt.putIfAbsent('discount_id[$i]', ()=>ct[i].cartItem.discountId != null ? ct[i].cartItem.discountId: 0);
+                  dt.putIfAbsent('discount_type[$i]', ()=>ct[i].cartItem.discountType != null ? ct[i].cartItem.discountType:'amount');
                 }
                 dt.putIfAbsent('payment_method', () => 0);
 
                 FormData formData= FormData.fromMap(dt);
 
-                // final response = await Provider.of<Orders>(context, listen: false).addOrder(formData);
-                // if (response != null) {
-                // var orderId = response['data']['customer_invoice']['invoice']['id'];
-                var orderId = '12345';
+                final response = await Provider.of<Orders>(context, listen: false).addOrder(formData);
+                if (response != null) {
+                var orderId = response['data']['customer_invoice']['invoice']['id'];
                   if(dt.containsKey('customer_shipping_address_id') && dt['customer_shipping_address_id'] != null){
                     Navigator.pushReplacement(context, MaterialPageRoute(
                       builder: (context) => OrderConfirmationScreen(
@@ -287,53 +281,53 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen>{
                         orderId,
                       ),
                     ));
-                //   }
-                //   else{
-                //     Navigator.pushReplacement(context, MaterialPageRoute(
-                //       builder: (context) => OrderConfirmationScreen(
-                //         null,
-                //         dt['city'],
-                //         dt['area_id'],
-                //         dt['shipping_address_line'],
-                //         dt['mobile_no'],
-                //         dt['comment'],
-                //         paymentOptionName,
-                //         dt['delivery_date'],
-                //           dt['delivery_slot_start'],
-                //           dt['delivery_slot_end'],
-                //         totalAmount,
-                //         delCharge,
-                //           orderId
-                //       ),
-                //     ));
-                //   }
-                //   cart.clearCartTable();
-                //   shippingAddress.selectedDate = null;
-                //   shippingAddress.selectedTime = null;
-                // }
-                // else {
-                //   await cart.removeCartItemRow('1');
-                //   setState(() {
-                //     _isLoading = false;
-                //   });
-                //   Flushbar(
-                //     duration: Duration(seconds: 5),
-                //     margin: EdgeInsets.only(bottom: 2),
-                //     padding: EdgeInsets.all(10),
-                //     borderRadius: 8,
-                //     backgroundColor: Colors.red.shade400,
-                //     boxShadows: [
-                //       BoxShadow(
-                //         color: Colors.black45,
-                //         offset: Offset(3, 3),
-                //         blurRadius: 3,
-                //       ),
-                //     ],
-                //     dismissDirection: FlushbarDismissDirection.HORIZONTAL,
-                //     forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
-                //     title: 'Order confirmation',
-                //     message: 'Something wrong. Please try again',
-                //   )..show(context);
+                  }
+                  else{
+                    Navigator.pushReplacement(context, MaterialPageRoute(
+                      builder: (context) => OrderConfirmationScreen(
+                        null,
+                        dt['city'],
+                        dt['area_id'],
+                        dt['shipping_address_line'],
+                        dt['mobile_no'],
+                        dt['comment'],
+                        paymentOptionName,
+                        dt['delivery_date'],
+                          dt['delivery_slot_start'],
+                          dt['delivery_slot_end'],
+                        totalAmount,
+                        delCharge,
+                          orderId
+                      ),
+                    ));
+                  }
+                  cart.clearCartTable();
+                  shippingAddress.selectedDate = null;
+                  shippingAddress.selectedTime = null;
+                }
+                else {
+                  await cart.removeCartItemRow('1');
+                  setState(() {
+                    _isLoading = false;
+                  });
+                  Flushbar(
+                    duration: Duration(seconds: 5),
+                    margin: EdgeInsets.only(bottom: 2),
+                    padding: EdgeInsets.all(10),
+                    borderRadius: 8,
+                    backgroundColor: Colors.red.shade400,
+                    boxShadows: [
+                      BoxShadow(
+                        color: Colors.black45,
+                        offset: Offset(3, 3),
+                        blurRadius: 3,
+                      ),
+                    ],
+                    dismissDirection: FlushbarDismissDirection.HORIZONTAL,
+                    forwardAnimationCurve: Curves.fastLinearToSlowEaseIn,
+                    title: 'Order confirmation',
+                    message: 'Something wrong. Please try again',
+                  )..show(context);
                 }
               });
             },

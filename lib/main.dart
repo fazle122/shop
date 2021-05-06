@@ -10,7 +10,6 @@ import 'package:shoptempdb/screens/auth_screen.dart';
 import 'package:shoptempdb/screens/cart_screen.dart';
 import 'package:shoptempdb/screens/confirm_order_screen.dart';
 import 'package:shoptempdb/screens/login_screen.dart';
-import 'package:shoptempdb/screens/order_confirmation_screen.dart';
 import 'package:shoptempdb/screens/order_detail_screen.dart';
 import 'package:shoptempdb/screens/orders_screen.dart';
 import 'package:shoptempdb/screens/product_detail_screen.dart';
@@ -24,7 +23,6 @@ import 'package:shoptempdb/style/app_theme.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -60,18 +58,7 @@ class MyApp extends StatelessWidget {
     builder: (ctx, auth, child) => MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Bepari',
-        // theme: ThemeData(primarySwatch: Colors.teal, accentColor: Colors.blueGrey),
         theme:AppTheme.themeBepari(),
-//        home: auth.isAuth
-//            ? ProductsOverviewScreen()
-//            : FutureBuilder(
-//          future: auth.tryAutoLogin(),
-//          builder: (ctx, authResultSnapshot) =>
-//          authResultSnapshot.connectionState ==
-//              ConnectionState.waiting
-//              ? SplashScreen()
-//              : AuthScreen(),
-//        ),
         home: SplashScreen(),
         routes: {
           AuthScreen.routeName: (context) => AuthScreen(),
@@ -82,7 +69,6 @@ class MyApp extends StatelessWidget {
           ProfilePage.routeName: (context) => ProfilePage(),
           DeliveryAddressScreen.routeName: (context) => DeliveryAddressScreen(),
           ConfirmOrderScreen.routeName:(context) => ConfirmOrderScreen(),
-          // OrderConfirmationScreen.routeName:(context) => OrderConfirmationScreen(),
           OrderDetailScreen.routeName: (context) => OrderDetailScreen(),
           CreateProfileScreen.routeName: (context) => CreateProfileScreen(),
           LoginScreen.routeName: (context) => LoginScreen(),

@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/cart.dart';
-import 'package:shoptempdb/providers/orders.dart';
 import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
 import 'package:dio/dio.dart';
-import 'package:shoptempdb/screens/confirm_order_screen.dart';
-import 'package:shoptempdb/screens/orders_screen.dart';
-import 'package:shoptempdb/screens/products_overview_screen.dart';
-import 'package:flushbar/flushbar.dart';
+import 'package:shoptempdb/widgets/dropdown_widget.dart';
 import 'package:toast/toast.dart';
+import 'package:velocity_x/velocity_x.dart';
 
 
 
@@ -29,8 +26,6 @@ class _CreateShippingAddressDialogState
   final _form = GlobalKey<FormState>();
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  TextEditingController _phoneEditController;
-  TextEditingController _addressEditController;
   String selectedArea;
   String selectedDistrict;
 
@@ -41,12 +36,6 @@ class _CreateShippingAddressDialogState
   Map<String, dynamic> product;
 
 
-  @override
-  void initState() {
-    _phoneEditController = TextEditingController();
-    _addressEditController = TextEditingController();
-    super.initState();
-  }
 
   @override
   void didChangeDependencies() {
@@ -114,7 +103,6 @@ class _CreateShippingAddressDialogState
       autofocus: false,
       keyboardType: TextInputType.multiline,
       maxLines: 2,
-//      controller: _addressEditController,
       validator: (value) {
         if (value.isEmpty) {
           return 'please enter your home address';
@@ -152,9 +140,9 @@ class _CreateShippingAddressDialogState
         dt.putIfAbsent('shipping_address_line', ()=>homeAddress);
         dt.putIfAbsent('mobile_no', ()=>mobileNumber);
 
-        // shippingAddress.selectedDistrict = null;
-        // shippingAddress.selectedArea = null;
-        // Navigator.of(context).pop(dt);
+        //// shippingAddress.selectedDistrict = null;
+        //// shippingAddress.selectedArea = null;
+        //// Navigator.of(context).pop(dt);
 
 
         ///new code///
@@ -170,7 +158,15 @@ class _CreateShippingAddressDialogState
           shippingAddress.selectedArea = null;
           Navigator.of(context).pop(id);
         }else{
-          Toast.show('Something went wrong, please try again', context,gravity: Toast.BOTTOM,duration: Toast.LENGTH_LONG);
+          // Toast.show('Something went wrong, please try again', context,gravity: Toast.BOTTOM,duration: Toast.LENGTH_LONG);
+          context.showToast(
+            msg: 'Something went wrong, please try again.',
+            showTime: 5000,
+            position: VxToastPosition.bottom,
+            bgColor: Colors.red,
+            textColor: Colors.white,
+
+          );
         }
 
         /// end ///
@@ -205,8 +201,6 @@ class _CreateShippingAddressDialogState
   Widget build(BuildContext context) {
     final shippingAddress = Provider.of<ShippingAddress>(context);
     final cart = Provider.of<Cart>(context,listen: false);
-    Map<String, dynamic> district = shippingAddress.allDistricts;
-    Map<String, dynamic> areas = Map();
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: AlertDialog(
@@ -227,13 +221,30 @@ class _CreateShippingAddressDialogState
                   SizedBox(
                     height: 15.0,
                   ),
-//                  DistrictDropDown(),
                   districtDropdown(shippingAddress,shippingAddress.allDistricts),
+                  // DropdownWidget(
+                  //   icon: Icons.location_city,
+                  //   items: shippingAddress.allDistricts,
+                  //   itemCallBack: (String value) {
+                  //     shippingAddress.selectedDistrict = value;
+                  //     shippingAddress.selectedArea = null;
+                  //   },
+                  //   currentItem: shippingAddress.selectedDistrict,
+                  //   errorMessage: 'please choose district',
+                  //   hintText: 'Select district',),
                   SizedBox(
                     height: 15.0,
                   ),
-//                  AreaDropDown(),
                   areaDropdown(shippingAddress,shippingAddress.allAreas),
+                  // DropdownWidget(
+                  //   icon: Icons.local_gas_station,
+                  //   items: shippingAddress.allAreas,
+                  //   itemCallBack: (String value) {
+                  //     shippingAddress.selectedArea = value;
+                  //   },
+                  //   currentItem: shippingAddress.selectedArea,
+                  //   errorMessage: 'please choose area',
+                  //   hintText: 'Select area',),
                   SizedBox(
                     height: 15.0,
                   ),
@@ -246,121 +257,6 @@ class _CreateShippingAddressDialogState
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25.0),
                           side: BorderSide(color: Colors.grey)),
-
-//                onPressed: () async {
-//                  if (widget.cart.items.length <= 0) {
-//                    print(shippingAddress.selectedDistrict);
-//                    print(shippingAddress.selectedArea);
-//                    print(_phoneEditController.text);
-//                    print(_addressEditController.text);
-//                    Provider.of<ShippingAddress>(context, listen: false).createShippingAddress(
-//                      shippingAddress.selectedArea.toString(),
-//                      _addressEditController.text,
-//                      _phoneEditController.text,
-//                    );
-//                    Navigator.of(context).pop();
-//                  } else {
-//                    FormData data = new FormData();
-//                    List<Cart> ct = [];
-//                    ct = widget.cart.items.entries
-//                        .map((e) => Cart(id: e.key, cartItem: e.value))
-//                        .toList();
-//
-//                    for (int i = 0; i < ct.length; i++) {
-//                      data.add('product_id[$i]', ct[i].cartItem.id);
-//                      data.add('quantity[$i]', ct[i].cartItem.quantity);
-//                      data.add('unit_price[$i]', ct[i].cartItem.price);
-//                      data.add('is_non_inventory[$i]',
-//                          ct[i].cartItem.isNonInventory);
-//                      data.add('discount[$i]', ct[i].cartItem.discount);
-//                    }
-//                    data.add('area_id',
-//                        shippingAddress.selectedArea.toString());
-//                    data.add('shipping_address_line',
-//                        _addressEditController.text);
-//                    data.add('mobile_no', _phoneEditController.text);
-//
-//                    if (shippingAddress.selectedArea == null ||
-//                        _addressEditController.text == null ||
-//                        _addressEditController.text == '' ||
-//                        _addressEditController.text.isEmpty ||
-//                        _phoneEditController.text == null ||
-//                        _phoneEditController.text == '' ||
-//                        _phoneEditController.text.isEmpty) {
-//                      showDialog(
-//                          context: context,
-//                          builder: (ctx) => AlertDialog(
-//                            title: Text('Required data confirmation'),
-//                            content: Text(
-//                                'Please provide all necessary data'),
-//                            actions: <Widget>[
-//                              FlatButton(
-//                                child: Text('ok'),
-//                                onPressed: () {
-//                                  Navigator.of(context).pop();
-//                                },
-//                              ),
-//                            ],
-//                          ));
-//                    } else {
-//                      setState(() {
-//                        _isLoading = true;
-//                      });
-//                      final response = await Provider.of<Orders>(context,
-//                          listen: false)
-//                          .addOrder(data);
-//                      if (response != null) {
-//                        setState(() {
-//                          _isLoading = false;
-//                        });
-//                        widget.cart.clear();
-//                        shippingAddress.selectedDistrict = null;
-//                        shippingAddress.selectedArea = null;
-//                        showDialog(
-//                            context: context,
-//                            builder: (ctx) => AlertDialog(
-//                              title: Text('Order confirmation'),
-//                              content: Text(response['msg']),
-//                              actions: <Widget>[
-//                                FlatButton(
-//                                  child: Text('view order'),
-//                                  onPressed: () {
-//                                    Navigator.of(context).pushNamed(
-//                                        OrdersScreen.routeName);
-//                                  },
-//                                ),
-//                                FlatButton(
-//                                  child: Text('create another'),
-//                                  onPressed: () {
-//                                    Navigator.of(context).pushNamed(
-//                                        ProductsOverviewScreen
-//                                            .routeName);
-//                                  },
-//                                )
-//                              ],
-//                            ));
-//                      } else {
-//                        showDialog(
-//                            context: context,
-//                            builder: (ctx) => AlertDialog(
-//                              title: Text('Order confirmation'),
-//                              content: Text(
-//                                  'something went wrong!!! Please try again'),
-//                              actions: <Widget>[
-//                                FlatButton(
-//                                  child: Text('ok'),
-//                                  onPressed: () {
-//                                    Navigator.of(context).pushNamed(
-//                                        ProductsOverviewScreen
-//                                            .routeName);
-//                                  },
-//                                ),
-//                              ],
-//                            ));
-//                      }
-//                    }
-//                  }
-//                },
                       color: Theme.of(context).primaryColor,
                       textColor: Colors.white,
                       child: Text("Confirm".toUpperCase(),
@@ -411,7 +307,6 @@ class _CreateShippingAddressDialogState
           final Widget child,
           ) {
         return DropdownButtonFormField(
-
           isExpanded: true,
           decoration: InputDecoration(
             prefixIcon: Icon(

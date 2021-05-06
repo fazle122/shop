@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -12,18 +10,10 @@ class OrderItemWidget extends StatelessWidget {
 
   OrderItemWidget(this.order);
 
-//  @override
-//  _OrderItemState createState() => _OrderItemState();
-//}
-//
-//class _OrderItemState extends State<OrderItemWidget> {
-
-
   @override
   Widget build(BuildContext context) {
     return Dismissible(
       key:ValueKey(order.id),
-//      key:UniqueKey(),
       direction: DismissDirection.endToStart,
       background: Container(
         color: Theme.of(context).errorColor,
@@ -67,30 +57,5 @@ class OrderItemWidget extends StatelessWidget {
         ),
       ),
     );
-
-
-
-
-
-
-
-
-//    return Card(
-//      margin: EdgeInsets.all(10),
-//      child: Column(
-//        children: <Widget>[
-//          ListTile(
-//            title: Text('\$${widget.order.invoiceAmount}'),
-//            subtitle: Text(
-//              DateFormat('dd/MM/yyyy hh:mm').format(widget.order.dateTime),
-//            ),
-//            onTap: (){
-//              Navigator.of(context).pushNamed(OrderDetailScreen.routeName,
-//                  arguments: widget.order.id);
-//            },
-//          ),
-//        ],
-//      ),
-//    );
   }
 }

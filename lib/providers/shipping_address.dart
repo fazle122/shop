@@ -1,11 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shoptempdb/utility/api_service.dart';
-import 'package:shoptempdb/providers/cart.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shoptempdb/models/http_exception.dart';
-
+import 'package:shoptempdb/utility/api_service.dart';
+import 'package:shoptempdb/utility/http_exception.dart';
 
 
 
@@ -80,6 +78,9 @@ class ShippingAddress with ChangeNotifier{
   List<ShippingDateItem> _allShippingDates = [];
   List<ShippingTimeItem> _allShippingTimes = [];
 
+  ShippingDateItem _selectedDate;
+  ShippingTimeItem _selectedTime;
+
   AddressItem _addressItem;
   final String authToken;
   final String userId;
@@ -144,15 +145,36 @@ class ShippingAddress with ChangeNotifier{
     this.notifyListeners();
   }
 
+  ProfileItem getProfileInfo(){
+    return _profileItem;
+  }
+
+
+  ShippingDateItem get selectedDate{
+    return this._selectedDate;
+  }
+  set selectedDate(final ShippingDateItem item) {
+    this._selectedDate = item;
+    // this._allShippingTimes = this._selectedDate.time;
+    this.notifyListeners();
+  }
+
+  ShippingTimeItem get selectedTime {
+    return this._selectedTime;
+  }
+
+  set selectedTime(final ShippingTimeItem item) {
+    this._selectedTime = item;
+    this.notifyListeners();
+  }
+
   Future<void> fetchDistrictList() async {
     List<dynamic> dbData = await ApiService.getDistrictDataFromLocalDB();
     Map<String,dynamic> districtData = Map();
     List<dynamic> data = [];
     data = dbData.map((model){
       return{
-//        'id':model['id'],
         'district': model['district'],
-//        'location':model['location'],
       };
     }).toList();
 
@@ -191,32 +213,12 @@ class ShippingAddress with ChangeNotifier{
     var area = await ApiService.getAreaNameFromLocalDB(areaId);
     print(area.toString());
     return area.toString();
-//    notifyListeners();
   }
-
-//  Future<void> fetchAreaList() async {
-//    var url = 'http://new.bepari.net/demo/api/V1.0/crm/customer/list-shipping-address';
-//    Map<int, dynamic> areaData = Map();
-//    try {
-//      final response = await http.get(url);
-//      final data = json.decode(response.body) as Map<String, dynamic>;
-//      if (data == null) {
-//        return;
-//      }
-//      for(int i =0; i<data['data']['area'].length; i++){
-//        areaData[data['data']['area'][i]['id']] = data['data']['area'][i]['area'];
-//      }
-//      _areaList = areaData;
-//      notifyListeners();
-//    } catch (error) {
-//      throw (error);
-//    }
-//  }
 
 
   Future<Map<String,dynamic>> createShippingAddress(String areaId, String city,String address,String phone) async {
     var responseData;
-    String qString = "http://new.bepari.net/demo/api/V1.0/crm/customer/create-shipping-address";
+    String qString = ApiService.BASE_URL + "api/V1.0/crm/customer/create-shipping-address";
 
     Map<String, String> headers = {
       'Authorization': 'Bearer ' + authToken,
@@ -252,10 +254,10 @@ class ShippingAddress with ChangeNotifier{
     String qString;
     Dio dioService = new Dio();
     if(shippingAddressId != null){
-      qString = "http://new.bepari.net/demo/api/V1.0/crm/customer/update-shipping-address/$shippingAddressId";
+      qString = ApiService.BASE_URL + "api/V1.0/crm/customer/update-shipping-address/$shippingAddressId";
 
     }else {
-      qString = "http://new.bepari.net/demo/api/V1.0/crm/customer/create-shipping-address";
+      qString = ApiService.BASE_URL +  "api/V1.0/crm/customer/create-shipping-address";
     }
 
     dioService.options.headers = {
@@ -286,7 +288,7 @@ class ShippingAddress with ChangeNotifier{
 
   Future<Map<String,dynamic>> deleteShippingAddress(String shippingAddressId) async {
     Dio dioService = new Dio();
-    String qString = "http://new.bepari.net/demo/api/V1.0/crm/customer/delete-shipping-address/$shippingAddressId";
+    String qString = ApiService.BASE_URL + "api/V1.0/crm/customer/delete-shipping-address/$shippingAddressId";
 
     dioService.options.headers = {
       'Authorization': 'Bearer ' + authToken,
@@ -311,41 +313,9 @@ class ShippingAddress with ChangeNotifier{
     }
   }
 
-  Future<void> updateProfileInfo(ProfileItem newInfo) async {
+  Future<Map<String,dynamic>> updateProfileInfo(String address,String phone,String name,String email,String district,int areaId) async {
     var responseData;
-    String qString = "http://new.bepari.net/demo/api/V1.0/access-control/user/update-profile";
-    Map<String, String> headers = {
-      'Authorization': 'Bearer ' + authToken,
-      'Content-Type': 'application/json',
-    };
-
-    final Map<String, dynamic> authData = {
-      'name':newInfo.name,
-//      'mobile_no': newInfo.mobileNumber,
-      'email':newInfo.email,
-//      'address': newInfo.address,
-
-    };
-//    try {
-//      final http.Response response = await http.post(
-//        qString,
-//        body: json.encode(authData),
-//        headers: headers,
-//      );
-//      responseData = json.decode(response.body);
-//
-//      if (responseData['error'] != null) {
-//        throw HttpException(responseData['error']['message']);
-//      }
-//      notifyListeners();
-//    } catch (error) {
-//      throw error;
-//    }
-  }
-
-  Future<Map<String,dynamic>> updateProfileInfo1(String address,String phone,String name,String email,String district,int areaId) async {
-    var responseData;
-    String qString = "http://new.bepari.net/demo/api/V1.0/access-control/user/update-profile";
+    String qString = ApiService.BASE_URL + "api/V1.0/access-control/user/update-profile";
     Map<String, String> headers = {
       'Authorization': 'Bearer ' + authToken,
       'Content-Type': 'application/json',
@@ -379,14 +349,8 @@ class ShippingAddress with ChangeNotifier{
     }
   }
 
-  ProfileItem getProfileInfo(){
-    return _profileItem;
-  }
-
   Future<void> fetchProfileInfo() async {
-    print('fetch profile');
-
-    var url = 'http://new.bepari.net/demo/api/V1.0/access-control/user/show-profile';
+    var url = ApiService.BASE_URL + 'api/V1.0/access-control/user/show-profile';
     Map<String, String> headers = {
       'Authorization': 'Bearer ' + authToken,
       'Content-Type': 'application/json',
@@ -400,19 +364,19 @@ class ShippingAddress with ChangeNotifier{
       if (data == null) {
         return;
       }
-      var alldata = data['data']['profile'];
+      var allData = data['data']['profile'];
         final ProfileItem info = ProfileItem(
-          id: alldata['id'].toString(),
-          name: alldata['name'],
-          displayName: alldata['display_name'],
-          gender: alldata['gender'],
-          email: alldata['email'],
-          mobileNumber: alldata['mobile'].toString(),
-          address: alldata['address'],
-          city: alldata['city'],
-          areaId: alldata['area_id'].toString(),
-          contactPerson: alldata['contact_person'],
-          contactPersonMobileNumber: alldata['contact_person_contact_no'],
+          id: allData['id'].toString(),
+          name: allData['name'],
+          displayName: allData['display_name'],
+          gender: allData['gender'],
+          email: allData['email'],
+          mobileNumber: allData['mobile'].toString(),
+          address: allData['address'],
+          city: allData['city'],
+          areaId: allData['area_id'].toString(),
+          contactPerson: allData['contact_person'],
+          contactPersonMobileNumber: allData['contact_person_contact_no'],
         );
       _profileItem = info;
       notifyListeners();
@@ -421,7 +385,7 @@ class ShippingAddress with ChangeNotifier{
   }
 
   Future<void> fetchShippingAddressList() async {
-    var url = 'http://new.bepari.net/demo/api/V1.0/crm/customer/list-shipping-address';
+    var url = ApiService.BASE_URL +  'api/V1.0/crm/customer/list-shipping-address';
     Map<String, String> headers = {
       'Authorization': 'Bearer ' + authToken,
       'Content-Type': 'application/json',
@@ -456,7 +420,7 @@ class ShippingAddress with ChangeNotifier{
   }
 
   Future<void> fetchShippingDates() async {
-    var url = 'http://new.bepari.net/demo/api/V1.0/accounts/invoice/delivery-schedule';
+    var url = ApiService.BASE_URL +  'api/V1.0/accounts/invoice/delivery-schedule';
     Map<String, String> headers = {
       'Authorization': 'Bearer ' + authToken,
       'Content-Type': 'application/json',
@@ -471,10 +435,10 @@ class ShippingAddress with ChangeNotifier{
         return;
       }
       final List<ShippingDateItem> loadedDates = [];
-      var alldata = data['data'];
-      for(int  i=0; i<alldata.length;i++){
+      var allData = data['data'];
+      for(int  i=0; i<allData.length;i++){
         final ShippingDateItem date = ShippingDateItem(
-          date: alldata[i]['date'].toString(),
+          date: allData[i]['date'].toString(),
           time:(data['data'][i]['time'] as List<dynamic>).map((item) => ShippingTimeItem(
             startTime: item['start_time'],
             endTime: item['end_time'],
@@ -490,7 +454,7 @@ class ShippingAddress with ChangeNotifier{
   }
 
   Future<void> fetchShippingAddress(String id) async {
-    var url = 'http://new.bepari.net/demo/api/V1.0/crm/customer/view-shipping-address/$id';
+    var url = ApiService.BASE_URL + 'api/V1.0/crm/customer/view-shipping-address/$id';
     Map<String, String> headers = {
       'Authorization': 'Bearer ' + authToken,
       'Content-Type': 'application/json',
@@ -521,74 +485,4 @@ class ShippingAddress with ChangeNotifier{
     }
   }
 
-
-  // String _selectedDate;
-  // String _selectedTime;
-  //
-  //
-  // String get selectedDate{
-  //   return this._selectedDate;
-  // }
-  //
-  // set selectedDate(var item) {
-  //   this._selectedDate = item.date.toString();
-  //   this._allShippingTimes = item.time;
-  //   this.notifyListeners();
-  // }
-  //
-  // String get selectedTime {
-  //   return this._selectedTime;
-  // }
-  //
-  // set selectedTime(final String item) {
-  //   this._selectedTime = item;
-  //   this.notifyListeners();
-  // }
-
-
-  ShippingDateItem _selectedDate;
-  ShippingTimeItem _selectedTime;
-
-
-  ShippingDateItem get selectedDate{
-    return this._selectedDate;
-  }
-  set selectedDate(final ShippingDateItem item) {
-    this._selectedDate = item;
-    // this._allShippingTimes = this._selectedDate.time;
-    this.notifyListeners();
-  }
-
-  ShippingTimeItem get selectedTime {
-    return this._selectedTime;
-  }
-
-  set selectedTime(final ShippingTimeItem item) {
-    this._selectedTime = item;
-    this.notifyListeners();
-  }
-
-  ///working///
-
-  // ShippingDateItem _selectedDate;
-  // String _selectedTime;
-  //
-  //
-  // ShippingDateItem get selectedDate{
-  //   return this._selectedDate;
-  // }
-  // set selectedDate(final ShippingDateItem item) {
-  //   this._selectedDate = item;
-  //   // this._allShippingTimes = this._selectedDate.time;
-  //   this.notifyListeners();
-  // }
-  //
-  // String get selectedTime {
-  //   return this._selectedTime;
-  // }
-  //
-  // set selectedTime(final String item) {
-  //   this._selectedTime = item;
-  //   this.notifyListeners();
-  // }
 }

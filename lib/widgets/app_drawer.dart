@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shoptempdb/providers/auth.dart';
@@ -8,8 +6,6 @@ import 'package:shoptempdb/screens/auth_screen.dart';
 import 'package:shoptempdb/screens/orders_screen.dart';
 import 'package:shoptempdb/screens/products_overview_screen.dart';
 import 'package:shoptempdb/screens/profile_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shoptempdb/screens/test.dart';
 
 class AppDrawer extends StatefulWidget {
   @override
@@ -42,7 +38,6 @@ class _AppDrawerState extends State<AppDrawer> {
                           children: <Widget>[
                             CircleAvatar(
                               radius: 30.0,
-//                  backgroundImage: NetworkImage(),
                               backgroundImage: AssetImage('assets/profile.png'),
                             ),
                             SizedBox(
@@ -70,7 +65,6 @@ class _AppDrawerState extends State<AppDrawer> {
                                         .pushNamed(AuthScreen.routeName);
                                   },
                                 ),
-//                    SizedBox(height: 5.0,),
                                 Text(
                                   'Login',
                                   style: TextStyle(
@@ -84,7 +78,6 @@ class _AppDrawerState extends State<AppDrawer> {
                             height: 0.0,
                           ),
                   ]))),
-//          AppBar(title: Text('Hello'),automaticallyImplyLeading: false,),
           Divider(),
           ListTile(
             leading: Icon(Icons.shop),
@@ -94,7 +87,6 @@ class _AppDrawerState extends State<AppDrawer> {
             },
           ),
           Divider(),
-
           ExpansionTile(
             key: _key,
             leading: Icon(Icons.category),
@@ -133,9 +125,7 @@ class _AppDrawerState extends State<AppDrawer> {
                                 ),
                                 title: Text(catData.getCategories[i].name),
                                 onTap: () {
-                                  Navigator.of(context).pushNamed(
-                                      ProductsOverviewScreen.routeName,
-                                      arguments: catData.getCategories[i].id);
+                                  Navigator.of(context).pushNamed(ProductsOverviewScreen.routeName, arguments: catData.getCategories[i].id);
                                 },
                               ),
                             ),
@@ -155,9 +145,7 @@ class _AppDrawerState extends State<AppDrawer> {
                       leading: Icon(Icons.payment),
                       title: Text('Orders'),
                       onTap: () {
-                        Navigator.of(context)
-                            .pushReplacementNamed(OrdersScreen.routeName);
-//              Navigator.of(context).pushReplacementNamed(TestScreen.routeName);
+                        Navigator.of(context).pushReplacementNamed(OrdersScreen.routeName);
                       },
                     )
                   ],

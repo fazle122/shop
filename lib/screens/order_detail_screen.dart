@@ -11,27 +11,6 @@ class OrderDetailScreen extends StatelessWidget {
   static const routeName = '/order-detail';
 
 
-  double _fetchDeliveryCharge(double invoiceAmount,List<InvoiceItem> item){
-    var itemSubTotal = 0.0;
-    var delCharge = 0.0;
-    item.forEach((item){
-      itemSubTotal += item.unitPrice.toDouble() * item.quantity;
-    });
-
-    delCharge = invoiceAmount - itemSubTotal;
-    return delCharge;
-  }
-
-  double _fetchItemTotal(List<InvoiceItem> item){
-    var itemSubTotal = 0.0;
-    item.forEach((item){
-      itemSubTotal += item.unitPrice.toDouble() * item.quantity;
-    });
-
-    return itemSubTotal;
-  }
-
-
   @override
   Widget build(BuildContext context) {
 
@@ -63,9 +42,6 @@ class OrderDetailScreen extends StatelessWidget {
                               children: <Widget>[
                                 Text('Total invoice amount: ' + orderDetailData.singOrderItem.invoiceAmount.toString() + ' BDT',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18.0),),
                                 Text('Due: ' + orderDetailData.singOrderItem.totalDue.toString() + ' BDT'),
-                                // Text('Subtotal: ' + _fetchItemTotal(orderDetailData.singOrderItem.invoiceItem).toString() + ' BDT'),
-                                // Text('Delivery charge: ' + _fetchDeliveryCharge(orderDetailData.singOrderItem.invoiceAmount,orderDetailData.singOrderItem.invoiceItem).toString() + ' BDT'),
-
                               ],
                             ) ,
                           ),
@@ -74,8 +50,6 @@ class OrderDetailScreen extends StatelessWidget {
                               children: <Widget>[
                                 Flexible(child:Text('Invoice date: ' + DateFormat('EEEE, MMM d, ').format(orderDetailData.singOrderItem.invoiceDate),style: TextStyle(fontSize: 15.0),),),
                                 Flexible(child:Text('Delivery date: ' + DateFormat('EEEE, MMM d, ').format(orderDetailData.singOrderItem.delivaryDate),style: TextStyle(fontSize: 15.0),),),
-                                // Flexible(child: Text('Invoice created: ' + DateFormat('EEEE, MMM d, hh:mm aaa').format(orderDetailData.singOrderItem.createdAt.toLocal()),style: TextStyle(fontSize: 12.0),),),
-
                               ],
                             )
                         )

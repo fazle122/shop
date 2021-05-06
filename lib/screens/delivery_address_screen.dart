@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shoptempdb/base_state.dart';
 import 'package:shoptempdb/providers/cart.dart';
 import 'package:shoptempdb/providers/products.dart';
 import 'package:shoptempdb/providers/shipping_address.dart';
@@ -8,12 +9,9 @@ import 'package:shoptempdb/screens/confirm_order_screen.dart';
 import 'package:shoptempdb/widgets/app_drawer.dart';
 import 'package:shoptempdb/widgets/create_shippingAddress_dialog.dart';
 import 'package:dio/dio.dart';
-import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import 'package:intl/intl.dart';
 import 'package:shoptempdb/widgets/update_shippingAddress_dialog.dart';
-import 'package:flushbar/flushbar.dart';
 
-import '../base_state.dart';
 
 class DeliveryAddressScreen extends StatefulWidget {
   static const routeName = '/delivery_address';
@@ -30,12 +28,8 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
   final format = DateFormat('yyyy-MM-dd');
   var _isInit = true;
   var _isLoading = false;
-  Map<String, dynamic> product;
+  Map<String, dynamic> delivery_charge_product;
 
-  DateTime _deliveryDate;
-  TimeOfDay _currentTime;
-  // TimeOfDay currentTime = TimeOfDay.now();
-  // final format = DateFormat('yyyy-MM-dd');
   final timeFormat = DateFormat("HH:mm");
   TextEditingController _noteController  = TextEditingController();
 
@@ -74,15 +68,14 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
   }
 
   getDeliveryCharge() async {
-    final cart = await Provider.of<Cart>(context, listen: false);
+    final cart = Provider.of<Cart>(context, listen: false);
     Map<String, dynamic> data = Map();
     data.putIfAbsent('amount', () => cart.totalAmount.toDouble());
     FormData formData = FormData.fromMap(data);
-    var response = await Provider.of<Products>(context, listen: false)
-        .fetchDeliveryCharge(formData);
+    var response = await Provider.of<Products>(context, listen: false).fetchDeliveryCharge(formData);
     if (response != null) {
       setState(() {
-        product = response['data']['product'];
+        delivery_charge_product = response['data']['product'];
       });
     }
   }
@@ -99,8 +92,6 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
           isExpanded: true,
           decoration: InputDecoration(
             border: OutlineInputBorder(),
-//                enabledBorder: UnderlineInputBorder(
-//                    borderSide: BorderSide(color: Colors.white))
           ),
           hint: Text('Select date'),
           value: shippingAddress.selectedDate,
@@ -135,8 +126,6 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
           isExpanded: true,
           decoration: InputDecoration(
             border: OutlineInputBorder(),
-//                enabledBorder: UnderlineInputBorder(
-//                    borderSide: BorderSide(color: Colors.white))
           ),
           hint: Text('Select time'),
           value: shippingAddress.selectedTime,
@@ -151,8 +140,6 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
           },
           onChanged: (newValue) {
             shippingAddress.selectedTime = newValue;
-            // shippingAddress.selectedTime = newValue.startTime.toString() + '-'+ newValue.endTime.toString();
-            print(newValue.startTime.toString() + '-'+ newValue.endTime.toString());
           },
           items: _timeMenuItems(times),
         );
@@ -266,7 +253,7 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                         await showDialog(
                             context: context,
                             barrierDismissible: false,
-                            child: UpdateShippingAddressDialog(
+                            builder: (context) => UpdateShippingAddressDialog(
                               addressItem: data,
                             ));
                         _refreshList();
@@ -341,7 +328,6 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                       Text('Select Delivery Address',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold,color:Colors.grey),),
                     ],
                   ),
-                  // child:  Text('Select Delivery Address'),
                 ),
 
                 Consumer<ShippingAddress>(
@@ -381,11 +367,10 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                               var data =  await showDialog(
                                   context: context,
                                   barrierDismissible: false,
-                                  child: CreateShippingAddressDialog(cart: cart));
+                                  builder: (context) => CreateShippingAddressDialog(cart: cart));
                               if(data != null){
                                 _refreshList();
                                 setState(() {
-                                  //// newAddressData = data;
                                   selectedAddressId = data.toString();
                                 });
                               }
@@ -407,7 +392,6 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                   height: MediaQuery.of(context).size.height * .3/ 6,
                   padding: EdgeInsets.only(left: 20.0),
                   child:Text('Preferred delivery date & time',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold,color:Colors.grey),),
-
                 ),
 
                 Container(
@@ -437,7 +421,6 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                   height: MediaQuery.of(context).size.height * .3/ 6,
                   padding: EdgeInsets.only(top:20,left: 20.0),
                   child:Text('Add order note',style: TextStyle(fontSize: 20.0,fontWeight: FontWeight.bold,color:Colors.grey),),
-
                 ),
 
                 Container(
@@ -488,9 +471,6 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                         ],
                       )),
                   onTap: () async{
-                    // print(_deliveryDate.toString());
-                    // print(_currentTime.toString());
-
                     print(shippingData.selectedDate.toString());
                     print(shippingData.selectedTime.toString());
                     print(newAddressData);
@@ -509,7 +489,7 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                                     children: <Widget>[
                                       Text('Please select a delivery address or create new one'),
                                       Container(
-                                          // margin: EdgeInsets.only(top:5.0),
+
                                           padding: EdgeInsets.all(5.0),
                                           width: 80.0,
                                           height: 30.0,
@@ -526,10 +506,6 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                                     ],
                                   )
                               ));
-                          // _scaffoldKey.currentState.showSnackBar(_snackBar(
-                          //     'Please select a delivery address or create new one'));
-
-                          // }else if(_deliveryDate == null || _currentTime == null){
                         }else if(shippingData.selectedDate == null || shippingData.selectedTime == null){
                           showDialog(
                               context: context,
@@ -542,7 +518,6 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                                         children: <Widget>[
                                           Text('You must select a delivery date and time to place the order'),
                                           Container(
-                                              // margin: EdgeInsets.only(top:5.0),
                                               padding: EdgeInsets.all(5.0),
                                               width: 80.0,
                                               height: 30.0,
@@ -560,8 +535,6 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                                       )
                                   )
                           );
-                          // _scaffoldKey.currentState.showSnackBar(_snackBar(
-                          //     'Please choose delivery date and time'));
                         }else {
                           if(selectedAddressId == null){
                             addressData.putIfAbsent('city',()=> newAddressData['city']);
@@ -571,9 +544,6 @@ class _DeliveryAddressScreenState extends BaseState<DeliveryAddressScreen> {
                           }else {
                             addressData.putIfAbsent('customer_shipping_address_id', () => selectedAddressId);
                           }
-
-                          // addressData.putIfAbsent('delivery_date', () => _deliveryDate.toString());
-                          // addressData.putIfAbsent('delivery_time', () => _currentTime);
                           addressData.putIfAbsent('delivery_date', () => shippingData.selectedDate.date.toString());
                           addressData.putIfAbsent('delivery_slot_start', () => shippingData.selectedTime.startTime.toString());
                           addressData.putIfAbsent('delivery_slot_end', () => shippingData.selectedTime.endTime.toString());

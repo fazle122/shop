@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,28 +8,19 @@ import 'package:access_settings_menu/access_settings_menu.dart';
 
 
 
-/// a base class for any statful widget for checking internet connectivity
 abstract class BaseState<T extends StatefulWidget> extends State<T> {
   final Connectivity _connectivity = Connectivity();
 
   StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
-  /// the internet connectivity status
   bool isOnline = true;
 
-  /// initialize connectivity checking
-  /// Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initConnectivity() async {
-    // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       await _connectivity.checkConnectivity();
     } on PlatformException catch (e) {
       print(e.toString());
     }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
     if (!mounted) {
       return;
     }
@@ -59,11 +49,6 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> {
                 barrierDismissible: false,
                 builder: (BuildContext context) => _connectionDialog(context),
               );
-
-
-//          Toast.show('You do not have internet connection', context,
-//              duration: Toast.LENGTH_SHORT, gravity: Toast.BOTTOM);
-////        showToast('Hello FilledStacks', position: ToastPosition.bottom);
             }
           }
           ));
@@ -106,7 +91,6 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> {
     }
   }
 
-
   @override
   void dispose() {
     _connectivitySubscription.cancel();
@@ -118,7 +102,6 @@ abstract class BaseState<T extends StatefulWidget> extends State<T> {
     _connectivitySubscription.pause();
     super.deactivate();
   }
-
 
 
   Future<bool> updateConnectionStatus() async {

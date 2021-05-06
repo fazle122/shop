@@ -40,8 +40,8 @@ dependencies:
   flutter_icons: ^1.1.0
   flushbar: ^1.10.4
   toast: ^0.1.5
-
-
+#  velocity_x: ^1.0.1
+  velocity_x: ^1.4.1
 
 dev_dependencies:
   flutter_test:
